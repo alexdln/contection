@@ -1,0 +1,33 @@
+{
+  "name": "contection-root",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexdln/contection.git"
+  },
+  "author": {
+    "name": "Alex Savelyev",
+    "email": "dev@alexdln.com",
+    "url": "https://github.com/alexdln/"
+  },
+  "scripts": {
+    "pkg": "pnpm --filter contection",
+    "lint": "eslint \".\"",
+    "eslint": "eslint",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "eslint": "9.39.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.4",
+    "husky": "9.1.7",
+    "prettier": "3.6.2",
+    "typescript-eslint": "8.46.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["eslint"]
+  },
+  "license": "MIC",
+  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971"
+}
