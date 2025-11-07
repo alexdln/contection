@@ -12,7 +12,7 @@
     "url": "https://github.com/alexdln/"
   },
   "scripts": {
-    "pkg": "pnpm --filter contection",
+    "package": "pnpm --filter contection",
     "lint": "eslint \".\"",
     "eslint": "eslint",
     "prepare": "husky"

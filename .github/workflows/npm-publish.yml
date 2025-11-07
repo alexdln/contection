@@ -23,7 +23,7 @@ jobs:
       - name: Install deps and Build package
         run: |
           pnpm install
-          pnpm pkg run build
+          pnpm package run build
           cp README.md ./package
           cp LICENSE ./package
 
