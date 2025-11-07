@@ -1,0 +1,38 @@
+{
+  "name": "contection",
+  "version": "1.0.0",
+  "description": "Package",
+  "keywords": [
+    "context",
+    "react",
+    "reducer",
+    "store",
+    "flux",
+    "state management"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexdln/contection.git"
+  },
+  "author": {
+    "name": "Alex Savelyev",
+    "email": "dev@alexdln.com",
+    "url": "https://github.com/alexdln/"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "react": ">= 19.0.0"
+  },
+  "license": "MIC"
+}
