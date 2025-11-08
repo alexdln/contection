@@ -81,10 +81,16 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         [],
     );
 
-    const storeWillMountCallback = useMemo(
-        () => (storeWillMount ? storeWillMount(storeProxy, update, listen, unlisten) : undefined),
-        [],
-    );
+    // In React Strict Mode "useMemo" is called twice, so we call "storeWillUnmountCallback.current"
+    // to clean up the previous call.
+    // We use "useMemo" instead of "useEffect" to run "storeWillMount" as soon as possible.
+    const storeWillUnmountCallback = useRef<((store: Store) => void) | void | undefined>(undefined);
+    useMemo(() => {
+        if (storeWillUnmountCallback.current) storeWillUnmountCallback.current(storeProxy);
+        storeWillUnmountCallback.current = storeWillMount
+            ? storeWillMount(storeProxy, update, listen, unlisten)
+            : undefined;
+    }, []);
 
     useLayoutEffect(() => {
         return () => {
@@ -98,7 +104,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         return () => {
             if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy);
             if (storeDidMountCallback) storeDidMountCallback(storeProxy);
-            if (storeWillMountCallback) storeWillMountCallback(storeProxy);
+            if (storeWillUnmountCallback.current) storeWillUnmountCallback.current(storeProxy);
         };
     }, []);
 
