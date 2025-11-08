@@ -33,6 +33,24 @@ export type GlobalStore<Store extends BaseStore> = {
     ) => void;
 };
 
+type LifecycleMountHook<Store extends BaseStore> = (
+    store: Store,
+    dispatch: GlobalStore<Store>["update"],
+    listen: GlobalStore<Store>["listen"],
+    unlisten: GlobalStore<Store>["unlisten"],
+) => void | ((store: Store) => void);
+
+type LifecycleUnmountHook<Store extends BaseStore> = (store: Store) => void;
+
+export type CreateStoreOptions<Store extends BaseStore> = {
+    lifecycleHooks?: {
+        storeWillMount?: LifecycleMountHook<Store>;
+        storeDidMount?: LifecycleMountHook<Store>;
+        storeWillUnmount?: LifecycleUnmountHook<Store>;
+        storeWillUnmountAsync?: LifecycleUnmountHook<Store>;
+    };
+};
+
 export interface StoreInstance<Store extends BaseStore = BaseStore> {
     readonly _initial: Store;
     readonly _context: React.Context<GlobalStore<Store>>;

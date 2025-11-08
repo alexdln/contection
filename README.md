@@ -27,13 +27,13 @@ pnpm add contection
 ```tsx
 import { createStore } from "contection";
 
-interface AppStore {
+interface AppStoreType {
   user: { name: string; email: string };
   count: number;
   theme: "light" | "dark";
 }
 
-const AppStore = createStore<AppStore>({
+const AppStore = createStore<AppStoreType>({
   user: { name: "", email: "" },
   count: 0,
   theme: "light",
@@ -220,12 +220,10 @@ function AnalyticsTracker() {
   const [store, dispatch, listen, unlisten] = useStoreReducer(AppStore);
 
   useEffect(() => {
-    // Subscribe to user changes for analytics
     const unsubscribeUser = listen("user", (user) => {
       analytics.track("user_updated", { userId: user.email });
     });
 
-    // Subscribe to theme changes
     const unsubscribeTheme = listen("theme", (theme) => {
       document.documentElement.setAttribute("data-theme", theme);
     });
@@ -289,22 +287,216 @@ function AutoCleanupSubscription() {
   const [, , listen] = useStoreReducer(AppStore);
 
   useEffect(() => {
-    // listen returns an unsubscribe function
     const unsubscribe = listen("count", (count) => {
       console.log("Current count:", count);
     });
 
-    // Automatically unsubscribes when component unmounts
     return unsubscribe;
   }, [listen]);
 }
 ```
 
+### Lifecycle Hooks
+
+Lifecycle hooks allow you to perform initialization and cleanup operations at different stages of the store's lifecycle. They are passed as options to `createStore`:
+
+```tsx
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+  },
+  {
+    lifecycleHooks: {
+      storeWillMount: (store, update, listen, unlisten) => {
+        // Initialization logic
+        // Return cleanup function if needed
+      },
+      storeDidMount: (store, update, listen, unlisten) => {
+        // Post-mount logic
+        // Return cleanup function if needed
+      },
+      storeWillUnmount: (store) => {
+        // Synchronous cleanup before unmount
+      },
+      storeWillUnmountAsync: (store) => {
+        // Asynchronous cleanup during unmount
+      },
+    },
+  }
+);
+```
+
+#### `storeWillMount`
+
+**Recommended for:** Single Page Applications (SPA), background key detection or subscriptions.
+
+Runs synchronously during render, **before** the store is fully initialized. This hook is ideal for:
+
+- Setting up background subscriptions that won't cause hydration errors
+- Initializing client-only state (e.g., localStorage, sessionStorage) in SPA
+- Detecting and subscribing to keys for custom logic
+
+**Important:** In React Strict Mode (development), `storeWillMount` is called **twice**. Return a cleanup function to properly handle subscriptions and prevent memory leaks:
+
+```tsx
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+    lastVisit: null as Date | null,
+  },
+  {
+    lifecycleHooks: {
+      storeWillMount: (store, update, listen) => {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme) {
+          update({ theme: savedTheme as "light" | "dark" });
+        }
+        const unlisten = listen("count", (count) => {
+          console.log("Count changed:", count);
+        });
+        return unlisten;
+      },
+    },
+  }
+);
+```
+
+#### `storeDidMount`
+
+**Recommended for:** Fullstack frameworks (Next.js, Remix, etc.) to avoid hydration errors.
+
+Runs asynchronously **after** the component mounts, making it safe for operations that might differ between server and client. This hook is ideal for:
+
+- Initializing state that depends on browser APIs
+- Fetching data that should only happen on the client
+- Setting up subscriptions that need to match server-rendered content
+
+```tsx
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+    windowWidth: 0,
+  },
+  {
+    lifecycleHooks: {
+      storeDidMount: (store, update, listen, unlisten) => {
+        update({ windowWidth: window.innerWidth });
+
+        const handleResize = () => {
+          update({ windowWidth: window.innerWidth });
+        };
+        window.addEventListener("resize", handleResize);
+
+        // Return cleanup function
+        return () => {
+          window.removeEventListener("resize", handleResize);
+        };
+      },
+    },
+  }
+);
+```
+
+#### `storeWillUnmount`
+
+**Recommended for:** Synchronous cleanup operations that must complete before the component unmounts.
+
+Runs synchronously in `useLayoutEffect` cleanup, **before** the component unmounts. This hook is ideal for:
+
+- Synchronous cleanup that must happen before unmount
+- Cleanup operations that should block unmounting
+
+**Note:** This hook runs synchronously and should not perform heavy operations that could block the UI.
+
+```tsx
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+  },
+  {
+    lifecycleHooks: {
+      storeWillUnmount: (store) => {
+        if (store.count > 0) {
+          localStorage.setItem("lastCount", String(store.count));
+        }
+      },
+    },
+  }
+);
+```
+
+#### `storeWillUnmountAsync`
+
+**Recommended for:** Asynchronous cleanup operations that can run during unmount.
+
+Runs asynchronously in `useEffect` cleanup, **during** component unmount. This hook is ideal for:
+
+- Asynchronous cleanup operations (API calls, timers, etc.)
+- Cleanup that doesn't need to block unmounting
+- Final data synchronization that can happen asynchronously
+
+**Execution Order:** This hook runs after `storeDidMount` cleanup (if provided) and after `storeWillMount` cleanup (if provided).
+
+```tsx
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+  },
+  {
+    lifecycleHooks: {
+      storeDidMount: (store, update, listen, unlisten) => {
+        const ws = new WebSocket("wss://example.com");
+
+        return () => {
+          ws.close();
+        };
+      },
+      storeWillUnmountAsync: (store) => {
+        fetch("https://example.com/api/sync-state", {
+          method: "POST",
+          body: JSON.stringify(store),
+        }).catch(console.error);
+      },
+    },
+  }
+);
+```
+
+### Lifecycle Execution Order
+
+1. **Mount Phase:**
+
+- `storeWillMount` (synchronous, during render) - called twice in React Strict Mode;
+- `storeDidMount` (asynchronous, after mount);
+
+2. **Unmount Phase:**
+
+- `storeWillUnmount` (synchronous, before unmount);
+- `storeWillMount` cleanup (if returned) - called an additional time in React Strict Mode;
+- `storeDidMount` cleanup (if returned);
+- `storeWillUnmountAsync` (asynchronous, during unmount).
+
 ## API Reference
 
-### `createStore<Store>(initialData: Store)`
+### `createStore<Store>(initialData: Store, options?)`
 
 Creates a new store instance with Provider and Consumer components.
+
+**Parameters:**
+
+- `initialData: Store` - Initial state for the store
+- `options?: CreateStoreOptions<Store>` (optional):
+  - `lifecycleHooks?: { storeWillMount?, storeDidMount?, storeWillUnmount?, storeWillUnmountAsync? }` - Lifecycle hooks for store initialization and cleanup
 
 **Returns:**
 
@@ -348,7 +540,7 @@ Component that provides a scoped store instance to child components. Each Provid
 
 **Scoping Behavior:**
 
-- Each `<AppStore.Provider>` or `<AppStore>` instance creates a completely isolated store
+- `<AppStore.Provider>` (same as `<AppStore>`) instance creates a completely isolated store
 - Multiple Providers of the same store type do not share state
 - Nested Providers create nested scopes (inner Provider overrides outer Provider for its children)
 

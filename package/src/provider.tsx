@@ -1,38 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useCallback, useMemo, useRef } from "react";
-import { BaseStore, GlobalStore } from "./types";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+
+import { type BaseStore, type CreateStoreOptions, type GlobalStore } from "./types";
 
 export interface GlobalStoreProviderProps<Store extends BaseStore = BaseStore> {
     children: React.ReactNode;
     defaultData?: Store;
+    options?: CreateStoreOptions<Store>;
     context: React.Context<GlobalStore<Store>>;
 }
 
 export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     children,
     defaultData,
+    options,
     context: Context,
 }: {
     children: React.ReactNode;
     defaultData?: Store;
+    options?: CreateStoreOptions<Store>;
     context: React.Context<GlobalStore<Store>>;
 }) => {
-    const store = useRef<{ [key: string]: { value: any; listeners: ((value: any) => void)[] } }>(
+    const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = options?.lifecycleHooks || {};
+    const store = useRef<{ [key: string | number | symbol]: { value: any; listeners: ((value: any) => void)[] } }>(
         defaultData
             ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, listeners: [] }]))
             : {},
-    );
-    const storeProxy = useMemo(
-        () =>
-            new Proxy(store.current, {
-                get: (target, key) => {
-                    if (typeof key !== "string") throw new Error("Key must be a string");
-                    return target[key].value;
-                },
-            }) as Store,
-        [],
     );
 
     const update = useCallback((part: Partial<Store> | ((prevData: Store) => Partial<Store>)) => {
@@ -49,7 +44,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         });
     }, []);
 
-    const listen = useCallback((key: string, listener: (value: any) => void) => {
+    const listen = useCallback((key: string | number | symbol, listener: (value: any) => void) => {
         if (!store.current[key]) store.current[key] = { value: undefined, listeners: [] };
 
         store.current[key].listeners.push(listener);
@@ -59,10 +54,21 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         };
     }, []);
 
-    const unlisten = useCallback((key: string, listener: (value: any) => void) => {
+    const unlisten = useCallback((key: string | number | symbol, listener: (value: any) => void) => {
         if (!store.current[key]) return;
 
         store.current[key].listeners = store.current[key].listeners.filter((l) => l !== listener);
+    }, []);
+
+    const storeProxy = useMemo(() => {
+        const proxy = new Proxy(store.current, {
+            get: (target, key) => {
+                if (typeof key !== "string") throw new Error("Key must be a string");
+                return target[key].value;
+            },
+        }) as Store;
+
+        return proxy;
     }, []);
 
     const storeData = useMemo(
@@ -74,6 +80,36 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         }),
         [],
     );
+
+    // In React Strict Mode "useMemo" is called twice, so we call "storeWillMountCallback.current"
+    // to clean up the previous call.
+    // We use "useMemo" instead of "useEffect" to run "storeWillMount" as soon as possible.
+    const storeWillMountCallback = useRef<((store: Store) => void) | void | undefined>(undefined);
+    useMemo(() => {
+        // We don't call "storeWillMount" on the server side to avoid unexpected behavior
+        if (typeof window === "undefined") return;
+
+        if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+        storeWillMountCallback.current = storeWillMount
+            ? storeWillMount(storeProxy, update, listen, unlisten)
+            : undefined;
+    }, []);
+
+    useLayoutEffect(() => {
+        return () => {
+            if (storeWillUnmount) storeWillUnmount(storeProxy);
+        };
+    }, []);
+
+    useEffect(() => {
+        const storeDidMountCallback = storeDidMount ? storeDidMount(storeProxy, update, listen, unlisten) : undefined;
+
+        return () => {
+            if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+            if (storeDidMountCallback) storeDidMountCallback(storeProxy);
+            if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy);
+        };
+    }, []);
 
     return <Context.Provider value={storeData as GlobalStore<Store>}>{children}</Context.Provider>;
 };

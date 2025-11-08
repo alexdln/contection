@@ -2,12 +2,12 @@
 
 import React, { createContext } from "react";
 
-import { type BaseStore, type GlobalStore } from "./types";
+import { type CreateStoreOptions, type BaseStore, type GlobalStore } from "./types";
 export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
 import { GlobalStoreConsumer } from "./consumer";
 
-export const createStore = <Store extends BaseStore>(initialData: Store) => {
+export const createStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
     const GlobalStoreContext = createContext<GlobalStore<Store>>({
         store: initialData,
         update: () => {},
@@ -15,7 +15,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store) => {
         unlisten: () => {},
     });
     const Provider = ({ children, value = initialData }: { children: React.ReactNode; value?: Store }) => (
-        <GlobalStoreProvider context={GlobalStoreContext} defaultData={value}>
+        <GlobalStoreProvider context={GlobalStoreContext} defaultData={value} options={options}>
             {children}
         </GlobalStoreProvider>
     );
