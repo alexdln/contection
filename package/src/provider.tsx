@@ -86,6 +86,9 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     // We use "useMemo" instead of "useEffect" to run "storeWillMount" as soon as possible.
     const storeWillMountCallback = useRef<((store: Store) => void) | void | undefined>(undefined);
     useMemo(() => {
+        // We don't call "storeWillMount" on the server side to avoid unexpected behavior
+        if (typeof window === "undefined") return;
+
         if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
         storeWillMountCallback.current = storeWillMount
             ? storeWillMount(storeProxy, update, listen, unlisten)
