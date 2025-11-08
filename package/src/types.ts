@@ -1,4 +1,5 @@
 export type BaseStore = Record<string | number | symbol, unknown>;
+
 export type BaseMutation<Store extends BaseStore, ReturnType = unknown> = (
     newStore: Store,
     prevStore?: Store,
@@ -18,10 +19,8 @@ export type CallbackStore<Store extends BaseStore, NewStorePart> = (prevStore: S
 
 export type GlobalStore<Store extends BaseStore> = {
     store: Store;
-    update: <NewStorePart extends Partial<Store>>(
-        newStorePart:
-            | ValidateNewStore<Store, NewStorePart>
-            | ((prevStore: Store) => ValidateNewStore<Store, NewStorePart>),
+    update: <NewStorePart extends Partial<Store>, CallbackStorePart extends Partial<Store>>(
+        newStorePart: ValidateNewStore<Store, NewStorePart> | CallbackStore<Store, CallbackStorePart>,
     ) => void;
     listen: <DataType extends Store[Key], Key extends keyof Store>(
         key: Key,

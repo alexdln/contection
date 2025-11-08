@@ -27,11 +27,13 @@ pnpm add contection
 ```tsx
 import { createStore } from "contection";
 
-interface AppStoreType {
+// It's recommended to always use a `type` instead of an `interface`
+// This currently provides better support through TypeScript.
+type AppStoreType = {
   user: { name: string; email: string };
   count: number;
   theme: "light" | "dark";
-}
+};
 
 const AppStore = createStore<AppStoreType>({
   user: { name: "", email: "" },
@@ -309,11 +311,11 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeWillMount: (store, update, listen, unlisten) => {
+      storeWillMount: (store, dispatch, listen, unlisten) => {
         // Initialization logic
         // Return cleanup function if needed
       },
-      storeDidMount: (store, update, listen, unlisten) => {
+      storeDidMount: (store, dispatch, listen, unlisten) => {
         // Post-mount logic
         // Return cleanup function if needed
       },
@@ -350,10 +352,10 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeWillMount: (store, update, listen) => {
+      storeWillMount: (store, dispatch, listen) => {
         const savedTheme = localStorage.getItem("theme");
         if (savedTheme) {
-          update({ theme: savedTheme as "light" | "dark" });
+          dispatch({ theme: savedTheme as "light" | "dark" });
         }
         const unlisten = listen("count", (count) => {
           console.log("Count changed:", count);
@@ -385,11 +387,11 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeDidMount: (store, update, listen, unlisten) => {
-        update({ windowWidth: window.innerWidth });
+      storeDidMount: (store, dispatch, listen) => {
+        dispatch({ windowWidth: window.innerWidth });
 
         const handleResize = () => {
-          update({ windowWidth: window.innerWidth });
+          dispatch({ windowWidth: window.innerWidth });
         };
         window.addEventListener("resize", handleResize);
 
@@ -454,7 +456,7 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeDidMount: (store, update, listen, unlisten) => {
+      storeDidMount: (store, dispatch, listen, unlisten) => {
         const ws = new WebSocket("wss://example.com");
 
         return () => {
