@@ -8,7 +8,9 @@ jobs:
   publish-experimental:
     runs-on: ubuntu-latest
 
-    if: ${{ github.head_ref != 'main' && !startsWith(github.head_ref, 'canary') }}
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ${{ github.head_ref != 'main' && !startsWith(github.head_ref, 'canary') }}
 
     steps:
       - name: Checkout code
