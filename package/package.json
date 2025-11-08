@@ -34,5 +34,5 @@
   "peerDependencies": {
     "react": ">= 19.0.0"
   },
-  "license": "MIC"
+  "license": "MIT"
 }
