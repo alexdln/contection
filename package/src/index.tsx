@@ -7,7 +7,7 @@ export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
 import { GlobalStoreConsumer } from "./consumer";
 
-export const createStore = <Store extends BaseStore>(initialData: Store, options: CreateStoreOptions<Store>) => {
+export const createStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
     const GlobalStoreContext = createContext<GlobalStore<Store>>({
         store: initialData,
         update: () => {},

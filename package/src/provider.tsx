@@ -67,7 +67,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
                 return target[key].value;
             },
         }) as Store;
-        storeWillMount?.(proxy, update, listen, unlisten);
+
         return proxy;
     }, []);
 
@@ -81,17 +81,24 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         [],
     );
 
+    const storeWillMountCallback = useMemo(
+        () => (storeWillMount ? storeWillMount(storeProxy, update, listen, unlisten) : undefined),
+        [],
+    );
+
     useLayoutEffect(() => {
         return () => {
-            if (storeWillUnmount) storeWillUnmount(storeProxy, update, listen, unlisten);
+            if (storeWillUnmount) storeWillUnmount(storeProxy);
         };
     }, []);
 
     useEffect(() => {
-        if (storeDidMount) storeDidMount(storeProxy, update, listen, unlisten);
+        const storeDidMountCallback = storeDidMount ? storeDidMount(storeProxy, update, listen, unlisten) : undefined;
 
         return () => {
-            if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy, update, listen, unlisten);
+            if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy);
+            if (storeDidMountCallback) storeDidMountCallback(storeProxy);
+            if (storeWillMountCallback) storeWillMountCallback(storeProxy);
         };
     }, []);
 

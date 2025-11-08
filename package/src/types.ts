@@ -38,14 +38,9 @@ type LifecycleMountHook<Store extends BaseStore> = (
     dispatch: GlobalStore<Store>["update"],
     listen: GlobalStore<Store>["listen"],
     unlisten: GlobalStore<Store>["unlisten"],
-) => void | (() => void);
+) => void | ((store: Store) => void);
 
-type LifecycleUnmountHook<Store extends BaseStore> = (
-    store: Store,
-    dispatch: GlobalStore<Store>["update"],
-    listen: GlobalStore<Store>["listen"],
-    unlisten: GlobalStore<Store>["unlisten"],
-) => void;
+type LifecycleUnmountHook<Store extends BaseStore> = (store: Store) => void;
 
 export type CreateStoreOptions<Store extends BaseStore> = {
     lifecycleHooks?: {
