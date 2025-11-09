@@ -4,6 +4,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
 import { type BaseStore, type CreateStoreOptions, type GlobalStore } from "./types";
+import { checkIsServer } from "./utils";
 
 export interface GlobalStoreProviderProps<Store extends BaseStore = BaseStore> {
     children: React.ReactNode;
@@ -64,6 +65,9 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         const proxy = new Proxy(store.current, {
             get: (target, key) => {
                 if (typeof key !== "string") throw new Error("Key must be a string");
+
+                if (!target[key]) return undefined;
+
                 return target[key].value;
             },
         }) as Store;
@@ -87,7 +91,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     const storeWillMountCallback = useRef<((store: Store) => void) | void | undefined>(undefined);
     useMemo(() => {
         // We don't call "storeWillMount" on the server side to avoid unexpected behavior
-        if (typeof window === "undefined") return;
+        if (checkIsServer()) return;
 
         if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
         storeWillMountCallback.current = storeWillMount

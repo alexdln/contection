@@ -41,22 +41,22 @@ export function useStore<
     { keys, mutation }: { keys?: Keys; mutation?: Mutation } = {},
 ): ResultType {
     const [store, , listen] = useStoreReducer<Store>(instance);
+    const storeKeys = keys || (Object.keys(store) as unknown as Keys);
     const prevStore = useRef<Store | null>(
-        keys ? (Object.fromEntries(keys.map((key) => [key, store[key as keyof Store]])) as Store) : store,
+        Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store,
     );
     const prevMutatedStore = useRef<ResultType | null | unknown>(mutation ? mutation(store, null) : null);
 
     const getSnapshot = useCallback(() => {
-        const newStore = keys
-            ? (Object.fromEntries(keys.map((key) => [key, store[key as keyof Store]])) as Store)
-            : store;
+        const newStore = Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store;
 
-        if (
-            mutation &&
-            prevStore.current &&
-            Object.entries(newStore).every(([key, value]) => value === prevStore.current?.[key as keyof Store])
-        )
-            return prevMutatedStore.current;
+        const isStoreEqual = Object.entries(newStore).every(
+            ([key, value]) => value === prevStore.current?.[key as keyof Store],
+        );
+
+        if (mutation && prevStore.current && prevMutatedStore.current && isStoreEqual) return prevMutatedStore.current;
+
+        if (!mutation && prevStore.current && isStoreEqual) return prevStore.current;
 
         prevStore.current = newStore;
 
@@ -71,9 +71,7 @@ export function useStore<
 
     const data = useSyncExternalStore(
         (onStoreChange: () => void) => {
-            const unlistens = (keys || (Object.keys(store) as unknown as Keys)).map((key) =>
-                listen<Store[typeof key], typeof key>(key, onStoreChange),
-            );
+            const unlistens = storeKeys.map((key) => listen<Store[typeof key], typeof key>(key, onStoreChange));
 
             return () => {
                 unlistens.forEach((unlisten) => unlisten());
