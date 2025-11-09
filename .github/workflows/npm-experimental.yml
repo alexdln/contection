@@ -24,9 +24,16 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install dependencies and build package
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
         run: |
-          pnpm install
+          pnpm --filter contection-tests test
+          pnpm --filter contection-tests test:types
+
+      - name: Build package
+        run: |
           pnpm package run build
           cp README.md ./package
           cp LICENSE ./package
