@@ -222,18 +222,18 @@ function AnalyticsTracker() {
   const [store, dispatch, listen, unlisten] = useStoreReducer(AppStore);
 
   useEffect(() => {
-    const unsubscribeUser = listen("user", (user) => {
+    const unlistenUser = listen("user", (user) => {
       analytics.track("user_updated", { userId: user.email });
     });
 
-    const unsubscribeTheme = listen("theme", (theme) => {
+    const unlistenTheme = listen("theme", (theme) => {
       document.documentElement.setAttribute("data-theme", theme);
     });
 
     // Cleanup subscriptions on unmount
     return () => {
-      unsubscribeUser();
-      unsubscribeTheme();
+      unlistenUser();
+      unlistenTheme();
     };
   }, [listen]);
 
@@ -279,7 +279,7 @@ function CustomSubscription() {
 }
 ```
 
-Using the returned unsubscribe function:
+Using the returned unlisten function:
 
 ```tsx
 import { useStoreReducer } from "contection";
@@ -289,11 +289,11 @@ function AutoCleanupSubscription() {
   const [, , listen] = useStoreReducer(AppStore);
 
   useEffect(() => {
-    const unsubscribe = listen("count", (count) => {
+    const unlisten = listen("count", (count) => {
       console.log("Current count:", count);
     });
 
-    return unsubscribe;
+    return unlisten;
   }, [listen]);
 }
 ```
