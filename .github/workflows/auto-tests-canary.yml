@@ -1,0 +1,42 @@
+name: Daily auto tests for React Canary
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: |
+          pnpm install --no-lockfile
+          pnpm --filter contection-tests add react@canary react-dom@canary --no-lockfile
+          pnpm --filter contection-tests add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
+
+      - name: Run tests
+        run: |
+          pnpm --filter contection-tests test
+          pnpm --filter contection-tests test:types
+
+      - name: Build package
+        run: |
+          pnpm package run build
+
+      - name: Set summary
+        run: |
+          REACT_VERSION=$(node -p "require('react/package.json').version")
+          echo "$REACT_VERSION" >> $GITHUB_STEP_SUMMARY
+        working-directory: ./tests
