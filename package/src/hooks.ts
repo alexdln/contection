@@ -1,24 +1,58 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useContext, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { type StoreInstance, type BaseStore, type GlobalStore } from "./types";
 
+/**
+ * Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
+ * Unlike `useStore`, the store returned from `useStoreReducer` does not trigger re-renders when it changes,
+ * making it useful for reading values in handlers or effects.
+ * @template Store - The store type
+ * @param store - The store instance
+ * @returns A tuple `[store, dispatch, listen, unlisten]`
+ * @example
+ * const [store, dispatch, listen, unlisten] = useStoreReducer(Store);
+ * // ...
+ * useEffect(() => {
+ *   return listen("count", (count) => {
+ *     console.log(count);
+ *   });
+ * }, []);
+ * const sendAnalyticsEvent = useCallback(() => {
+ *   sendAnalyticsEvent("user_action", { userId: store.user.id });
+ * }, []);
+ * // ...
+ * <button onClick={() => dispatch((prev) => ({ count: prev.count + 1 }))}>Increment</button>
+ */
 export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstance<Store>, "_context">) => {
     const data = useContext<GlobalStore<Store>>(store._context);
     return useMemo(() => [data.store, data.update, data.listen, data.unlisten] as const, [data]);
 };
 
+/**
+ * Hook that subscribes to store state with optional key filtering and computed value derivation.
+ * Component re-renders only when subscribed keys change (or when mutation result changes).
+ * @template Store - The store type
+ * @template Keys - Array of store keys to subscribe to
+ * @template Mutation - Mutation function that transforms the subscribed state
+ * @param instance - The store instance
+ * @param options - The options for the store subscription
+ * @param options.keys - The keys to subscribe to
+ * @param options.mutation - The mutation function to apply to the subscribed state, if provided, the hook will return the result of the mutation function
+ * @returns The subscribed store state
+ * @example
+ * const store = useStore(Store);
+ * const headerStore = useStore(Store, { keys: ["user", "project"] });
+ * const doubledCount = useStore(Store, { keys: ["count"], mutation: (store) => store.count * 2 });
+ */
 export function useStore<
     Store extends BaseStore,
     Keys extends Extract<keyof Store, string>[],
     Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown,
-    ResultType = ReturnType<Mutation>,
 >(instance: Pick<StoreInstance<Store>, "_context">, options: { keys: Keys; mutation: Mutation }): ReturnType<Mutation>;
 export function useStore<
     Store extends BaseStore,
     Keys extends Extract<keyof Store, string>[],
     Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown,
-    ResultType = ReturnType<Mutation>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
     options: { keys?: undefined; mutation: Mutation },

@@ -6,6 +6,10 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 
 import { type BaseStore, type CreateStoreOptions, type GlobalStore } from "./types";
 import { checkIsServer } from "./utils";
 
+/**
+ * Props for the GlobalStoreProvider component.
+ * @template Store - The store type
+ */
 export interface GlobalStoreProviderProps<Store extends BaseStore = BaseStore> {
     children: React.ReactNode;
     defaultData?: Store;
@@ -13,6 +17,11 @@ export interface GlobalStoreProviderProps<Store extends BaseStore = BaseStore> {
     context: React.Context<GlobalStore<Store>>;
 }
 
+/**
+ * Internal provider component that manages store state, subscriptions and lifecycle hooks.
+ * Creates an isolated store scope for its children, similar to React Context.Provider.
+ * @template Store - The store type
+ */
 export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     children,
     defaultData,

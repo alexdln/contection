@@ -555,16 +555,6 @@ Component that consumes the store using render props pattern.
 - `children: (data) => React.ReactNode` - Render function
 - `options?: { keys?: string[], mutation?: Function }` - Optional subscription and mutation options
 
-## Architecture
-
-Contection addresses limitations of the standard React Context API:
-
-1. **Granular Updates** - Implements `useSyncExternalStore` to enable per-key subscriptions, preventing unnecessary re-renders when unrelated state changes
-2. **Selective Subscriptions** - Components subscribe only to specified store keys, reducing render cycles
-3. **Computed State** - Built-in support for derived state through mutation functions
-4. **React Patterns** - Maintains compatibility with standard React hooks and component patterns
-5. **Type Safety** - TypeScript generics provide compile-time type checking for store keys and computed values
-
 ## License
 
 MIC
