@@ -23,7 +23,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --no-lockfile
           pnpm --filter contection-tests add react@canary react-dom@canary --no-lockfile
           pnpm --filter contection-tests add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
 
