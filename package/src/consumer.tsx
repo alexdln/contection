@@ -1,6 +1,13 @@
 import { type BaseStore, type StoreInstance } from "./types";
 import { useStore } from "./hooks";
 
+/**
+ * Consumer component that provides store data using the render props pattern.
+ * Supports selective subscriptions and computed values, similar to `useStore` hook.
+ * @template Store - The store type
+ * @template Keys - Array of store keys to subscribe to
+ * @template Mutation - Mutation function that transforms the subscribed state
+ */
 export function GlobalStoreConsumer<
     Store extends BaseStore,
     Keys extends Extract<keyof Store, string>[] = Extract<keyof Store, string>[],
