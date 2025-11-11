@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useContext, useMemo, useRef, useSyncExternalStore } from "react";
 
-import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn } from "./types";
+import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, ListenOptions } from "./types";
 
 /**
  * Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
@@ -39,6 +39,7 @@ export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstan
  * @param options - The options for the store subscription
  * @param options.keys - The keys to subscribe to
  * @param options.mutation - The mutation function to apply to the subscribed state, if provided, the hook will return the result of the mutation function
+ * @param options.enabled - The condition to subscribe to the store. The hook will only subscribe to the store if the condition is true
  * @returns The subscribed store state
  * @example
  * const store = useStore(Store);
@@ -51,7 +52,7 @@ export function useStore<
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
-    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType> },
+    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] },
 ): ResultType;
 export function useStore<
     Store extends BaseStore = BaseStore,
@@ -59,7 +60,7 @@ export function useStore<
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
-    options?: { keys?: Keys; mutation?: undefined },
+    options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] },
 ): Pick<Store, Keys[number]>;
 export function useStore<
     Store extends BaseStore = BaseStore,
@@ -67,10 +68,14 @@ export function useStore<
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
-    { keys, mutation }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType> } = {},
+    {
+        keys,
+        mutation,
+        enabled,
+    }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] } = {},
 ): ResultType {
     const [store, , listen] = useStoreReducer<Store>(instance);
-    const storeKeys = keys || (Object.keys(store) as unknown as Keys);
+    const storeKeys = useMemo(() => keys || (Object.keys(store) as unknown as Keys), [keys]);
     const prevStore = useRef<Store | undefined>(
         Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store,
     );
@@ -96,18 +101,21 @@ export function useStore<
         }
 
         return newStore;
-    }, []);
+    }, [storeKeys]);
 
-    const data = useSyncExternalStore(
+    const subscribe = useCallback(
         (onStoreChange: () => void) => {
-            const unlistens = storeKeys.map((key) => listen<Store[typeof key], typeof key>(key, onStoreChange));
+            const unlistens = storeKeys.map((key) =>
+                listen<Store[typeof key], typeof key>(key, onStoreChange, { enabled }),
+            );
 
             return () => {
                 unlistens.forEach((unlisten) => unlisten());
             };
         },
-        getSnapshot,
-        getSnapshot,
+        [storeKeys, enabled],
     );
+
+    const data = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     return data as ResultType;
 }

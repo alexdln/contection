@@ -3,7 +3,14 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
-import { type BaseStore, type CreateStoreOptions, type GlobalStore } from "./types";
+import {
+    type StoreKey,
+    type BaseStore,
+    type CreateStoreOptions,
+    type GlobalStore,
+    type InternalStoreType,
+    type ListenOptions,
+} from "./types";
 import { checkIsServer } from "./utils";
 
 /**
@@ -34,7 +41,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     context: React.Context<GlobalStore<Store>>;
 }) => {
     const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = options?.lifecycleHooks || {};
-    const store = useRef<{ [key: string | number | symbol]: { value: any; listeners: ((value: any) => void)[] } }>(
+    const store = useRef<InternalStoreType<Store>>(
         defaultData
             ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, listeners: [] }]))
             : {},
@@ -42,6 +49,12 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
 
     const update = useCallback((part: Partial<Store> | ((prevData: Store) => Partial<Store>)) => {
         const newPart = typeof part === "function" ? part(storeProxy) : part;
+        const listenersToNotify: {
+            callback: (value: any) => void;
+            enabled: ListenOptions<Store>["enabled"];
+            value: unknown;
+        }[] = [];
+
         Object.entries(newPart).forEach(([key, value]) => {
             if (!store.current[key]) store.current[key] = { value: undefined, listeners: [] };
 
@@ -50,24 +63,39 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
             if (store.current[key].value === newValue) return;
 
             store.current[key].value = newValue;
-            store.current[key].listeners.forEach((listener) => listener(store.current[key].value));
+            store.current[key].listeners.forEach(({ callback, enabled }) => {
+                listenersToNotify.push({
+                    callback,
+                    enabled,
+                    value: newValue,
+                });
+            });
+        });
+        // We first change all the values, and then call all the related listeners.
+        // Otherwise, in batch updates, a race condition could occur, in which
+        // some listeners are checked and called with new values, and some with old ones
+        listenersToNotify.forEach(({ callback, enabled, value }) => {
+            if (enabled === undefined || (typeof enabled === "function" ? enabled(storeProxy) : enabled)) {
+                callback(value);
+            }
         });
     }, []);
 
-    const listen = useCallback((key: string | number | symbol, listener: (value: any) => void) => {
+    const listen = useCallback((key: StoreKey, listener: (value: any) => void, options: ListenOptions<Store> = {}) => {
         if (!store.current[key]) store.current[key] = { value: undefined, listeners: [] };
 
-        store.current[key].listeners.push(listener);
+        const listenerEntry = { callback: listener, ...options };
+        store.current[key].listeners.push(listenerEntry);
 
         return () => {
-            store.current[key].listeners = store.current[key].listeners.filter((l) => l !== listener);
+            store.current[key].listeners = store.current[key].listeners.filter((entry) => entry !== listenerEntry);
         };
     }, []);
 
-    const unlisten = useCallback((key: string | number | symbol, listener: (value: any) => void) => {
+    const unlisten = useCallback((key: StoreKey, listener: (value: any) => void) => {
         if (!store.current[key]) return;
 
-        store.current[key].listeners = store.current[key].listeners.filter((l) => l !== listener);
+        store.current[key].listeners = store.current[key].listeners.filter(({ callback }) => callback !== listener);
     }, []);
 
     const storeProxy = useMemo(() => {
