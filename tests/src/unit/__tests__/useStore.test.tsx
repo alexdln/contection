@@ -40,12 +40,7 @@ describe("useStore", () => {
             const TestComponent = () => {
                 renderCount++;
                 const store = useStore(TestStore);
-                return (
-                    <div>
-                        <span data-testid="count">{store.count}</span>
-                        <span data-testid="render-count">{renderCount}</span>
-                    </div>
-                );
+                return <span data-testid="count">{store.count}</span>;
             };
 
             const UpdateComponent = () => {
@@ -383,6 +378,186 @@ describe("useStore", () => {
             );
 
             expect(screen.getByTestId("result")).toHaveTextContent("null");
+        });
+    });
+
+    describe("enabled option", () => {
+        it("should not re-render when enabled is false", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore, { enabled: false });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+        });
+
+        it("should re-render when enabled is true", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore, { enabled: true });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+        });
+
+        it("should re-render when enabled is undefined", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore);
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+        });
+
+        it("should not re-render when enabled function returns false", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore, { enabled: () => false });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+        });
+
+        it("should re-render when enabled function returns true", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore, { enabled: () => true });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+        });
+
+        it("should evaluate enabled function with current store state", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStore, {
+                    keys: ["count"],
+                    enabled: (store) => store.count > 10,
+                });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return (
+                    <>
+                        <button data-testid="update-to-zero" onClick={() => update({ count: 0 })}>
+                            Update to 0
+                        </button>
+                        <button data-testid="update-to-ten" onClick={() => update({ count: 10 })}>
+                            Update to 10
+                        </button>
+                        <button data-testid="update-to-twenty" onClick={() => update({ count: 20 })}>
+                            Update to 20
+                        </button>
+                    </>
+                );
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByTestId("update-to-zero").click());
+            expect(renderCount).toBe(1);
+            act(() => screen.getByTestId("update-to-ten").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByTestId("update-to-twenty").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("20");
         });
     });
 });
