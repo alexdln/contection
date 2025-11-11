@@ -9,17 +9,16 @@ import React from "react";
 
 import { createStore, useStore, useStoreReducer } from "contection";
 
-// @TODO add support for interface
-type TestStore = {
+interface TestStore {
     count: number;
     name: string;
     user: {
         id: number;
         email: string;
     };
-    theme: "light" | "dark";
+    theme?: "light" | "dark";
     items: string[];
-};
+}
 
 // Test 1: Store creation with type inference
 const Store = createStore<TestStore>({
@@ -42,10 +41,16 @@ function testUseStoreReducer() {
 
     // Update should accept partial store
     update({ count: 1 });
-    update({ name: "New" });
+    update({ name: "New", theme: undefined });
+    // @ts-expect-error - should not accept undefined value if it was not defined in the store
+    update({ name: "New", items: undefined });
+    update({ name: "New", items: [] });
     update((prev) => ({ count: prev.count + 1 }));
     // @ts-expect-error - should not accept invalid key
     update({ invalidKey: "value" });
+    // @ts-expect-error - should not accept undefined value if it was not defined in the store
+    update((prev) => ({ count: prev.count + 1, items: undefined }));
+    update((prev) => ({ count: prev.count + 1, items: [] }));
 
     // Listen should be typed correctly
     const unsubscribe = listen("count", (value: number) => {
@@ -174,7 +179,7 @@ function testConsumerOptions() {
 
     // With keys
     <Store.Consumer options={{ keys: ["count", "name"] }}>
-        {(data: { count: number; name: string }) => <div>{data.count}</div>}
+        {(data: { count: number; name?: string }) => <div>{data.count}</div>}
     </Store.Consumer>;
 
     // With keys check unexpect error
