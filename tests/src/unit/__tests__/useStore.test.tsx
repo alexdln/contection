@@ -1,8 +1,8 @@
 import { useStore, useStoreReducer } from "contection";
 import React from "react";
 
+import { createTestStore, type TestStoreType } from "../../fixtures/test-store";
 import { render, screen, act } from "../../setup/test-utils";
-import { createTestStore } from "../../fixtures/test-store";
 
 describe("useStore", () => {
     let TestStore: ReturnType<typeof createTestStore>;
@@ -171,6 +171,77 @@ describe("useStore", () => {
             );
 
             expect(screen.getByTestId("result")).toHaveTextContent("23");
+        });
+
+        it("should pass prevStore and prevMutatedStore to mutation", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                // Explicitly set ResultType generic to ensure prevMutatedStore is correctly typed
+                const result = useStore<TestStoreType, TestStoreType["user"] & { generatedContent: string }, ["user"]>(
+                    TestStore,
+                    {
+                        keys: ["user"],
+                        mutation: (newStore, prevStore, prevMutatedStore) => {
+                            if (prevMutatedStore?.id === newStore.user.id) return prevMutatedStore;
+
+                            return {
+                                id: newStore.user.id,
+                                email: newStore.user.email,
+                                generatedContent: `Generated content for ${newStore.user.id}`,
+                            };
+                        },
+                    },
+                );
+                renderCount++;
+                return <div data-testid="result">{result.generatedContent}</div>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return (
+                    <>
+                        <button data-testid="inc" onClick={() => update((prev) => ({ count: prev.count + 1 }))}>
+                            Inc
+                        </button>
+                        <button
+                            data-testid="update-orig-user"
+                            onClick={() => update({ user: { id: 1, email: "test@test.com" } })}
+                        >
+                            Update User
+                        </button>
+                        <button
+                            data-testid="update-other-user"
+                            onClick={() => update({ user: { id: 2, email: "test2@test.com" } })}
+                        >
+                            Update Other User
+                        </button>
+                    </>
+                );
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            // Initial render: prevStore and prevMutatedStore should be undefined
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("Generated content for 1");
+
+            // First increment
+            act(() => screen.getByTestId("inc").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("Generated content for 1");
+
+            act(() => screen.getByTestId("update-orig-user").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("Generated content for 1");
+
+            act(() => screen.getByTestId("update-other-user").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("result")).toHaveTextContent("Generated content for 2");
         });
 
         it("should re-render only when mutation result changes", () => {

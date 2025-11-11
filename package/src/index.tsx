@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { createContext } from "react";
 
-import { type CreateStoreOptions, type BaseStore, type GlobalStore } from "./types";
+import { type CreateStoreOptions, type BaseStore, type GlobalStore, type MutationFn } from "./types";
 export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
 import { GlobalStoreConsumer } from "./consumer";
@@ -37,51 +38,25 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         </GlobalStoreProvider>
     );
 
-    function Consumer<
-        Keys extends Extract<keyof Store, string>[] = Extract<keyof Store, string>[],
-        Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown = (
-            newStore: Pick<Store, Keys[number]>,
-            prevStore?: Pick<Store, Keys[number]>,
-        ) => unknown,
-    >(props: {
-        children: (data: ReturnType<Mutation>) => React.ReactNode;
-        options: { keys: Keys; mutation: Mutation };
+    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
+        options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType> };
+        children: (data: ResultType) => React.ReactNode;
     }): React.ReactNode;
-    function Consumer<
-        Keys extends Extract<keyof Store, string>[] = Extract<keyof Store, string>[],
-        Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown = (
-            newStore: Pick<Store, Keys[number]>,
-            prevStore?: Pick<Store, Keys[number]>,
-        ) => unknown,
-    >(props: {
-        children: (data: ReturnType<Mutation>) => React.ReactNode;
-        options: { keys?: undefined; mutation: Mutation };
-    }): React.ReactNode;
-    function Consumer<Keys extends Extract<keyof Store, string>[] = Extract<keyof Store, string>[]>(props: {
+    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
+        options?: { keys?: Keys; mutation?: undefined };
         children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
-        options: { keys: Keys; mutation?: undefined };
     }): React.ReactNode;
-    function Consumer(props: {
-        children: (data: Store) => React.ReactNode;
-        options?: { keys?: undefined; mutation?: undefined };
-    }): React.ReactNode;
-    function Consumer<
-        Keys extends Extract<keyof Store, string>[] = Extract<keyof Store, string>[],
-        Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown = (
-            newStore: Pick<Store, Keys[number]>,
-            prevStore?: Pick<Store, Keys[number]>,
-        ) => unknown,
-    >({
+    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>({
         children,
         options,
     }: {
-        children: (data: Store | ReturnType<Mutation>) => React.ReactNode;
-        options?: { keys?: Keys; mutation?: Mutation };
+        options?: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType> };
+        children: (data: Store | ResultType) => React.ReactNode;
     }): React.ReactNode {
         return (
             <GlobalStoreConsumer
                 instance={{ _context: GlobalStoreContext }}
-                options={options as { keys: Keys; mutation: Mutation }}
+                options={options as { keys: Keys; mutation: MutationFn<Store, Keys, ResultType> }}
             >
                 {children}
             </GlobalStoreConsumer>

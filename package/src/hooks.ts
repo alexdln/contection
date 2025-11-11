@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useContext, useMemo, useRef, useSyncExternalStore } from "react";
 
-import { type StoreInstance, type BaseStore, type GlobalStore } from "./types";
+import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn } from "./types";
 
 /**
  * Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
@@ -45,41 +46,35 @@ export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstan
  * const doubledCount = useStore(Store, { keys: ["count"], mutation: (store) => store.count * 2 });
  */
 export function useStore<
-    Store extends BaseStore,
-    Keys extends Extract<keyof Store, string>[],
-    Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown,
->(instance: Pick<StoreInstance<Store>, "_context">, options: { keys: Keys; mutation: Mutation }): ReturnType<Mutation>;
-export function useStore<
-    Store extends BaseStore,
-    Keys extends Extract<keyof Store, string>[],
-    Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: Pick<Store, Keys[number]>) => unknown,
+    Store extends BaseStore = BaseStore,
+    ResultType = unknown,
+    Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
-    options: { keys?: undefined; mutation: Mutation },
-): ReturnType<Mutation>;
-export function useStore<Store extends BaseStore, Keys extends Extract<keyof Store, string>[]>(
+    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType> },
+): ResultType;
+export function useStore<
+    Store extends BaseStore = BaseStore,
+    ResultType = unknown,
+    Keys extends Array<keyof Store> = Array<keyof Store>,
+>(
     instance: Pick<StoreInstance<Store>, "_context">,
-    options: { keys: Keys; mutation?: undefined },
+    options?: { keys?: Keys; mutation?: undefined },
 ): Pick<Store, Keys[number]>;
-export function useStore<Store extends BaseStore>(
-    instance: Pick<StoreInstance<Store>, "_context">,
-    options?: { keys?: undefined; mutation?: undefined },
-): Store;
 export function useStore<
-    Store extends BaseStore,
-    Keys extends Extract<keyof Store, string>[],
-    Mutation extends (newStore: Pick<Store, Keys[number]>, prevStore?: unknown) => unknown,
-    ResultType = ReturnType<Mutation>,
+    Store extends BaseStore = BaseStore,
+    ResultType = unknown,
+    Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context">,
-    { keys, mutation }: { keys?: Keys; mutation?: Mutation } = {},
+    { keys, mutation }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType> } = {},
 ): ResultType {
     const [store, , listen] = useStoreReducer<Store>(instance);
     const storeKeys = keys || (Object.keys(store) as unknown as Keys);
-    const prevStore = useRef<Store | null>(
+    const prevStore = useRef<Store | undefined>(
         Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store,
     );
-    const prevMutatedStore = useRef<ResultType | null | unknown>(mutation ? mutation(store, null) : null);
+    const prevMutatedStore = useRef<ResultType | undefined>(mutation ? mutation(store) : undefined);
 
     const getSnapshot = useCallback(() => {
         const newStore = Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store;
@@ -95,7 +90,7 @@ export function useStore<
         prevStore.current = newStore;
 
         if (mutation) {
-            const mutatedData = mutation(newStore, prevStore.current);
+            const mutatedData = mutation(newStore, prevStore.current, prevMutatedStore.current);
             prevMutatedStore.current = mutatedData;
             return mutatedData;
         }
