@@ -1,8 +1,11 @@
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+type NonFunction<T> = T extends Function ? never : T extends object ? T : never;
+
 /**
  * Base type for all store objects.
  * "number" and "symbol" support are for future use
  */
-export type BaseStore = Record<string | number | symbol, unknown>;
+export type BaseStore = NonFunction<object>;
 
 /**
  * Base type for mutation functions that transform store state in Consumer and useStore
@@ -24,7 +27,7 @@ export type MutationFn<Store, Keys extends Array<keyof Store> = Array<keyof Stor
 export type ValidateNewStore<Store extends BaseStore, NewStorePart extends BaseStore> = NewStorePart extends {
     [K in keyof NewStorePart]: K extends keyof Store ? (undefined extends Store[K] ? Store[K] : never) : never;
 }
-    ? NewStorePart
+    ? NewStorePart // @ts-expect-error - NewStorePart is guaranteed to be a subset of Store
     : Pick<Store, keyof NewStorePart>;
 
 /**
@@ -32,10 +35,12 @@ export type ValidateNewStore<Store extends BaseStore, NewStorePart extends BaseS
  * @template Store - The full store state type
  * @template NewStorePart - The callback argument as partial store state type being validated
  */
-export type CallbackStore<Store extends BaseStore, NewStorePart> = (prevStore: Store) => NewStorePart extends {
+export type CallbackStore<Store extends BaseStore, NewStorePart extends BaseStore> = (
+    prevStore: Store,
+) => NewStorePart extends {
     [K in keyof NewStorePart]: K extends keyof Store ? (undefined extends Store[K] ? Store[K] : never) : never;
 }
-    ? NewStorePart
+    ? NewStorePart // @ts-expect-error - NewStorePart is guaranteed to be a subset of Store
     : Pick<Store, keyof NewStorePart>;
 
 /**

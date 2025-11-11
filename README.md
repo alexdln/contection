@@ -27,8 +27,6 @@ pnpm add contection
 ```tsx
 import { createStore } from "contection";
 
-// It's recommended to always use a `type` instead of an `interface`
-// This currently provides better support through TypeScript.
 type AppStoreType = {
   user: { name: string; email: string };
   count: number;
@@ -174,9 +172,8 @@ const data = useStore(AppStore, { keys: ["user", "theme"] });
 Derive computed state from store values using mutation functions:
 
 ```tsx
-// Compute derived value from store state
-// Component re-renders only when mutation result change
 // Mutation calls only when 'user' key change
+// Component re-renders only when mutation result change
 const userInitials = useStore(AppStore, {
   keys: ["user"],
   mutation: (user) => {
@@ -202,7 +199,7 @@ The mutation function receives three parameters:
 Use `prevStore` and `prevMutatedStore` to implement incremental updates, compare values, or optimize computations:
 
 ```tsx
-// Track changes and compute differences
+// Track count changes and compute differences
 const countChange = useStore(AppStore, {
   keys: ["count"],
   mutation: (newStore, prevStore, prevMutatedStore) => {
@@ -234,7 +231,6 @@ const filteredItems = useStore(AppStore, {
 Access the entire store when needed with full re-render cycle:
 
 ```tsx
-// Get the entire store
 const store = useStore(AppStore);
 
 // Or with Consumer
