@@ -1,10 +1,20 @@
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 type NonFunction<T> = T extends Function ? never : T extends object ? T : never;
 
-/**
- * Base type for all store objects.
- * "number" and "symbol" support are for future use
- */
+export type StoreKey = string | number | symbol;
+
+export type ListenOptions<Store extends BaseStore = BaseStore> = {
+    enabled?: boolean | ((store: Store) => boolean);
+};
+
+export type InternalStoreType<Store extends BaseStore = BaseStore> = {
+    [key: StoreKey]: {
+        value: unknown;
+        listeners: ({ callback: (value: unknown) => void } & ListenOptions<Store>)[];
+    };
+};
+
+/** Base type for all store objects */
 export type BaseStore = NonFunction<object>;
 
 /**
@@ -62,11 +72,17 @@ export type GlobalStore<Store extends BaseStore> = {
      * Subscribes to changes for a specific store key
      * @template DataType - The type of the value for the listened key
      * @template Key - The listened key in the store
+     * @param options.enabled - The condition to subscribe to the store. The hook will only subscribe to the store if the condition is true
      * @returns A function to unsubscribe from the listener
+     * @example
+     * const unlisten = listen("count", (value) => {
+     *     console.log(value);
+     * }, { enabled: true });
      */
     listen: <DataType extends Store[Key], Key extends keyof Store>(
         key: Key,
         listener: (value: DataType) => void,
+        options?: ListenOptions<Store>,
     ) => () => void;
     /**
      * Unsubscribes from changes for a specific store key
