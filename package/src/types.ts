@@ -7,11 +7,13 @@ export type BaseStore = Record<string | number | symbol, unknown>;
 /**
  * Base type for mutation functions that transform store state in Consumer and useStore
  * @template Store - The store state type
+ * @template Keys - The keys of the store to mutate
  * @template ReturnType - The return type of the mutation
  */
-export type BaseMutation<Store extends BaseStore, ReturnType = unknown> = (
-    newStore: Store,
-    prevStore?: Store,
+export type MutationFn<Store, Keys extends Array<keyof Store> = Array<keyof Store>, ReturnType = unknown> = (
+    newStore: Pick<Store, Keys[number]>,
+    prevStore?: Pick<Store, Keys[number]>,
+    prevMutatedStore?: ReturnType,
 ) => ReturnType;
 
 /**

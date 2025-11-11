@@ -164,14 +164,23 @@ function testConsumerOptions() {
         {(data: { count: number; name: string }) => <div>{data.count}</div>}
     </Store.Consumer>;
 
+    // With keys check unexpect error
+    <Store.Consumer
+        options={{
+            keys: ["count"],
+        }}
+    >
+        {/* @ts-expect-error - should not have unselected keys */}
+        {(data) => <div>{data.name}</div>}
+    </Store.Consumer>;
+
     // With mutation
     <Store.Consumer
         options={{
             mutation: (Store) => Store.count * 2,
         }}
     >
-        {/* @TODO add support for argument type with mutation. i.e. (doubled: number) => <div>{doubled}</div> */}
-        {(doubled) => <div>{doubled as number}</div>}
+        {(doubled: number) => <div>{doubled}</div>}
     </Store.Consumer>;
 
     // With keys and mutation
@@ -181,7 +190,7 @@ function testConsumerOptions() {
             mutation: (Store) => Store.count * 2,
         }}
     >
-        {(doubled) => <div>{doubled as number}</div>}
+        {(doubled: number) => <div>{doubled}</div>}
     </Store.Consumer>;
 }
 
