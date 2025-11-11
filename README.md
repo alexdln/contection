@@ -1,6 +1,6 @@
 # Contection
 
-A state management library that extends React Context API with fine-grained subscriptions and computed values. Built on React hooks and `useSyncExternalStore` to provide efficient, granular state updates while maintaining a React-native API.
+A state management library that extends React Context API with fine-grained subscriptions and computed values. Built on React hooks and `useSyncExternalStore` to provide efficient, granular state updates.
 
 ## Features
 
@@ -176,6 +176,7 @@ Derive computed state from store values using mutation functions:
 ```tsx
 // Compute derived value from store state
 // Component re-renders only when mutation result change
+// Mutation calls only when 'user' key change
 const userInitials = useStore(AppStore, {
   keys: ["user"],
   mutation: (user) => {
@@ -187,7 +188,45 @@ const userInitials = useStore(AppStore, {
   },
 });
 
-// Returns computed string value (e.g., "JD") instead of the full user object
+return userInitials; // JD
+```
+
+#### Mutation Function Parameters
+
+The mutation function receives three parameters:
+
+1. **`newStore`** - The current store state (or selected keys if `keys` option is used)
+2. **`prevStore`** - The previous store state (or selected keys). `undefined` on the first call
+3. **`prevMutatedStore`** - The previous result of the mutation function. `undefined` on the first call
+
+Use `prevStore` and `prevMutatedStore` to implement incremental updates, compare values, or optimize computations:
+
+```tsx
+// Track changes and compute differences
+const countChange = useStore(AppStore, {
+  keys: ["count"],
+  mutation: (newStore, prevStore, prevMutatedStore) => {
+    if (!prevStore) {
+      return { current: newStore.count, change: 0 };
+    }
+    return {
+      current: newStore.count,
+      change: newStore.count - prevStore.count,
+    };
+  },
+});
+
+// Incremental list updates using previous computed value
+const filteredItems = useStore(AppStore, {
+  keys: ["items", "filter"],
+  mutation: (newStore, prevStore, prevMutatedStore) => {
+    // Reuse previous result if filter hasn't changed
+    if (prevMutatedStore && prevStore?.filter === newStore.filter) {
+      return prevMutatedStore;
+    }
+    return newStore.items.filter((item) => item.includes(newStore.filter));
+  },
+});
 ```
 
 ### Full Store Access
@@ -369,7 +408,7 @@ const AppStore = createStore<AppStoreType>(
 
 #### `storeDidMount`
 
-**Recommended for:** Fullstack frameworks (Next.js, Remix, etc.) to avoid hydration errors.
+**Recommended for:** Fullstack solutions (Next.js, Remix, etc.) to avoid hydration errors.
 
 Runs asynchronously **after** the component mounts, making it safe for operations that might differ between server and client. This hook is ideal for:
 
@@ -484,7 +523,7 @@ const AppStore = createStore<AppStoreType>(
 2. **Unmount Phase:**
 
 - `storeWillUnmount` (synchronous, before unmount);
-- `storeWillMount` cleanup (if returned) - called an additional time in React Strict Mode;
+- `storeWillMount` cleanup (if returned) - called an additional time in React Strict Mode between `storeWillMount` calls;
 - `storeDidMount` cleanup (if returned);
 - `storeWillUnmountAsync` (asynchronous, during unmount).
 
@@ -504,19 +543,22 @@ Creates a new store instance with Provider and Consumer components.
 
 - `Provider` - React component to wrap scope
 - `Consumer` - React component for render props pattern
-- `_context` - The underlying React Context
+- `_context` - The underlying React Context. In some cases, you can use it with the `use` hook to access the useStoreReducer data
 - `_initial` - The initial store data
 
 ### `useStore(instance, options?)`
 
-Hook that subscribes to store state with optional key filtering and computed value derivation.
+Hook that subscribes to store state with optional key listening and computed value derivation.
 
 **Parameters:**
 
 - `instance` - Store instance returned from `createStore`
 - `options` (optional):
   - `keys?: string[]` - Array of store keys to subscribe to. If omitted, subscribes to all keys.
-  - `mutation?: (newStore, prevStore?) => T` - Function to compute derived value from subscribed state
+  - `mutation?: (newStore, prevStore?, prevMutatedStore?) => T` - Function to compute derived value from subscribed state. Receives:
+    - `newStore` - Current store state (or selected keys if `keys` is provided)
+    - `prevStore` - Previous store state (or selected keys). `undefined` on first call
+    - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
 
 **Returns:** Subscribed store data or computed value if mutation function is provided
 
@@ -553,7 +595,12 @@ Component that consumes the store using render props pattern.
 **Props:**
 
 - `children: (data) => React.ReactNode` - Render function
-- `options?: { keys?: string[], mutation?: Function }` - Optional subscription and mutation options
+- `options?: { keys?: string[], mutation?: Function }` - Optional subscription and mutation options:
+  - `keys?: string[]` - Array of store keys to subscribe to. If omitted, subscribes to all keys.
+  - `mutation?: (newStore, prevStore?, prevMutatedStore?) => T` - Function to compute derived value from subscribed state. Receives:
+    - `newStore` - Current store state (or selected keys if `keys` is provided)
+    - `prevStore` - Previous store state (or selected keys). `undefined` on first call
+    - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
 
 ## License
 
