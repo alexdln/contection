@@ -112,6 +112,19 @@ function testUseStoreWithMutation() {
             return newStore.count * 2;
         },
     });
+
+    // Mutation should receive arguments with correct inferred type
+    const accumulatedCount = useStore<TestStore, number, ["count"]>(Store, {
+        keys: ["count"],
+        mutation: (newStore, prevStore, prevMutatedStore: number | undefined) => {
+            const current: number = newStore.count;
+            if (prevStore) {
+                const prev: number = prevStore.count;
+            }
+            return (prevMutatedStore ?? 0) + current;
+        },
+    });
+    const accumulatedCountCheck: number = accumulatedCount;
 }
 
 // Test 6: Store instance structure
