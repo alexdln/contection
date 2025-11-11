@@ -167,6 +167,36 @@ const { count } = useStore(AppStore, { keys: ["count"] });
 const data = useStore(AppStore, { keys: ["user", "theme"] });
 ```
 
+### Conditional Subscriptions
+
+Use the `enabled` option to conditionally enable or disable subscriptions. This is useful for tracking changes only under specific conditions, such as user roles, value ranges, or page contexts. When the `enabled` value changes, the hook will automatically resubscribe.
+
+The `enabled` option accepts:
+
+- A `boolean` value - enables or disables the subscription
+- A function `(store: Store) => boolean` - dynamically determines if the subscription should be active based on the current store state
+
+```tsx
+// Track account changes only if user is an admin
+const { account } = useStore(AppStore, {
+  keys: ["account"],
+  enabled: (store) => store.user.role === "admin",
+});
+
+// Track numbers only when their values are less than 10
+const { count } = useStore(AppStore, {
+  keys: ["count"],
+  enabled: (store) => store.count < 10,
+});
+
+// Disable subscription on specific pages
+const isSettingsPage = useLocation().pathname === "/settings";
+const { notifications } = useStore(AppStore, {
+  keys: ["notifications"],
+  enabled: !isSettingsPage,
+});
+```
+
 ### Computed Values
 
 Derive computed state from store values using mutation functions:
@@ -330,6 +360,46 @@ function AutoCleanupSubscription() {
 
     return unlisten;
   }, [listen]);
+}
+```
+
+### Conditional Listen Subscriptions
+
+The `listen` function also supports the `enabled` option for conditional subscriptions (_same as `useStore(Store, { enabled })`_):
+
+```tsx
+import { useStoreReducer } from "contection";
+import { useEffect } from "react";
+
+function ConditionalTracker() {
+  const [store, dispatch, listen] = useStoreReducer(AppStore);
+
+  useEffect(() => {
+    // Track account changes only if user is an admin
+    const unlistenAccount = listen(
+      "account",
+      (account) => {
+        analytics.track("account_updated", { accountId: account.id });
+      },
+      { enabled: (store) => store.user.role === "admin" }
+    );
+
+    // Track count only when it's less than 10
+    const unlistenCount = listen(
+      "count",
+      (count) => {
+        console.log("Count is low:", count);
+      },
+      { enabled: (store) => store.count < 10 }
+    );
+
+    return () => {
+      unlistenAccount();
+      unlistenCount();
+    };
+  }, [listen]);
+
+  return null;
 }
 ```
 
@@ -555,6 +625,7 @@ Hook that subscribes to store state with optional key listening and computed val
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active. If `false` or function returns `false`, the subscription is disabled. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** Subscribed store data or computed value if mutation function is provided
 
@@ -566,7 +637,7 @@ Hook that returns a tuple containing the store state and dispatch functions, sim
 
 - `store` - Current store state object
 - `dispatch` - Function to update store state: `(partial: Partial<Store> | (prev: Store) => Partial<Store>) => void`
-- `listen` - Function to subscribe to store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void) => () => void`
+- `listen` - Function to subscribe to store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void, options?: { enabled?: boolean | ((store: Store) => boolean) }) => () => void`. The `enabled` option conditionally enables or disables the subscription. When the `enabled` value changes, the subscription will automatically resubscribe.
 - `unlisten` - Function to unsubscribe from store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void) => void`
 
 ### `Provider`
