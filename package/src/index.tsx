@@ -3,7 +3,13 @@
 
 import React, { createContext } from "react";
 
-import { type CreateStoreOptions, type BaseStore, type GlobalStore, type MutationFn } from "./types";
+import {
+    type CreateStoreOptions,
+    type BaseStore,
+    type GlobalStore,
+    type MutationFn,
+    type ProviderProps,
+} from "./types";
 export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
 import { GlobalStoreConsumer } from "./consumer";
@@ -16,7 +22,7 @@ import { GlobalStoreConsumer } from "./consumer";
  * @param options - The options for the store creation
  * @returns store instance
  * @example
- * const Store = createStore({ count: 0 });
+ * const Store = createStore({ count: 0 }, { lifecycleHooks: { storeWillMount: () => {} } });
  * // ...
  * <Store>
  *   <YourComponent />
@@ -32,8 +38,12 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         unlisten: () => {},
     });
 
-    const Provider = ({ children, value = initialData }: { children: React.ReactNode; value?: Store }) => (
-        <GlobalStoreProvider context={GlobalStoreContext} defaultData={value} options={options}>
+    const Provider: React.FC<ProviderProps<Store>> = ({ children, value = initialData, options: providerOptions }) => (
+        <GlobalStoreProvider
+            context={GlobalStoreContext}
+            defaultData={value}
+            options={{ ...options, ...providerOptions }}
+        >
             {children}
         </GlobalStoreProvider>
     );
@@ -69,20 +79,23 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         /**
          * Consumer component that provides store data using the render props pattern.
          * Supports selective subscriptions and computed values, similar to `useStore` hook.
-         * @template Store - The store type
-         * @template Keys - Array of store keys to subscribe to
-         * @template Mutation - Mutation function that transforms the subscribed state
+         * @param props.options - The options for the store creation
+         * @example
+         * <Store.Consumer options={{ keys: ["count"], mutation: (store) => store.count }}>
+         *   {(count) => <div>Count: {count}</div>}
+         * </Store.Consumer>
          */
         Consumer,
         /**
          * Provider component that wraps children with store access
          * @param props.value - The initial store data
+         * @param props.options - The options for the store creation
          * @example
          * <Store>
          *   <div>Hello World</div>
          * </Store>
          * // ...
-         * <Store.Provider value={{ count: 1 }}>
+         * <Store.Provider value={{ count: 1 }} options={{ lifecycleHooks: { storeWillMount: () => {} } }}>
          *   <div>Hello World</div>
          * </Store.Provider>
          */

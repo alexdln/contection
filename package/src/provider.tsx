@@ -34,12 +34,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     defaultData,
     options,
     context: Context,
-}: {
-    children: React.ReactNode;
-    defaultData?: Store;
-    options?: CreateStoreOptions<Store>;
-    context: React.Context<GlobalStore<Store>>;
-}) => {
+}: GlobalStoreProviderProps<Store>) => {
     const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = options?.lifecycleHooks || {};
     const store = useRef<InternalStoreType<Store>>(
         defaultData
@@ -101,7 +96,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     const storeProxy = useMemo(() => {
         const proxy = new Proxy(store.current, {
             get: (target, key) => {
-                if (typeof key !== "string") throw new Error("Key must be a string");
+                if (typeof key !== "string") throw new Error(`Key must be a string, received ${typeof key}`);
 
                 if (!target[key]) return undefined;
 
