@@ -451,4 +451,163 @@ describe("GlobalStoreProvider", () => {
             expect(screen.getByTestId("consumer2")).toHaveTextContent("20");
         });
     });
+
+    describe("Provider options prop", () => {
+        it("should accept options prop and call lifecycle hooks", () => {
+            const storeWillMount = jest.fn();
+            const storeDidMount = jest.fn();
+            const storeWillUnmount = jest.fn();
+            const storeWillUnmountAsync = jest.fn();
+
+            const Store = createTestStore();
+
+            const TestComponent = () => <div>Test</div>;
+
+            const { unmount } = render(
+                <Store.Provider
+                    options={{
+                        lifecycleHooks: {
+                            storeWillMount,
+                            storeDidMount,
+                            storeWillUnmount,
+                            storeWillUnmountAsync,
+                        },
+                    }}
+                >
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(storeWillMount).toHaveBeenCalled();
+            expect(storeDidMount).toHaveBeenCalled();
+            expect(storeWillUnmount).not.toHaveBeenCalled();
+            expect(storeWillUnmountAsync).not.toHaveBeenCalled();
+
+            unmount();
+
+            expect(storeWillUnmount).toHaveBeenCalled();
+            expect(storeWillUnmountAsync).toHaveBeenCalled();
+        });
+
+        it("should not merge Provider options with createStore options", () => {
+            const providerWillMount = jest.fn();
+            const createStoreDidMount = jest.fn();
+
+            const Store = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeDidMount: createStoreDidMount,
+                },
+            });
+
+            const TestComponent = () => <div>Test</div>;
+
+            render(
+                <Store.Provider
+                    options={{
+                        lifecycleHooks: {
+                            storeWillMount: providerWillMount,
+                        },
+                    }}
+                >
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(providerWillMount).toHaveBeenCalled();
+            expect(createStoreDidMount).not.toHaveBeenCalled();
+        });
+
+        it("should merge partial Provider options with createStore options", () => {
+            const createStoreWillMount = jest.fn();
+            const createStoreDidMount = jest.fn();
+            const providerWillUnmount = jest.fn();
+
+            const Store = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: createStoreWillMount,
+                    storeDidMount: createStoreDidMount,
+                },
+            });
+
+            const TestComponent = () => <div>Test</div>;
+
+            const { unmount } = render(
+                <Store.Provider
+                    options={{
+                        lifecycleHooks: {
+                            storeWillUnmount: providerWillUnmount,
+                        },
+                    }}
+                >
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(createStoreWillMount).not.toHaveBeenCalled();
+            expect(createStoreDidMount).not.toHaveBeenCalled();
+
+            unmount();
+
+            expect(providerWillUnmount).toHaveBeenCalled();
+        });
+
+        it("should work with multiple Provider instances having different options", () => {
+            const hook1 = jest.fn();
+            const hook2 = jest.fn();
+
+            const Store = createTestStore();
+
+            const Consumer = ({ id }: { id: string }) => {
+                const count = useStore(Store, { keys: ["count"] });
+                return <div data-testid={id}>{count.count}</div>;
+            };
+
+            render(
+                <>
+                    <Store.Provider
+                        options={{
+                            lifecycleHooks: {
+                                storeDidMount: hook1,
+                            },
+                        }}
+                    >
+                        <Consumer id="consumer1" />
+                    </Store.Provider>
+                    <Store.Provider
+                        options={{
+                            lifecycleHooks: {
+                                storeDidMount: hook2,
+                            },
+                        }}
+                    >
+                        <Consumer id="consumer2" />
+                    </Store.Provider>
+                </>,
+            );
+
+            expect(hook1).toHaveBeenCalledTimes(1);
+            expect(hook2).toHaveBeenCalledTimes(1);
+        });
+
+        it("should clear store options when provider options pass empty lifecycleHooks", () => {
+            const createStoreWillMount = jest.fn();
+            const createStoreDidMount = jest.fn();
+
+            const Store = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: createStoreWillMount,
+                    storeDidMount: createStoreDidMount,
+                },
+            });
+            const TestComponent = () => <div>Test</div>;
+
+            render(
+                <Store.Provider options={{ lifecycleHooks: {} }}>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+            expect(createStoreWillMount).not.toHaveBeenCalled();
+            expect(createStoreDidMount).not.toHaveBeenCalled();
+        });
+    });
 });

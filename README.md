@@ -95,16 +95,43 @@ function App() {
 import { useStore } from "contection";
 
 function Counter() {
+  // Component re-renders only when 'count' value changes
   const { count } = useStore(AppStore, { keys: ["count"] });
 
   return (
     <div>
       <p>Count: {count}</p>
-      <button
-        onClick={() => {
-          // Access store via useStoreReducer for updates
-        }}
-      >
+      {/* ... */}
+    </div>
+  );
+}
+```
+
+```tsx
+import { useStore } from "contection";
+
+function UserEmail() {
+  // Component re-renders only when 'email' changes
+  const email = useStore(AppStore, {
+    keys: ["user"],
+    mutation: (store) => store.user.email,
+  });
+
+  return <p>E-mail: {email}</p>;
+}
+```
+
+```tsx
+import { useStoreReducer } from "contection";
+
+function Counter() {
+  // useStoreReducer never triggers re-render
+  const [store, dispatch] = useStoreReducer(AppStore);
+
+  return (
+    <div>
+      <button onClick={() => alert(store.count)}>Show count</button>
+      <button onClick={() => dispatch({ count: store.count + 1 })}>
         Increment
       </button>
     </div>
@@ -117,6 +144,7 @@ function Counter() {
 ```tsx
 function UserProfile() {
   return (
+    // Consumer re-renders only when 'user' value changes
     <AppStore.Consumer options={{ keys: ["user"] }}>
       {({ user }) => (
         <div>
@@ -435,6 +463,8 @@ const AppStore = createStore<AppStoreType>(
 );
 ```
 
+You can also pass `options` to individual Provider instances to customize lifecycle hooks per instance. Provider options completely override options passed to `createStore`, allowing you to disable or customize settings for specific Provider instances. See [Provider-Level Lifecycle Hooks](#provider-level-lifecycle-hooks) for details.
+
 #### `storeWillMount`
 
 **Recommended for:** Single Page Applications (SPA), background key detection or subscriptions.
@@ -593,6 +623,63 @@ const AppStore = createStore<AppStoreType>(
 - `storeDidMount` cleanup (if returned);
 - `storeWillUnmountAsync` (asynchronous, during unmount).
 
+### Provider-Level Lifecycle Hooks
+
+While lifecycle hooks can be passed to `createStore`, they are shared across all Provider instances and initialized outside React's scope. For per-instance customization, you can pass `options` directly to individual Provider components.
+
+**Provider options completely override options from `createStore`**, allowing you to:
+
+- Disable lifecycle hooks for specific instances
+- Customize hooks per Provider instance
+- Use React state/props in lifecycle hooks (since they're initialized within React scope)
+
+```tsx
+const sharedOptions = {
+  lifecycleHooks: {
+    storeDidMount: (store, dispatch) => {
+      console.log("Shared initialization");
+    },
+  },
+};
+
+const AppStore = createStore<AppStoreType>(
+  {
+    user: { name: "", email: "" },
+    count: 0,
+    theme: "light",
+  },
+  sharedOptions
+);
+
+function App() {
+  return (
+    <>
+      {/* Uses shared options from createStore */}
+      <AppStore>
+        <ComponentA />
+      </AppStore>
+      {/* Overrides with Provider-specific options */}
+      <AppStore
+        options={{
+          lifecycleHooks: {
+            ...sharedOptions.lifecycleHooks,
+            storeWillMount: (store, dispatch) => {
+              dispatch({ count: 100 });
+            },
+          },
+        }}
+      >
+        <ComponentB />
+      </AppStore>
+      {/* Disables lifecycle hooks */}
+      <AppStore options={{ lifecycleHooks: {} }}>
+        <ComponentC />
+      </AppStore>
+    </>
+  );
+}
+```
+
 ## API Reference
 
 ### `createStore<Store>(initialData: Store, options?)`
@@ -648,6 +735,8 @@ Component that provides a scoped store instance to child components. Each Provid
 
 - `children: React.ReactNode`
 - `value?: Store` - Optional initial value for this Provider's scope (defaults to store's initial data from `createStore`)
+- `options?: CreateStoreOptions<Store>` (optional):
+  - `lifecycleHooks?: { storeWillMount?, storeDidMount?, storeWillUnmount?, storeWillUnmountAsync? }` - lifecycle hooks configuration. **Completely overrides** options passed to `createStore`, allowing per-instance customization. See [Lifecycle Hooks](#lifecycle-hooks) for available hooks.
 
 **Scoping Behavior:**
 
@@ -671,4 +760,4 @@ Component that consumes the store using render props pattern.
 
 ## License
 
-MIC
+MIT

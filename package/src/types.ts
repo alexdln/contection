@@ -151,3 +151,9 @@ export interface StoreInstance<Store extends BaseStore = BaseStore> {
     /** Provider component (alternative to calling the instance directly) */
     Provider({ children, value }: { children: React.ReactNode; value?: Store }): React.ReactNode;
 }
+
+export type ProviderProps<Store extends BaseStore = BaseStore> = {
+    children: React.ReactNode;
+    value?: Store;
+    options?: CreateStoreOptions<Store>;
+};

@@ -172,6 +172,73 @@ function testProviderValue() {
     </Store.Provider>;
 }
 
+// Test 10: Provider options prop
+function testProviderOptions() {
+    // Should accept optional options prop
+    <Store.Provider>
+        <div>Test</div>
+    </Store.Provider>;
+
+    // Should accept options with lifecycle hooks
+    <Store.Provider
+        options={{
+            lifecycleHooks: {
+                storeWillMount: (Store, update, listen, unlisten) => {
+                    const count: number = Store.count;
+                    update({ count: 1 });
+                    const unsubscribe = listen("count", (value: number) => {});
+                    unlisten("count", () => {});
+                    return (Store) => {};
+                },
+                storeDidMount: (Store, update, listen, unlisten) => {
+                    return () => {};
+                },
+                storeWillUnmount: (Store) => {
+                    const count: number = Store.count;
+                },
+                storeWillUnmountAsync: (Store) => {
+                    const count: number = Store.count;
+                },
+            },
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+
+    // Should accept empty options object
+    <Store.Provider options={{}}>
+        <div>Test</div>
+    </Store.Provider>;
+
+    // Should accept partial lifecycle hooks
+    <Store.Provider
+        options={{
+            lifecycleHooks: {
+                storeDidMount: (Store, update, listen, unlisten) => {},
+            },
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+    <Store.Provider
+        options={{
+            lifecycleHooks: {
+                // @ts-expect-error - should return void or cleanup function
+                storeDidMount: (Store) => "invalid",
+            },
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+
+    <Store.Provider
+        // @ts-expect-error - should not accept invalid property
+        options={{ invalidProperty: true }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+}
+
 // Test 8: Consumer options
 function testConsumerOptions() {
     // No options
