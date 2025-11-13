@@ -26,6 +26,10 @@ jobs:
           pnpm --filter contection-tests --filter contection add react@canary react-dom@canary --no-lockfile
           pnpm --filter contection-tests --filter contection add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
 
+      - name: Build package
+        run: |
+          pnpm package run build
+
       - name: Run tests
         run: |
           pnpm --filter contection-tests test

@@ -1,0 +1,29 @@
+{
+  "name": "contection-viewport",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [
+    "contection"
+  ],
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexdln/contection.git"
+  },
+  "author": {
+    "name": "Alex Savelyev",
+    "email": "dev@alexdln.com",
+    "url": "https://github.com/alexdln/"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "contection": "1.4.2",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "contection": ">=1.4.0",
+    "react": ">= 19.0.0"
+  },
+  "license": "MIT"
+}

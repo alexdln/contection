@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:types": "tsc --noEmit -p src/types/tsconfig.json"
+    "test:types": "tsc --noEmit -p check.tsconfig.json"
   },
   "dependencies": {
     "contection": "workspace:*",
