@@ -1,0 +1,45 @@
+{
+  "name": "contection-viewport",
+  "version": "1.0.0",
+  "description": "A performance-based viewport management module built on top of contection",
+  "keywords": [
+    "contection",
+    "viewport",
+    "hooks",
+    "breakpoints",
+    "responsive",
+    "react",
+    "state management",
+    "performance",
+    "resize",
+    "screen",
+    "size"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexdln/contection.git"
+  },
+  "author": {
+    "name": "Alex Savelyev",
+    "email": "dev@alexdln.com",
+    "url": "https://github.com/alexdln/"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "contection": "1.4.2",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "contection": ">=1.4.0",
+    "react": ">= 19.0.0"
+  },
+  "license": "MIT"
+}
