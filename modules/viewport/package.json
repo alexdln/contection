@@ -1,9 +1,19 @@
 {
   "name": "contection-viewport",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
+  "description": "A performance-based viewport management module built on top of contection",
   "keywords": [
-    "contection"
+    "contection",
+    "viewport",
+    "hooks",
+    "breakpoints",
+    "responsive",
+    "react",
+    "state management",
+    "performance",
+    "resize",
+    "screen",
+    "size"
   ],
   "main": "src/index.tsx",
   "types": "src/index.tsx",
