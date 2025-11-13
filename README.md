@@ -201,8 +201,10 @@ Use the `enabled` option to conditionally enable or disable subscriptions. This 
 
 The `enabled` option accepts:
 
-- A `boolean` value - enables or disables the subscription
-- A function `(store: Store) => boolean` - dynamically determines if the subscription should be active based on the current store state
+- `"always"` (default) - Subscription is always active
+- `"never"` - Subscription is never active
+- `"after-hydration"` - Subscription is active only after the component has mounted (useful for SSR/hydration scenarios)
+- A function `(store: Store) => boolean` - Dynamically determines if the subscription should be active based on the current store state
 
 ```tsx
 // Track account changes only if user is an admin
@@ -217,11 +219,16 @@ const { count } = useStore(AppStore, {
   enabled: (store) => store.count < 10,
 });
 
-// Disable subscription on specific pages
-const isSettingsPage = useLocation().pathname === "/settings";
+// Disable subscription completely
 const { notifications } = useStore(AppStore, {
   keys: ["notifications"],
-  enabled: !isSettingsPage,
+  enabled: "never",
+});
+
+// Enable subscription only after hydration (useful for SSR)
+const { user } = useStore(AppStore, {
+  keys: ["user"],
+  enabled: "after-hydration",
 });
 ```
 
@@ -712,7 +719,7 @@ Hook that subscribes to store state with optional key listening and computed val
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** Subscribed store data or computed value if mutation function is provided
 
@@ -757,7 +764,7 @@ Component that consumes the store using render props pattern.
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the consumer will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the consumer will automatically resubscribe.
 
 ## Contection modules
 

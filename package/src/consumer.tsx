@@ -5,9 +5,10 @@ import { useStore } from "./hooks";
 /**
  * Consumer component that provides store data using the render props pattern.
  * Supports selective subscriptions and computed values, similar to `useStore` hook.
- * @template Store - The store type
- * @template Keys - Array of store keys to subscribe to
- * @template Mutation - Mutation function that transforms the subscribed state
+ * @param options - The options for the store subscription
+ * @param options.keys - The keys to subscribe to
+ * @param options.mutation - The mutation function to apply to the subscribed state, if provided, the hook will return the result of the mutation function
+ * @param options.enabled - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
  */
 export function GlobalStoreConsumer<
     Store extends BaseStore,

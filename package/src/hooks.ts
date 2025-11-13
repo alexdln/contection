@@ -39,7 +39,7 @@ export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstan
  * @param options - The options for the store subscription
  * @param options.keys - The keys to subscribe to
  * @param options.mutation - The mutation function to apply to the subscribed state, if provided, the hook will return the result of the mutation function
- * @param options.enabled - The condition to subscribe to the store. The hook will only subscribe to the store if the condition is true
+ * @param options.enabled - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
  * @returns The subscribed store state
  * @example
  * const store = useStore(Store);
@@ -135,8 +135,10 @@ export function useStore<
     // We listen to the mount state at the component level to avoid prematurely updating new components,
     // especially for PPR or suspense
     useEffect(() => {
-        mounted.current = true;
-        internalListen.current?.();
+        if (!mounted.current) {
+            mounted.current = true;
+            internalListen.current?.();
+        }
     }, [enabled === "after-hydration"]);
 
     const data = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);

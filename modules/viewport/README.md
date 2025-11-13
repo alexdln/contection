@@ -198,8 +198,10 @@ Use the `enabled` option to conditionally enable or disable subscriptions. This 
 
 The `enabled` option accepts:
 
-- A `boolean` value - enables or disables the subscription
-- A function `(store: ViewportStore) => boolean` - dynamically determines if the subscription should be active based on the current store state
+- `"always"` (default) - Subscription is always active
+- `"never"` - Subscription is never active
+- `"after-hydration"` - Subscription is active only after the component has mounted (useful for SSR/hydration scenarios)
+- A function `(store: Store) => boolean` - Dynamically determines if the subscription should be active based on the current store state
 
 ```tsx
 // Track width changes only when viewport is larger than 1024px
@@ -212,6 +214,18 @@ const { width } = useViewport(ViewportStore, {
 const breakpoint = useViewport(ViewportStore, {
   keys: ["widthOptions"],
   enabled: (store) => store.mounted,
+});
+
+// Disable subscription completely
+const { height } = useViewport(ViewportStore, {
+  keys: ["height"],
+  enabled: "never",
+});
+
+// Enable subscription only after hydration (useful for SSR)
+const { width } = useViewport(ViewportStore, {
+  keys: ["width"],
+  enabled: "after-hydration",
 });
 ```
 
@@ -323,7 +337,7 @@ _Re-renders:_ Only when subscribed keys change (and when mutation result changes
 - `options` (optional):
   - `keys?: string[]` - Array of store keys to subscribe to (e.g., `["width", "height"]`)
   - `mutation?: (state, prevState?, prevMutated?) => any` - Custom mutation function to transform store state
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** Store state (full state if no options, or subset based on `keys` option, or `mutation` result)
 
@@ -360,7 +374,7 @@ _Re-renders:_ Only when width value changes
 
 - `ViewportStore` - Viewport store instance
 - `options?` (optional):
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `number | null` - Current viewport width in pixels
 
@@ -375,7 +389,7 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 - `ViewportStore` - Viewport store instance
 - `options?` (optional):
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `Option` object with:
 
@@ -395,7 +409,7 @@ _Re-renders:_ Only when comparison result changes
   - `compareWith: string` - Breakpoint name to compare with
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
   - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
@@ -409,7 +423,7 @@ _Re-renders:_ Only when height value changes
 
 - `ViewportStore` - Viewport store instance
 - `options?` (optional):
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `number | null` - Current viewport height in pixels
 
@@ -424,7 +438,7 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 - `ViewportStore` - Viewport store instance
 - `options?` (optional):
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `Option` object with:
 
@@ -444,7 +458,7 @@ _Re-renders:_ Only when comparison result changes
   - `compareWith: string` - Breakpoint name to compare with
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
   - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
