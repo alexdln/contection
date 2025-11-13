@@ -2,10 +2,10 @@ import {
     createViewportStore,
     useViewport,
     useViewportWidth,
-    useViewportWidthComparer,
+    useViewportWidthCompare,
     useViewportWidthBreakpoint,
     useViewportHeight,
-    useViewportHeightComparer,
+    useViewportHeightCompare,
     useViewportHeightBreakpoint,
     useViewportStorage,
 } from "contection-viewport";
@@ -233,7 +233,7 @@ describe("viewport hooks", () => {
         });
     });
 
-    describe("useViewportWidthComparer", () => {
+    describe("useViewportWidthCompare", () => {
         it("should return true when current breakpoint equals compareWith and mode includes 'equal'", () => {
             Object.defineProperty(window, "innerWidth", {
                 writable: true,
@@ -252,7 +252,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "tablet", "base", ["equal"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                    type: "base",
+                    mode: ["equal"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -283,7 +287,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "desktop", "base", ["equal"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "desktop",
+                    type: "base",
+                    mode: ["equal"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -314,7 +322,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "tablet", "base", ["greater"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                    type: "base",
+                    mode: ["greater"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -345,7 +357,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "desktop", "base", ["less"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "desktop",
+                    type: "base",
+                    mode: ["less"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -361,8 +377,12 @@ describe("viewport hooks", () => {
         it("should return null when widthOptions is not available", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
-                // @ts-expect-error - nonexistent type
-                const result = useViewportWidthComparer(Store, "mobile", "nonexistent", ["equal"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "mobile",
+                    // @ts-expect-error - nonexistent type
+                    type: "nonexistent",
+                    mode: ["equal"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -393,7 +413,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "tablet", "base", ["equal", "greater"]);
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                    type: "base",
+                    mode: ["equal", "greater"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -404,6 +428,107 @@ describe("viewport hooks", () => {
             );
 
             expect(screen.getByTestId("result")).toHaveTextContent("false");
+        });
+
+        it("should default to first type when type is omitted", () => {
+            Object.defineProperty(window, "innerWidth", {
+                writable: true,
+                configurable: true,
+                value: 800,
+            });
+
+            const Store = createViewportStore({
+                width: {
+                    base: {
+                        mobile: 0,
+                        tablet: 600,
+                        desktop: 1024,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                    mode: ["equal"],
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
+        });
+
+        it("should default to ['equal'] mode when mode is omitted", () => {
+            Object.defineProperty(window, "innerWidth", {
+                writable: true,
+                configurable: true,
+                value: 800,
+            });
+
+            const Store = createViewportStore({
+                width: {
+                    base: {
+                        mobile: 0,
+                        tablet: 600,
+                        desktop: 1024,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                    type: "base",
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
+        });
+
+        it("should work with both type and mode omitted", () => {
+            Object.defineProperty(window, "innerWidth", {
+                writable: true,
+                configurable: true,
+                value: 800,
+            });
+
+            const Store = createViewportStore({
+                width: {
+                    base: {
+                        mobile: 0,
+                        tablet: 600,
+                        desktop: 1024,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportWidthCompare(Store, {
+                    compareWith: "tablet",
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
         });
     });
 
@@ -426,7 +551,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const breakpoint = useViewportWidthBreakpoint(Store, "base");
+                const breakpoint = useViewportWidthBreakpoint(Store, { type: "base" });
                 return (
                     <div>
                         <span data-testid="current">{String(breakpoint?.current)}</span>
@@ -460,7 +585,7 @@ describe("viewport hooks", () => {
 
             const TestComponent = () => {
                 renderCount++;
-                const breakpoint = useViewportWidthBreakpoint(Store, "base");
+                const breakpoint = useViewportWidthBreakpoint(Store, { type: "base" });
                 return <div data-testid="current">{String(breakpoint?.current)}</div>;
             };
 
@@ -498,7 +623,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const breakpoint = useViewportWidthBreakpoint(Store, "base");
+                const breakpoint = useViewportWidthBreakpoint(Store, { type: "base" });
                 return <div data-testid="current">{String(breakpoint?.current)}</div>;
             };
 
@@ -624,7 +749,7 @@ describe("viewport hooks", () => {
         });
     });
 
-    describe("useViewportHeightComparer", () => {
+    describe("useViewportHeightCompare", () => {
         it("should return true when current breakpoint equals compareWith and mode includes 'equal'", () => {
             Object.defineProperty(window, "innerHeight", {
                 writable: true,
@@ -643,7 +768,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportHeightComparer(Store, "medium", "base", ["equal"]);
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "medium",
+                    type: "base",
+                    mode: ["equal"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -674,7 +803,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportHeightComparer(Store, "medium", "base", ["greater"]);
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "medium",
+                    type: "base",
+                    mode: ["greater"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -705,7 +838,11 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportHeightComparer(Store, "small", "base", ["greater"]);
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "small",
+                    type: "base",
+                    mode: ["greater"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -729,8 +866,12 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent2 = () => {
-                // @ts-expect-error - nonexistent type
-                const result = useViewportHeightComparer(StoreWithHeight, "small", "nonexistent", ["equal"]);
+                const result = useViewportHeightCompare(StoreWithHeight, {
+                    compareWith: "small",
+                    // @ts-expect-error - nonexistent type
+                    type: "nonexistent",
+                    mode: ["equal"],
+                });
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -741,6 +882,107 @@ describe("viewport hooks", () => {
             );
 
             expect(screen.getByTestId("result")).toHaveTextContent("null");
+        });
+
+        it("should default to first type when type is omitted", () => {
+            Object.defineProperty(window, "innerHeight", {
+                writable: true,
+                configurable: true,
+                value: 500,
+            });
+
+            const Store = createViewportStore({
+                height: {
+                    base: {
+                        small: 0,
+                        medium: 400,
+                        large: 800,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "medium",
+                    mode: ["equal"],
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
+        });
+
+        it("should default to ['equal'] mode when mode is omitted", () => {
+            Object.defineProperty(window, "innerHeight", {
+                writable: true,
+                configurable: true,
+                value: 500,
+            });
+
+            const Store = createViewportStore({
+                height: {
+                    base: {
+                        small: 0,
+                        medium: 400,
+                        large: 800,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "medium",
+                    type: "base",
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
+        });
+
+        it("should work with both type and mode omitted", () => {
+            Object.defineProperty(window, "innerHeight", {
+                writable: true,
+                configurable: true,
+                value: 500,
+            });
+
+            const Store = createViewportStore({
+                height: {
+                    base: {
+                        small: 0,
+                        medium: 400,
+                        large: 800,
+                    },
+                },
+            });
+
+            const TestComponent = () => {
+                const result = useViewportHeightCompare(Store, {
+                    compareWith: "medium",
+                });
+                return <div data-testid="result">{String(result)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
         });
     });
 
@@ -763,7 +1005,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const breakpoint = useViewportHeightBreakpoint(Store, "base");
+                const breakpoint = useViewportHeightBreakpoint(Store, { type: "base" });
                 return (
                     <div>
                         <span data-testid="current">{String(breakpoint?.current)}</span>
@@ -798,7 +1040,7 @@ describe("viewport hooks", () => {
 
             const TestComponent = () => {
                 renderCount++;
-                const breakpoint = useViewportHeightBreakpoint(Store, "base");
+                const breakpoint = useViewportHeightBreakpoint(Store, { type: "base" });
                 return <div data-testid="current">{String(breakpoint?.current)}</div>;
             };
 
@@ -839,7 +1081,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const breakpoint = useViewportHeightBreakpoint(Store, "base");
+                const breakpoint = useViewportHeightBreakpoint(Store, { type: "base" });
                 return <div data-testid="current">{String(breakpoint?.current)}</div>;
             };
 
