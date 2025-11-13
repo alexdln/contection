@@ -157,6 +157,102 @@ describe("viewport hooks", () => {
             expect(screen.getByTestId("lower")).toHaveTextContent("mobile");
             expect(screen.getByTestId("lower")).toHaveTextContent("tablet");
         });
+
+        it("should subscribe when enabled is true", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const store = useViewport(Store, { keys: ["width"], enabled: true });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+        });
+
+        it("should not subscribe when enabled is false", () => {
+            let renderCount = 0;
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                renderCount++;
+                const store = useViewport(Store, { keys: ["width"], enabled: false });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+
+            act(() => {
+                Object.defineProperty(window, "innerWidth", {
+                    writable: true,
+                    configurable: true,
+                    value: 800,
+                });
+                window.dispatchEvent(new Event("resize"));
+            });
+
+            expect(renderCount).toBe(1);
+        });
+
+        it("should subscribe when enabled function returns true", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const store = useViewport(Store, {
+                    keys: ["width"],
+                    enabled: (store) => store.mounted,
+                });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+        });
+
+        it("should not subscribe when enabled function returns false", () => {
+            let renderCount = 0;
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                renderCount++;
+                const store = useViewport(Store, {
+                    keys: ["width"],
+                    enabled: () => false,
+                });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+
+            act(() => {
+                Object.defineProperty(window, "innerWidth", {
+                    writable: true,
+                    configurable: true,
+                    value: 800,
+                });
+                window.dispatchEvent(new Event("resize"));
+            });
+
+            expect(renderCount).toBe(1);
+        });
     });
 
     describe("useViewportWidth", () => {
