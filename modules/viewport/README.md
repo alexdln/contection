@@ -57,7 +57,7 @@ function App() {
 import { useViewportWidthBreakpoint } from "contection-viewport";
 
 function ResponsiveComponent() {
-  // Component re-renders only when 'default' breakpoint changes
+  // Component re-renders only when breakpoint in 'default' category changes
   const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
 
   return (
@@ -111,6 +111,7 @@ Compare breakpoints with multiple modes:
 import { useViewportWidthComparer } from "contection-viewport";
 
 function ResponsiveButton() {
+  // Component re-renders only when comparison result changes
   const isTabletOrLarger = useViewportWidthComparer(
     ViewportStore,
     "tablet",
@@ -156,6 +157,58 @@ const ViewportStore = createViewportStore(
 ```
 
 Throttling reduces the frequency of resize event processing while ensuring the final state is always accurate.
+
+### Direct Store Access
+
+Use `useViewport` for flexible store subscriptions with custom keys and mutations:
+
+```tsx
+import { useViewport } from "contection-viewport";
+
+function CustomComponent() {
+  // Subscribe to specific keys
+  const store = useViewport(ViewportStore, { keys: ["width", "mounted"] });
+
+  // Or access full store state
+  const fullStore = useViewport(ViewportStore);
+
+  // Or use custom mutation
+  const showbanner = useViewport(ViewportStore, {
+    keys: ["width"],
+    mutation: (state) => state.width > 800,
+  });
+
+  return (
+    <div>
+      <p>Width: {store.width}px</p>
+      <p>Mounted: {String(store.mounted)}</p>
+    </div>
+  );
+}
+```
+
+### Conditional Subscriptions
+
+Use the `enabled` option to conditionally enable or disable subscriptions. This is useful for tracking changes only under specific conditions, such as viewport size ranges or component states. When the `enabled` value changes, the hook will automatically resubscribe.
+
+The `enabled` option accepts:
+
+- A `boolean` value - enables or disables the subscription
+- A function `(store: ViewportStore) => boolean` - dynamically determines if the subscription should be active based on the current store state
+
+```tsx
+// Track width changes only when viewport is larger than 1024px
+const { width } = useViewport(ViewportStore, {
+  keys: ["width"],
+  enabled: (store) => store.width !== null && store.width > 1024,
+});
+
+// Track breakpoint changes only when component is mounted
+const breakpoint = useViewport(ViewportStore, {
+  keys: ["widthOptions"],
+  enabled: (store) => store.mounted,
+});
+```
 
 ### Direct Width/Height Access
 
@@ -251,17 +304,58 @@ const ViewportStore = createViewportStore({
 });
 ```
 
+### `useViewport(ViewportStore, options?)`
+
+Generic hook that provides flexible access to the viewport store with customizable subscriptions.
+
+_Re-renders:_ Only when subscribed keys change (and when mutation result changes)
+
+**Parameters:**
+
+- `ViewportStore` - Viewport store instance
+- `options` (optional):
+  - `keys?: string[]` - Array of store keys to subscribe to (e.g., `["width", "height"]`)
+  - `mutation?: (state, prevState?, prevMutated?) => any` - Custom mutation function to transform store state
+  - `enabled?: boolean | ((store: ViewportStore) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active. If `false` or function returns `false`, the subscription is disabled. When this value changes, the hook will automatically resubscribe.
+
+**Returns:** Store state (full state if no options, or subset based on `keys` option, or `mutation` result)
+
+**Examples:**
+
+```tsx
+// Full store access
+const store = useViewport(ViewportStore);
+
+// Subscribe to specific keys
+const partial = useViewport(ViewportStore, { keys: ["width", "mounted"] });
+
+// Custom mutation
+const showbanner = useViewport(ViewportStore, {
+  keys: ["width"],
+  mutation: (state) => state.width > 800,
+});
+
+// Conditional subscription
+const { width } = useViewport(ViewportStore, {
+  keys: ["width"],
+  enabled: (store) =>
+    store.mounted && store.width !== null && store.width > 1024,
+});
+```
+
 ### `useViewportWidth(ViewportStore)`
 
 Hook that subscribes to viewport width changes.
 
-**Returns:** `number | null` - Current viewport width in pixels
+_Re-renders:_ Only when width value changes
 
-**Re-renders:** Only when width value changes
+**Returns:** `number | null` - Current viewport width in pixels
 
 ### `useViewportWidthBreakpoint(ViewportStore, type)`
 
 Hook that subscribes to a specific width breakpoint type.
+
+_Re-renders:_ Only when the breakpoint in selected type changes
 
 **Parameters:**
 
@@ -273,11 +367,11 @@ Hook that subscribes to a specific width breakpoint type.
 - `current: string | null` - Current breakpoint name
 - `lowerBreakpoints: string[] | null` - Array of breakpoint names lower than current
 
-**Re-renders:** Only when the breakpoint changes (memoized)
-
 ### `useViewportWidthComparer(ViewportStore, compareWith, type, mode)`
 
 Hook that compares current breakpoint with a target breakpoint.
+
+_Re-renders:_ Only when comparison result changes
 
 **Parameters:**
 
@@ -288,19 +382,19 @@ Hook that compares current breakpoint with a target breakpoint.
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
-**Re-renders:** Only when comparison result changes
-
 ### `useViewportHeight(ViewportStore)`
 
 Hook that subscribes to viewport height changes.
 
-**Returns:** `number | null` - Current viewport height in pixels
+_Re-renders:_ Only when height value changes
 
-**Re-renders:** Only when height value changes
+**Returns:** `number | null` - Current viewport height in pixels
 
 ### `useViewportHeightBreakpoint(ViewportStore, type)`
 
 Hook that subscribes to a specific height breakpoint type.
+
+_Re-renders:_ Only when the breakpoint in selected type changes
 
 **Parameters:**
 
@@ -309,11 +403,11 @@ Hook that subscribes to a specific height breakpoint type.
 
 **Returns:** `Option` object with current and lowerBreakpoints
 
-**Re-renders:** Only when the breakpoint changes (memoized)
-
 ### `useViewportHeightComparer(ViewportStore, compareWith, type, mode)`
 
 Hook that compares current height breakpoint with a target breakpoint.
+
+_Re-renders:_ Only when comparison result changes
 
 **Parameters:**
 
@@ -324,11 +418,11 @@ Hook that compares current height breakpoint with a target breakpoint.
 
 **Returns:** `boolean | null` - Comparison result
 
-**Re-renders:** Only when comparison result changes
-
 ### `useViewportStorage(ViewportStore)`
 
 Hook that returns store state and imperative subscription functions.
+
+_Re-renders:_ never
 
 **Returns:** `[store, listen, unlisten]` tuple where:
 
@@ -389,7 +483,7 @@ Global memoization uses previous store to compare breakpoint state, ensuring com
 Components subscribe only to the breakpoint types they need:
 
 ```tsx
-// Component re-renders only when 'default' breakpoint changes
+// Component re-renders only when breakpoint in "default" category changes
 const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
 
 // Another component can subscribe to a different breakpoint type

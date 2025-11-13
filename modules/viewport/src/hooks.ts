@@ -3,6 +3,8 @@ import { useMemo } from "react";
 
 import { Option, StoreInstance, ViewportBreakpoints } from "./types";
 
+export const useViewport = useStore;
+
 export const useViewportWidth = <
     ViewportWidthOptions extends ViewportBreakpoints,
     ViewportHeightOptions extends ViewportBreakpoints | undefined,

@@ -9,6 +9,7 @@ import React from "react";
 
 import {
     createViewportStore,
+    useViewport,
     useViewportWidth,
     useViewportWidthComparer,
     useViewportWidthBreakpoint,
@@ -351,7 +352,43 @@ function testUseViewportStorage() {
     }
 }
 
-// Test 13: Store Provider and Consumer
+// Test 13: useViewport
+function testUseViewport() {
+    const Store = createViewportStore({
+        width: {
+            base: {
+                mobile: 0,
+                tablet: 600,
+                desktop: 1024,
+            },
+        },
+        height: {
+            base: {
+                small: 0,
+                medium: 400,
+            },
+        },
+    });
+
+    function Component() {
+        // Basic usage - should return full store state
+        const store = useViewport(Store);
+        const width: number | null = store.width;
+        const height: number | null = store.height;
+        const mounted: boolean = store.mounted;
+        const widthBase = store.widthOptions.base;
+        const heightBase = store.heightOptions.base;
+
+        // Usage with keys option - should return only selected keys
+        const partial = useViewport(Store, { keys: ["width", "mounted"] });
+        const partialWidth: number | null = partial.width;
+        const partialMounted: boolean = partial.mounted;
+        // @ts-expect-error - should not have unselected keys
+        const partialHeight = partial.height;
+    }
+}
+
+// Test 14: Store Provider and Consumer
 function testStoreProviderConsumer() {
     const Store = createViewportStore({
         width: {
@@ -390,7 +427,7 @@ function testStoreProviderConsumer() {
     </Store.Consumer>;
 }
 
-// Test 14: Type inference with const breakpoints
+// Test 15: Type inference with const breakpoints
 function testTypeInferenceWithConst() {
     const breakpoints = {
         base: {
@@ -408,7 +445,7 @@ function testTypeInferenceWithConst() {
     const baseCurrent: "mobile" | "tablet" | "desktop" | null = Store._initial.widthOptions.base.current;
 }
 
-// Test 15: Multiple breakpoint groups
+// Test 16: Multiple breakpoint groups
 function testMultipleBreakpointGroups() {
     const Store = createViewportStore({
         width: {
@@ -445,7 +482,7 @@ function testMultipleBreakpointGroups() {
     const verticalCurrent: "short" | "medium" | "tall" | null = vertical.current;
 }
 
-// Test 16: Store instance structure
+// Test 17: Store instance structure
 function testStoreInstanceStructure() {
     const Store = createViewportStore();
 
@@ -463,7 +500,7 @@ function testStoreInstanceStructure() {
     const Consumer = Store.Consumer;
 }
 
-// Test 17: Edge case - single breakpoint
+// Test 18: Edge case - single breakpoint
 function testSingleBreakpoint() {
     const Store = createViewportStore({
         width: {
