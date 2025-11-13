@@ -41,6 +41,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
             ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, listeners: [] }]))
             : {},
     );
+    const mounted = useRef(false);
 
     const update = useCallback((part: Partial<Store> | ((prevData: Store) => Partial<Store>)) => {
         const newPart = typeof part === "function" ? part(storeProxy) : part;
@@ -70,7 +71,11 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         // Otherwise, in batch updates, a race condition could occur, in which
         // some listeners are checked and called with new values, and some with old ones
         listenersToNotify.forEach(({ callback, enabled, value }) => {
-            if (enabled === undefined || (typeof enabled === "function" ? enabled(storeProxy) : enabled)) {
+            let disabled = false;
+            if (enabled === "never") disabled = true;
+            else if (enabled === "after-hydration") disabled = !mounted.current;
+            else if (typeof enabled === "function") disabled = !enabled(storeProxy);
+            if (!disabled) {
                 callback(value);
             }
         });
@@ -139,6 +144,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
 
     useEffect(() => {
         const storeDidMountCallback = storeDidMount ? storeDidMount(storeProxy, update, listen, unlisten) : undefined;
+        mounted.current = true;
 
         return () => {
             if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);

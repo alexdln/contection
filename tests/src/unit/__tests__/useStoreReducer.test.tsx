@@ -240,13 +240,13 @@ describe("useStoreReducer", () => {
         });
 
         describe("enabled option", () => {
-            it("should not call listener when enabled is false", (done) => {
+            it("should not call listener when enabled is never", (done) => {
                 const listener = jest.fn();
                 const TestComponent = () => {
                     const [, update, listen] = useStoreReducer(TestStore);
 
                     useEffect(() => {
-                        listen("count", listener, { enabled: false });
+                        listen("count", listener, { enabled: "never" });
                         update({ count: 1 });
                         expect(listener).not.toHaveBeenCalled();
                         done();
@@ -262,13 +262,13 @@ describe("useStoreReducer", () => {
                 );
             });
 
-            it("should call listener when enabled is true", (done) => {
+            it("should call listener when enabled is always", (done) => {
                 const listener = jest.fn();
                 const TestComponent = () => {
                     const [, update, listen] = useStoreReducer(TestStore);
 
                     useEffect(() => {
-                        const unlisten = listen("count", listener, { enabled: true });
+                        const unlisten = listen("count", listener, { enabled: "always" });
                         update({ count: 1 });
                         expect(listener).toHaveBeenCalledWith(1);
                         expect(listener).toHaveBeenCalledTimes(1);

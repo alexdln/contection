@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type ViewportBreakpoints } from "contection-viewport/types";
-import { formatOptions, calculateCurrentBreakpoint } from "contection-viewport/utils";
+import { type ViewportBreakpoints } from "contection-viewport/src/types";
+import { formatOptions, calculateCurrentBreakpoint } from "contection-viewport/src/utils";
 
 describe("formatOptions", () => {
     it("should format breakpoints correctly", () => {

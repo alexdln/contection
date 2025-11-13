@@ -1,5 +1,5 @@
 import { useStoreReducer, useStore } from "contection";
-import * as Utils from "contection/utils";
+import * as Utils from "contection/src/utils";
 import React from "react";
 
 import { render, screen, act } from "../../setup/test-utils";

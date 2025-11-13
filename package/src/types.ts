@@ -4,7 +4,7 @@ type NonFunction<T> = T extends Function ? never : T extends object ? T : never;
 export type StoreKey = string | number | symbol;
 
 export type ListenOptions<Store extends BaseStore = BaseStore> = {
-    enabled?: boolean | ((store: Store) => boolean);
+    enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean);
 };
 
 export type InternalStoreType<Store extends BaseStore = BaseStore> = {

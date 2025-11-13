@@ -16,7 +16,7 @@ export function GlobalStoreConsumer<
 >(props: {
     options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] };
     children: (data: ResultType) => React.ReactNode;
-    instance: Pick<StoreInstance<Store>, "_context">;
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
 }): React.ReactNode;
 export function GlobalStoreConsumer<
     Store extends BaseStore,
@@ -25,7 +25,7 @@ export function GlobalStoreConsumer<
 >(props: {
     options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] };
     children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
-    instance: Pick<StoreInstance<Store>, "_context">;
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
 }): React.ReactNode;
 export function GlobalStoreConsumer<
     Store extends BaseStore,
@@ -42,7 +42,7 @@ export function GlobalStoreConsumer<
         enabled?: ListenOptions<Store>["enabled"];
     };
     children: (data: Store | ResultType) => React.ReactNode;
-    instance: Pick<StoreInstance<Store>, "_context">;
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
 }): React.ReactNode {
     const data = useStore(
         instance,

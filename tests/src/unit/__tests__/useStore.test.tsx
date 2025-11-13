@@ -382,11 +382,11 @@ describe("useStore", () => {
     });
 
     describe("enabled option", () => {
-        it("should not re-render when enabled is false", () => {
+        it("should not re-render when enabled is never", () => {
             let renderCount = 0;
             const TestComponent = () => {
                 renderCount++;
-                const store = useStore(TestStore, { enabled: false });
+                const store = useStore(TestStore, { enabled: "never" });
                 return <span data-testid="count">{store.count}</span>;
             };
 
@@ -409,11 +409,11 @@ describe("useStore", () => {
             expect(screen.getByTestId("count")).toHaveTextContent("0");
         });
 
-        it("should re-render when enabled is true", () => {
+        it("should re-render when enabled is after-hydration", () => {
             let renderCount = 0;
             const TestComponent = () => {
                 renderCount++;
-                const store = useStore(TestStore, { enabled: true });
+                const store = useStore(TestStore, { enabled: "after-hydration" });
                 return <span data-testid="count">{store.count}</span>;
             };
 

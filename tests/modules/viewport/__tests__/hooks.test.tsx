@@ -158,10 +158,10 @@ describe("viewport hooks", () => {
             expect(screen.getByTestId("lower")).toHaveTextContent("tablet");
         });
 
-        it("should subscribe when enabled is true", () => {
+        it("should subscribe when enabled is always", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
-                const store = useViewport(Store, { keys: ["width"], enabled: true });
+                const store = useViewport(Store, { keys: ["width"], enabled: "always" });
                 return <div data-testid="width">{String(store.width)}</div>;
             };
 
@@ -174,12 +174,39 @@ describe("viewport hooks", () => {
             expect(screen.getByTestId("width")).toHaveTextContent("1024");
         });
 
-        it("should not subscribe when enabled is false", () => {
+        it("should subscribe when enabled is after-hydration", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const store = useViewport(Store, { keys: ["width"], enabled: "after-hydration" });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+
+            act(() => {
+                Object.defineProperty(window, "innerWidth", {
+                    writable: true,
+                    configurable: true,
+                    value: 800,
+                });
+                window.dispatchEvent(new Event("resize"));
+            });
+
+            expect(screen.getByTestId("width")).toHaveTextContent("800");
+        });
+
+        it("should not subscribe when enabled is never", () => {
             let renderCount = 0;
             const Store = createViewportStore();
             const TestComponent = () => {
                 renderCount++;
-                const store = useViewport(Store, { keys: ["width"], enabled: false });
+                const store = useViewport(Store, { keys: ["width"], enabled: "never" });
                 return <div data-testid="width">{String(store.width)}</div>;
             };
 
@@ -207,7 +234,7 @@ describe("viewport hooks", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
                 const store = useViewport(Store, {
-                    keys: ["width"],
+                    keys: ["width", "mounted"],
                     enabled: (store) => store.mounted,
                 });
                 return <div data-testid="width">{String(store.width)}</div>;

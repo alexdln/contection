@@ -74,7 +74,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
     }): React.ReactNode {
         return (
             <GlobalStoreConsumer
-                instance={{ _context: GlobalStoreContext }}
+                instance={{ _context: GlobalStoreContext, _initial: initialData }}
                 options={
                     options as {
                         keys: Keys;
