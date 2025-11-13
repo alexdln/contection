@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { type MutationFn, type BaseStore, type StoreInstance } from "./types";
+import { type MutationFn, type BaseStore, type StoreInstance, ListenOptions } from "./types";
 import { useStore } from "./hooks";
 
 /**
@@ -14,7 +14,7 @@ export function GlobalStoreConsumer<
     ResultType,
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(props: {
-    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType> };
+    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] };
     children: (data: ResultType) => React.ReactNode;
     instance: Pick<StoreInstance<Store>, "_context">;
 }): React.ReactNode;
@@ -23,7 +23,7 @@ export function GlobalStoreConsumer<
     ResultType,
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(props: {
-    options?: { keys?: Keys; mutation?: undefined };
+    options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] };
     children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
     instance: Pick<StoreInstance<Store>, "_context">;
 }): React.ReactNode;
@@ -36,11 +36,22 @@ export function GlobalStoreConsumer<
     instance,
     options,
 }: {
-    options?: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType> };
+    options?: {
+        keys?: Keys;
+        mutation?: MutationFn<Store, Keys, ResultType>;
+        enabled?: ListenOptions<Store>["enabled"];
+    };
     children: (data: Store | ResultType) => React.ReactNode;
     instance: Pick<StoreInstance<Store>, "_context">;
 }): React.ReactNode {
-    const data = useStore(instance, options as { keys: Keys; mutation: MutationFn<Store, Keys, ResultType> });
+    const data = useStore(
+        instance,
+        options as {
+            keys: Keys;
+            mutation: MutationFn<Store, Keys, ResultType>;
+            enabled?: ListenOptions<Store>["enabled"];
+        },
+    );
 
     return children(data);
 }
