@@ -154,8 +154,8 @@ describe("viewport hooks", () => {
             );
 
             expect(screen.getByTestId("current")).toHaveTextContent("desktop");
-            expect(screen.getByTestId("lower")).toContain("mobile");
-            expect(screen.getByTestId("lower")).toContain("tablet");
+            expect(screen.getByTestId("lower")).toHaveTextContent("mobile");
+            expect(screen.getByTestId("lower")).toHaveTextContent("tablet");
         });
     });
 
