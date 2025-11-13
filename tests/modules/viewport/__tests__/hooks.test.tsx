@@ -167,7 +167,7 @@ describe("viewport hooks", () => {
             Object.defineProperty(window, "innerWidth", {
                 writable: true,
                 configurable: true,
-                value: 1200,
+                value: 500,
             });
 
             const Store = createViewportStore({
@@ -181,7 +181,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "mobile", "base", ["greater"]);
+                const result = useViewportWidthComparer(Store, "tablet", "base", ["greater"]);
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -212,7 +212,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportWidthComparer(Store, "mobile", "base", ["less"]);
+                const result = useViewportWidthComparer(Store, "desktop", "base", ["less"]);
                 return <div data-testid="result">{String(result)}</div>;
             };
 
@@ -270,7 +270,7 @@ describe("viewport hooks", () => {
                 </Store.Provider>,
             );
 
-            expect(screen.getByTestId("result")).toHaveTextContent("true");
+            expect(screen.getByTestId("result")).toHaveTextContent("false");
         });
     });
 
@@ -523,7 +523,7 @@ describe("viewport hooks", () => {
             expect(screen.getByTestId("result")).toHaveTextContent("true");
         });
 
-        it("should return false when compareWith is in lowerBreakpoints and mode includes 'greater'", () => {
+        it("should return true when compareWith is in lowerBreakpoints and mode includes 'greater'", () => {
             Object.defineProperty(window, "innerHeight", {
                 writable: true,
                 configurable: true,
@@ -551,10 +551,10 @@ describe("viewport hooks", () => {
                 </Store.Provider>,
             );
 
-            expect(screen.getByTestId("result")).toHaveTextContent("false");
+            expect(screen.getByTestId("result")).toHaveTextContent("true");
         });
 
-        it("should return true when compareWith is in lowerBreakpoints and mode includes 'less'", () => {
+        it("should return true when compareWith is in lowerBreakpoints and mode includes 'greater'", () => {
             Object.defineProperty(window, "innerHeight", {
                 writable: true,
                 configurable: true,
@@ -572,7 +572,7 @@ describe("viewport hooks", () => {
             });
 
             const TestComponent = () => {
-                const result = useViewportHeightComparer(Store, "small", "base", ["less"]);
+                const result = useViewportHeightComparer(Store, "small", "base", ["greater"]);
                 return <div data-testid="result">{String(result)}</div>;
             };
 

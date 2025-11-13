@@ -34,10 +34,10 @@ export const useViewportWidthComparer = <
             if (mode.includes("equal") && isCurrentBreakpoint) {
                 return true;
             }
-            if (mode.includes("greater") && !isCurrentBreakpoint && !isLowerBreakpoint) {
+            if (mode.includes("greater") && !isCurrentBreakpoint && isLowerBreakpoint) {
                 return true;
             }
-            if (mode.includes("less") && isLowerBreakpoint) {
+            if (mode.includes("less") && !isCurrentBreakpoint && !isLowerBreakpoint) {
                 return true;
             }
             return false;
@@ -98,10 +98,10 @@ export const useViewportHeightComparer = <
             if (mode.includes("equal") && isCurrentBreakpoint) {
                 return true;
             }
-            if (mode.includes("greater") && !isCurrentBreakpoint && !isLowerBreakpoint) {
+            if (mode.includes("greater") && !isCurrentBreakpoint && isLowerBreakpoint) {
                 return true;
             }
-            if (mode.includes("less") && isLowerBreakpoint) {
+            if (mode.includes("less") && !isCurrentBreakpoint && !isLowerBreakpoint) {
                 return true;
             }
             return false;
