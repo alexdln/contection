@@ -16,23 +16,26 @@ export const useViewportWidth = <
         mutation: (state) => state.width,
     });
 };
-export const useViewportWidthComparer = <
+export const useViewportWidthCompare = <
     ViewportWidthOptions extends ViewportBreakpoints,
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
     Type extends keyof ViewportWidthOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    compareWith: keyof ViewportWidthOptions[Type],
-    type: Type,
-    mode: ("equal" | "greater" | "less")[],
+    {
+        compareWith,
+        type,
+        mode = ["equal"],
+    }: { compareWith: keyof ViewportWidthOptions[Type]; type?: Type; mode?: ("equal" | "greater" | "less")[] },
 ) => {
     const result = useStore(ViewportStore, {
         keys: ["widthOptions"],
         mutation: ({ widthOptions }) => {
-            if (!widthOptions[type]?.current || !widthOptions[type].lowerBreakpoints) return null;
+            const currentType = type ?? (Object.keys(widthOptions)[0] as Type);
+            if (!widthOptions[currentType]?.current || !widthOptions[currentType].lowerBreakpoints) return null;
 
-            const isCurrentBreakpoint = widthOptions[type].current === compareWith;
-            const isLowerBreakpoint = widthOptions[type].lowerBreakpoints.includes(compareWith);
+            const isCurrentBreakpoint = widthOptions[currentType].current === compareWith;
+            const isLowerBreakpoint = widthOptions[currentType].lowerBreakpoints.includes(compareWith);
             if (mode.includes("equal") && isCurrentBreakpoint) {
                 return true;
             }
@@ -54,15 +57,16 @@ export const useViewportWidthBreakpoint = <
     Type extends keyof ViewportWidthOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    type: Type,
+    { type }: { type?: Type } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["widthOptions"],
         mutation: (store, prevStore, prevMutatedStore) => {
-            if (store?.widthOptions[type].current === prevMutatedStore?.current) {
+            const currentType = type ?? (Object.keys(store.widthOptions)[0] as Type);
+            if (store?.widthOptions[currentType].current === prevMutatedStore?.current) {
                 return prevMutatedStore;
             }
-            return store.widthOptions[type];
+            return store.widthOptions[currentType];
         },
     }) as Option<ViewportWidthOptions, Type>;
 };
@@ -79,20 +83,23 @@ export const useViewportHeight = <
     });
 };
 
-export const useViewportHeightComparer = <
+export const useViewportHeightCompare = <
     ViewportWidthOptions extends ViewportBreakpoints,
     ViewportHeightOptions extends ViewportBreakpoints,
     Type extends keyof ViewportHeightOptions = keyof ViewportHeightOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    compareWith: keyof ViewportHeightOptions[Type],
-    type: Type,
-    mode: ("equal" | "greater" | "less")[],
+    {
+        compareWith,
+        type,
+        mode = ["equal"],
+    }: { compareWith: keyof ViewportHeightOptions[Type]; type?: Type; mode?: ("equal" | "greater" | "less")[] },
 ) => {
     const result = useStore(ViewportStore, {
         keys: ["heightOptions"],
         mutation: ({ heightOptions }) => {
-            const heightOption = (heightOptions as Record<Type, Option<ViewportHeightOptions, Type>>)?.[type];
+            const currentType = type ?? (Object.keys(heightOptions)[0] as Type);
+            const heightOption = (heightOptions as Record<Type, Option<ViewportHeightOptions, Type>>)?.[currentType];
             if (!heightOption?.current || !heightOption.lowerBreakpoints) return null;
 
             const isCurrentBreakpoint = heightOption.current === compareWith;
@@ -118,12 +125,15 @@ export const useViewportHeightBreakpoint = <
     Type extends keyof ViewportHeightOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    type: Type,
+    { type }: { type?: Type } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["heightOptions"],
         mutation: (store, prevStore, prevMutatedStore) => {
-            const heightOption = (store.heightOptions as Record<Type, Option<ViewportHeightOptions, Type>>)?.[type];
+            const currentType = type ?? (Object.keys(store.heightOptions)[0] as Type);
+            const heightOption = (store.heightOptions as Record<Type, Option<ViewportHeightOptions, Type>>)?.[
+                currentType
+            ];
             if (heightOption?.current === prevMutatedStore?.current) {
                 return prevMutatedStore;
             }

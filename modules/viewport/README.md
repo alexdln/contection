@@ -58,7 +58,7 @@ import { useViewportWidthBreakpoint } from "contection-viewport";
 
 function ResponsiveComponent() {
   // Component re-renders only when breakpoint in 'default' category changes
-  const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
+  const breakpoint = useViewportWidthBreakpoint(ViewportStore);
 
   return (
     <div>
@@ -98,9 +98,15 @@ const ViewportStore = createViewportStore({
 });
 
 // Use different breakpoint types
-const defaultBreakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
-const contentBreakpoint = useViewportWidthBreakpoint(ViewportStore, "content");
-const heightBreakpoint = useViewportHeightBreakpoint(ViewportStore, "vertical");
+const defaultBreakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "default",
+});
+const contentBreakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "content",
+});
+const heightBreakpoint = useViewportHeightBreakpoint(ViewportStore, {
+  type: "vertical",
+});
 ```
 
 ### Breakpoint Comparison
@@ -108,16 +114,15 @@ const heightBreakpoint = useViewportHeightBreakpoint(ViewportStore, "vertical");
 Compare breakpoints with multiple modes:
 
 ```tsx
-import { useViewportWidthComparer } from "contection-viewport";
+import { useViewportWidthCompare } from "contection-viewport";
 
 function ResponsiveButton() {
   // Component re-renders only when comparison result changes
-  const isTabletOrLarger = useViewportWidthComparer(
-    ViewportStore,
-    "tablet",
-    "default",
-    ["equal", "greater"]
-  );
+  const isTabletOrLarger = useViewportWidthCompare(ViewportStore, {
+    compareWith: "tablet",
+    type: "default",
+    mode: ["equal", "greater"],
+  });
 
   return (
     <button disabled={!isTabletOrLarger}>
@@ -237,7 +242,9 @@ function Dimensions() {
 Get detailed breakpoint information:
 
 ```tsx
-const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
+const breakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "default", // optional, defaults to first breakpoint type
+});
 // breakpoint.current - Current breakpoint name (e.g., "desktop")
 // breakpoint.lowerBreakpoints - Array of breakpoint names that are lower than current
 //   (e.g., ["mobile", "tablet"] when current is "desktop")
@@ -351,7 +358,7 @@ _Re-renders:_ Only when width value changes
 
 **Returns:** `number | null` - Current viewport width in pixels
 
-### `useViewportWidthBreakpoint(ViewportStore, type)`
+### `useViewportWidthBreakpoint(ViewportStore, options)`
 
 Hook that subscribes to a specific width breakpoint type.
 
@@ -360,14 +367,15 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `type` - Breakpoint type key (e.g., `"default"`)
+- `options?`:
+  - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
 
 **Returns:** `Option` object with:
 
 - `current: string | null` - Current breakpoint name
 - `lowerBreakpoints: string[] | null` - Array of breakpoint names lower than current
 
-### `useViewportWidthComparer(ViewportStore, compareWith, type, mode)`
+### `useViewportWidthCompare(ViewportStore, options)`
 
 Hook that compares current breakpoint with a target breakpoint.
 
@@ -376,9 +384,10 @@ _Re-renders:_ Only when comparison result changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `compareWith` - Breakpoint name to compare with
-- `type` - Breakpoint type key
-- `mode` - Array of comparison modes: `"equal"`, `"greater"`, `"less"`
+- `options`:
+  - `compareWith: string` - Breakpoint name to compare with
+  - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
+  - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
@@ -390,7 +399,7 @@ _Re-renders:_ Only when height value changes
 
 **Returns:** `number | null` - Current viewport height in pixels
 
-### `useViewportHeightBreakpoint(ViewportStore, type)`
+### `useViewportHeightBreakpoint(ViewportStore, options)`
 
 Hook that subscribes to a specific height breakpoint type.
 
@@ -399,11 +408,15 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `type` - Breakpoint type key
+- `options?`:
+  - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
 
-**Returns:** `Option` object with current and lowerBreakpoints
+**Returns:** `Option` object with:
 
-### `useViewportHeightComparer(ViewportStore, compareWith, type, mode)`
+- `current: string | null` - Current breakpoint name
+- `lowerBreakpoints: string[] | null` - Array of breakpoint names lower than current
+
+### `useViewportHeightCompare(ViewportStore, options)`
 
 Hook that compares current height breakpoint with a target breakpoint.
 
@@ -412,11 +425,12 @@ _Re-renders:_ Only when comparison result changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `compareWith` - Breakpoint name to compare with
-- `type` - Breakpoint type key
-- `mode` - Array of comparison modes
+- `options`:
+  - `compareWith: string` - Breakpoint name to compare with
+  - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
+  - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
 
-**Returns:** `boolean | null` - Comparison result
+**Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
 ### `useViewportStorage(ViewportStore)`
 
@@ -426,7 +440,7 @@ _Re-renders:_ never
 
 **Returns:** `[store, listen, unlisten]` tuple where:
 
-- `store` - Current store state
+- `store` - Store state reference
 - `listen` - Function to subscribe to store key changes
 - `unlisten` - Function to unsubscribe from store key changes
 
@@ -470,7 +484,9 @@ This means if you have 100 components tracking viewport changes, you still have 
 Breakpoint values are memoized to prevent unnecessary re-renders:
 
 ```tsx
-const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
+const breakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "default",
+});
 
 // Component won't re-render if breakpoint.current remains "desktop"
 // even if window.innerWidth changes within the desktop range
@@ -484,10 +500,14 @@ Components subscribe only to the breakpoint types they need:
 
 ```tsx
 // Component re-renders only when breakpoint in "default" category changes
-const breakpoint = useViewportWidthBreakpoint(ViewportStore, "default");
+const breakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "default",
+});
 
 // Another component can subscribe to a different breakpoint type
-const customBreakpoint = useViewportWidthBreakpoint(ViewportStore, "custom");
+const customBreakpoint = useViewportWidthBreakpoint(ViewportStore, {
+  type: "custom",
+});
 ```
 
 ### Change Detection

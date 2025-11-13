@@ -11,10 +11,10 @@ import {
     createViewportStore,
     useViewport,
     useViewportWidth,
-    useViewportWidthComparer,
+    useViewportWidthCompare,
     useViewportWidthBreakpoint,
     useViewportHeight,
-    useViewportHeightComparer,
+    useViewportHeightCompare,
     useViewportHeightBreakpoint,
     useViewportStorage,
 } from "contection-viewport";
@@ -149,8 +149,8 @@ function testUseViewportWidth() {
     }
 }
 
-// Test 7: useViewportWidthComparer
-function testUseViewportWidthComparer() {
+// Test 7: useViewportWidthCompare
+function testUseViewportWidthCompare() {
     const Store = createViewportStore({
         width: {
             base: {
@@ -163,23 +163,45 @@ function testUseViewportWidthComparer() {
 
     function Component() {
         // Should accept valid breakpoint name
-        const result1 = useViewportWidthComparer(Store, "mobile", "base", ["equal"]);
+        const result1 = useViewportWidthCompare(Store, { compareWith: "mobile", type: "base", mode: ["equal"] });
         // Result should be boolean | null
         if (result1 !== null) {
             const isTrue: boolean = result1;
         }
 
-        const result2 = useViewportWidthComparer(Store, "tablet", "base", ["greater", "less"]);
+        const result2 = useViewportWidthCompare(Store, {
+            compareWith: "tablet",
+            type: "base",
+            mode: ["greater", "less"],
+        });
         // Result should be boolean | null
         if (result2 !== null) {
             const isTrue: boolean = result2;
         }
 
         // @ts-expect-error - should not accept invalid breakpoint name
-        const invalid1 = useViewportWidthComparer(Store, "invalid", "base", ["equal"]);
+        const invalid1 = useViewportWidthCompare(Store, { compareWith: "invalid", type: "base", mode: ["equal"] });
 
         // @ts-expect-error - should not accept invalid type
-        const invalid2 = useViewportWidthComparer(Store, "mobile", "invalid", ["equal"]);
+        const invalid2 = useViewportWidthCompare(Store, { compareWith: "mobile", type: "invalid", mode: ["equal"] });
+
+        // Should work with optional type (defaults to first key)
+        const result3 = useViewportWidthCompare(Store, { compareWith: "mobile", mode: ["equal"] });
+        if (result3 !== null) {
+            const isTrue: boolean = result3;
+        }
+
+        // Should work with optional mode (defaults to ["equal"])
+        const result4 = useViewportWidthCompare(Store, { compareWith: "tablet", type: "base" });
+        if (result4 !== null) {
+            const isTrue: boolean = result4;
+        }
+
+        // Should work with both optional parameters
+        const result5 = useViewportWidthCompare(Store, { compareWith: "desktop" });
+        if (result5 !== null) {
+            const isTrue: boolean = result5;
+        }
     }
 }
 
@@ -201,17 +223,17 @@ function testUseViewportWidthBreakpoint() {
 
     function Component() {
         // Should return correct option type for base
-        const baseBreakpoint = useViewportWidthBreakpoint(Store, "base");
+        const baseBreakpoint = useViewportWidthBreakpoint(Store, { type: "base" });
         const baseCurrent: "mobile" | "tablet" | "desktop" | null = baseBreakpoint.current;
         const baseLower: ("mobile" | "tablet" | "desktop")[] | null = baseBreakpoint.lowerBreakpoints;
 
         // Should return correct option type for custom
-        const customBreakpoint = useViewportWidthBreakpoint(Store, "custom");
+        const customBreakpoint = useViewportWidthBreakpoint(Store, { type: "custom" });
         const customCurrent: "small" | "large" | null = customBreakpoint.current;
         const customLower: ("small" | "large")[] | null = customBreakpoint.lowerBreakpoints;
 
         // @ts-expect-error - should not accept invalid type
-        const invalid = useViewportWidthBreakpoint(Store, "invalid");
+        const invalid = useViewportWidthBreakpoint(Store, { type: "invalid" });
     }
 }
 
@@ -239,8 +261,8 @@ function testUseViewportHeight() {
     // This is tested implicitly by TypeScript's type system
 }
 
-// Test 10: useViewportHeightComparer
-function testUseViewportHeightComparer() {
+// Test 10: useViewportHeightCompare
+function testUseViewportHeightCompare() {
     const Store = createViewportStore({
         height: {
             base: {
@@ -253,22 +275,44 @@ function testUseViewportHeightComparer() {
 
     function Component() {
         // Should accept valid breakpoint name
-        const result1 = useViewportHeightComparer(Store, "small", "base", ["equal"]);
+        const result1 = useViewportHeightCompare(Store, { compareWith: "small", type: "base", mode: ["equal"] });
         // Result type is inferred from the hook implementation
         const result1Value = result1;
 
-        const result2 = useViewportHeightComparer(Store, "medium", "base", ["greater", "less"]);
+        const result2 = useViewportHeightCompare(Store, {
+            compareWith: "medium",
+            type: "base",
+            mode: ["greater", "less"],
+        });
         // Result type is inferred from the hook implementation
         const result2Value = result2;
 
         // @ts-expect-error - should not accept invalid breakpoint name
-        const invalid1 = useViewportHeightComparer(Store, "invalid", "base", ["equal"]);
+        const invalid1 = useViewportHeightCompare(Store, { compareWith: "invalid", type: "base", mode: ["equal"] });
 
         // @ts-expect-error - should not accept invalid type
-        const invalid2 = useViewportHeightComparer(Store, "small", "invalid", ["equal"]);
+        const invalid2 = useViewportHeightCompare(Store, { compareWith: "small", type: "invalid", mode: ["equal"] });
+
+        // Should work with optional type (defaults to first key)
+        const result3 = useViewportHeightCompare(Store, { compareWith: "small", mode: ["equal"] });
+        if (result3 !== null) {
+            const isTrue: boolean = result3;
+        }
+
+        // Should work with optional mode (defaults to ["equal"])
+        const result4 = useViewportHeightCompare(Store, { compareWith: "medium", type: "base" });
+        if (result4 !== null) {
+            const isTrue: boolean = result4;
+        }
+
+        // Should work with both optional parameters
+        const result5 = useViewportHeightCompare(Store, { compareWith: "large" });
+        if (result5 !== null) {
+            const isTrue: boolean = result5;
+        }
     }
 
-    // Note: useViewportHeightComparer requires height options
+    // Note: useViewportHeightCompare requires height options
     // TypeScript will enforce this constraint
 }
 
@@ -290,17 +334,17 @@ function testUseViewportHeightBreakpoint() {
 
     function Component() {
         // Should return correct option type for base
-        const baseBreakpoint = useViewportHeightBreakpoint(Store, "base");
+        const baseBreakpoint = useViewportHeightBreakpoint(Store, { type: "base" });
         const baseCurrent: "small" | "medium" | "large" | null = baseBreakpoint.current;
         const baseLower: ("small" | "medium" | "large")[] | null = baseBreakpoint.lowerBreakpoints;
 
         // Should return correct option type for custom
-        const customBreakpoint = useViewportHeightBreakpoint(Store, "custom");
+        const customBreakpoint = useViewportHeightBreakpoint(Store, { type: "custom" });
         const customCurrent: "tiny" | "huge" | null = customBreakpoint.current;
         const customLower: ("tiny" | "huge")[] | null = customBreakpoint.lowerBreakpoints;
 
         // @ts-expect-error - should not accept invalid type
-        const invalid = useViewportHeightBreakpoint(Store, "invalid");
+        const invalid = useViewportHeightBreakpoint(Store, { type: "invalid" });
     }
 
     // Note: useViewportHeightBreakpoint requires height options
