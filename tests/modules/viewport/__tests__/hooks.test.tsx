@@ -1,5 +1,6 @@
 import {
     createViewportStore,
+    useViewport,
     useViewportWidth,
     useViewportWidthComparer,
     useViewportWidthBreakpoint,
@@ -23,6 +24,138 @@ describe("viewport hooks", () => {
             writable: true,
             configurable: true,
             value: 768,
+        });
+    });
+
+    describe("useViewport", () => {
+        it("should return current viewport width", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const width = useViewport(Store, { keys: ["width"], mutation: (state) => state.width });
+                return <div data-testid="width">{String(width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+        });
+        it("should return width and height", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const store = useViewport(Store, { keys: ["width", "height"] });
+                return (
+                    <>
+                        <div data-testid="width">{String(store.width)}</div>
+                        <div data-testid="height">{String(store.height)}</div>
+                        {/* @ts-expect-error - heightOptions is not available */}
+                        <div data-testid="height-options">{String(store.heightOptions)}</div>
+                    </>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+            expect(screen.getByTestId("height")).toHaveTextContent("768");
+            expect(screen.getByTestId("height-options")).toHaveTextContent("undefined");
+        });
+
+        it("should update when viewport changes", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const store = useViewport(Store, { keys: ["width"] });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1024");
+
+            act(() => {
+                Object.defineProperty(window, "innerWidth", {
+                    writable: true,
+                    configurable: true,
+                    value: 800,
+                });
+                window.dispatchEvent(new Event("resize"));
+            });
+
+            expect(screen.getByTestId("width")).toHaveTextContent("800");
+        });
+
+        it("should not re-render when unsubscribed keys change", () => {
+            let renderCount = 0;
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                renderCount++;
+                const store = useViewport(Store, { keys: ["width"] });
+                return <div data-testid="width">{String(store.width)}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+
+            act(() => {
+                Object.defineProperty(window, "innerHeight", {
+                    writable: true,
+                    configurable: true,
+                    value: 600,
+                });
+                window.dispatchEvent(new Event("resize"));
+            });
+
+            expect(renderCount).toBe(1);
+        });
+
+        it("should access breakpoint options", () => {
+            const Store = createViewportStore({
+                width: {
+                    base: {
+                        mobile: 0,
+                        tablet: 600,
+                        desktop: 1024,
+                    },
+                },
+            });
+            const TestComponent = () => {
+                const store = useViewport(Store, { keys: ["widthOptions"] });
+                const breakpoint = store.widthOptions.base;
+                return (
+                    <>
+                        <div data-testid="current">{String(breakpoint.current)}</div>
+                        <div data-testid="lower">
+                            {breakpoint.lowerBreakpoints ? breakpoint.lowerBreakpoints.join(",") : "null"}
+                        </div>
+                    </>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("current")).toHaveTextContent("desktop");
+            expect(screen.getByTestId("lower")).toHaveTextContent("mobile");
+            expect(screen.getByTestId("lower")).toHaveTextContent("tablet");
         });
     });
 
