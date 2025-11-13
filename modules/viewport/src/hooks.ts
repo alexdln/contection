@@ -1,7 +1,7 @@
 import { useStore, useStoreReducer } from "contection";
 import { useMemo } from "react";
 
-import { Option, StoreInstance, ViewportBreakpoints } from "./types";
+import { type Option, type StoreInstance, type ViewportBreakpoints, type ViewportEnabled } from "./types";
 
 export const useViewport = useStore;
 
@@ -10,10 +10,12 @@ export const useViewportWidth = <
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    { enabled }: { enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["width"],
         mutation: (state) => state.width,
+        enabled,
     });
 };
 export const useViewportWidthCompare = <
@@ -26,7 +28,13 @@ export const useViewportWidthCompare = <
         compareWith,
         type,
         mode = ["equal"],
-    }: { compareWith: keyof ViewportWidthOptions[Type]; type?: Type; mode?: ("equal" | "greater" | "less")[] },
+        enabled,
+    }: {
+        compareWith: keyof ViewportWidthOptions[Type];
+        type?: Type;
+        mode?: ("equal" | "greater" | "less")[];
+        enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions>;
+    },
 ) => {
     const result = useStore(ViewportStore, {
         keys: ["widthOptions"],
@@ -47,6 +55,7 @@ export const useViewportWidthCompare = <
             }
             return false;
         },
+        enabled,
     });
     return result;
 };
@@ -57,7 +66,7 @@ export const useViewportWidthBreakpoint = <
     Type extends keyof ViewportWidthOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    { type }: { type?: Type } = {},
+    { type, enabled }: { type?: Type; enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["widthOptions"],
@@ -68,6 +77,7 @@ export const useViewportWidthBreakpoint = <
             }
             return store.widthOptions[currentType];
         },
+        enabled,
     }) as Option<ViewportWidthOptions, Type>;
 };
 
@@ -76,10 +86,12 @@ export const useViewportHeight = <
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    { enabled }: { enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["height"],
         mutation: (state) => state.height,
+        enabled,
     });
 };
 
@@ -93,7 +105,13 @@ export const useViewportHeightCompare = <
         compareWith,
         type,
         mode = ["equal"],
-    }: { compareWith: keyof ViewportHeightOptions[Type]; type?: Type; mode?: ("equal" | "greater" | "less")[] },
+        enabled,
+    }: {
+        compareWith: keyof ViewportHeightOptions[Type];
+        type?: Type;
+        mode?: ("equal" | "greater" | "less")[];
+        enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions>;
+    },
 ) => {
     const result = useStore(ViewportStore, {
         keys: ["heightOptions"],
@@ -115,6 +133,7 @@ export const useViewportHeightCompare = <
             }
             return false;
         },
+        enabled,
     });
     return result;
 };
@@ -125,7 +144,7 @@ export const useViewportHeightBreakpoint = <
     Type extends keyof ViewportHeightOptions,
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
-    { type }: { type?: Type } = {},
+    { type, enabled }: { type?: Type; enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
         keys: ["heightOptions"],
@@ -139,6 +158,7 @@ export const useViewportHeightBreakpoint = <
             }
             return heightOption;
         },
+        enabled,
     }) as Option<Exclude<ViewportHeightOptions, undefined>, Type>;
 };
 

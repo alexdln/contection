@@ -712,7 +712,7 @@ Hook that subscribes to store state with optional key listening and computed val
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active. If `false` or function returns `false`, the subscription is disabled. When this value changes, the hook will automatically resubscribe.
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** Subscribed store data or computed value if mutation function is provided
 
@@ -751,12 +751,13 @@ Component that consumes the store using render props pattern.
 **Props:**
 
 - `children: (data) => React.ReactNode` - Render function
-- `options?: { keys?: string[], mutation?: Function }` - Optional subscription and mutation options:
+- `options?: { keys?: string[], mutation?: Function, enabled?: boolean | Function }`:
   - `keys?: string[]` - Array of store keys to subscribe to. If omitted, subscribes to all keys.
   - `mutation?: (newStore, prevStore?, prevMutatedStore?) => T` - Function to compute derived value from subscribed state. Receives:
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the consumer will automatically resubscribe.
 
 ## Contection modules
 

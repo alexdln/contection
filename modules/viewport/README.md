@@ -323,7 +323,7 @@ _Re-renders:_ Only when subscribed keys change (and when mutation result changes
 - `options` (optional):
   - `keys?: string[]` - Array of store keys to subscribe to (e.g., `["width", "height"]`)
   - `mutation?: (state, prevState?, prevMutated?) => any` - Custom mutation function to transform store state
-  - `enabled?: boolean | ((store: ViewportStore) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active. If `false` or function returns `false`, the subscription is disabled. When this value changes, the hook will automatically resubscribe.
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** Store state (full state if no options, or subset based on `keys` option, or `mutation` result)
 
@@ -350,15 +350,21 @@ const { width } = useViewport(ViewportStore, {
 });
 ```
 
-### `useViewportWidth(ViewportStore)`
+### `useViewportWidth(ViewportStore, options?)`
 
 Hook that subscribes to viewport width changes.
 
 _Re-renders:_ Only when width value changes
 
+**Parameters:**
+
+- `ViewportStore` - Viewport store instance
+- `options?` (optional):
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+
 **Returns:** `number | null` - Current viewport width in pixels
 
-### `useViewportWidthBreakpoint(ViewportStore, options)`
+### `useViewportWidthBreakpoint(ViewportStore, options?)`
 
 Hook that subscribes to a specific width breakpoint type.
 
@@ -367,8 +373,9 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `options?`:
+- `options?` (optional):
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `Option` object with:
 
@@ -388,18 +395,25 @@ _Re-renders:_ Only when comparison result changes
   - `compareWith: string` - Breakpoint name to compare with
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
   - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
-### `useViewportHeight(ViewportStore)`
+### `useViewportHeight(ViewportStore, options?)`
 
 Hook that subscribes to viewport height changes.
 
 _Re-renders:_ Only when height value changes
 
+**Parameters:**
+
+- `ViewportStore` - Viewport store instance
+- `options?` (optional):
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
+
 **Returns:** `number | null` - Current viewport height in pixels
 
-### `useViewportHeightBreakpoint(ViewportStore, options)`
+### `useViewportHeightBreakpoint(ViewportStore, options?)`
 
 Hook that subscribes to a specific height breakpoint type.
 
@@ -408,8 +422,9 @@ _Re-renders:_ Only when the breakpoint in selected type changes
 **Parameters:**
 
 - `ViewportStore` - Viewport store instance
-- `options?`:
+- `options?` (optional):
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `Option` object with:
 
@@ -429,6 +444,7 @@ _Re-renders:_ Only when comparison result changes
   - `compareWith: string` - Breakpoint name to compare with
   - `type?: string` - Breakpoint type key (optional, defaults to first breakpoint type)
   - `mode?: ("equal" | "greater" | "less")[]` - Array of comparison modes (optional, defaults to `["equal"]`)
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the hook will automatically resubscribe.
 
 **Returns:** `boolean | null` - Comparison result, or `null` if breakpoint is not available
 
@@ -465,7 +481,13 @@ Component that consumes the viewport store using render props pattern.
 **Props:**
 
 - `children: (data) => React.ReactNode` - Render function
-- `options?: { keys?: string[], mutation?: Function }` - Optional subscription and mutation options
+- `options?: { keys?: string[], mutation?: Function, enabled?: boolean | Function }`:
+  - `keys?: string[]` - Array of store keys to subscribe to. If omitted, subscribes to all keys.
+  - `mutation?: (newStore, prevStore?, prevMutatedStore?) => T` - Function to compute derived value from subscribed state. Receives:
+    - `newStore` - Current store state (or selected keys if `keys` is provided)
+    - `prevStore` - Previous store state (or selected keys). `undefined` on first call
+    - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
+  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the consumer will automatically resubscribe.
 
 ## Performance Optimizations
 

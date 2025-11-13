@@ -6,11 +6,11 @@ export const formatOptions = <BreakpointOptions extends ViewportBreakpoints>(bre
             option,
             Object.entries(breakpoints)
                 .map(([name, size]) => {
-                    return [name, size] as const;
+                    return [name, size] as [keyof BreakpointOptions[string], number];
                 })
                 .sort((a, b) => ((a[1] as number | null) || 0) - ((b[1] as number | null) || 0)),
         ] as const;
-    }) as [keyof BreakpointOptions, [keyof BreakpointOptions[string], number][]][];
+    });
 
     const currentOptions = Object.fromEntries(
         formattedOptions.map(([option]) => [option, { lowerBreakpoints: null, current: null }]),
