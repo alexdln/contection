@@ -9,6 +9,7 @@ import {
     type GlobalStore,
     type MutationFn,
     type ProviderProps,
+    ListenOptions,
 } from "./types";
 export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
@@ -49,24 +50,38 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
     );
 
     function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
-        options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType> };
+        options: {
+            keys?: Keys;
+            mutation: MutationFn<Store, Keys, ResultType>;
+            enabled?: ListenOptions<Store>["enabled"];
+        };
         children: (data: ResultType) => React.ReactNode;
     }): React.ReactNode;
     function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
-        options?: { keys?: Keys; mutation?: undefined };
+        options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] };
         children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
     }): React.ReactNode;
     function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>({
         children,
         options,
     }: {
-        options?: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType> };
+        options?: {
+            keys?: Keys;
+            mutation?: MutationFn<Store, Keys, ResultType>;
+            enabled?: ListenOptions<Store>["enabled"];
+        };
         children: (data: Store | ResultType) => React.ReactNode;
     }): React.ReactNode {
         return (
             <GlobalStoreConsumer
                 instance={{ _context: GlobalStoreContext }}
-                options={options as { keys: Keys; mutation: MutationFn<Store, Keys, ResultType> }}
+                options={
+                    options as {
+                        keys: Keys;
+                        mutation: MutationFn<Store, Keys, ResultType>;
+                        enabled?: ListenOptions<Store>["enabled"];
+                    }
+                }
             >
                 {children}
             </GlobalStoreConsumer>

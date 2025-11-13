@@ -758,6 +758,23 @@ Component that consumes the store using render props pattern.
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
 
+## Contection modules
+
+### [contection-viewport](https://github.com/alexdln/contection/tree/main/modules/viewport)
+
+A performance-based viewport management module built on top of Contection. Provides efficient screen size tracking with granular subscriptions, memoization, and a single global resize listener.
+
+**Features:**
+
+- Custom width and height breakpoints with multiple breakpoint types
+- Single global resize listener per Provider instance
+- Selective re-renders only when subscribed option change (e.g. breakpoint, width, height, etc.)
+- Memoization to prevent unnecessary re-renders
+
+```bash
+npm install contection-viewport
+```
+
 ## License
 
 MIT
