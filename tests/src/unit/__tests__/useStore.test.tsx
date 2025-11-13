@@ -409,6 +409,104 @@ describe("useStore", () => {
             expect(screen.getByTestId("count")).toHaveTextContent("0");
         });
 
+        it("should not re-render when enabled is never with keys option", () => {
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const data = useStore(TestStore, { keys: ["count", "name"], enabled: "never" });
+                return (
+                    <div>
+                        <span data-testid="count">{data.count}</span>
+                        <span data-testid="name">{data.name}</span>
+                    </div>
+                );
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return (
+                    <>
+                        <button data-testid="update-count" onClick={() => update({ count: 5 })}>
+                            Update Count
+                        </button>
+                        <button data-testid="update-name" onClick={() => update({ name: "New" })}>
+                            Update Name
+                        </button>
+                    </>
+                );
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            expect(screen.getByTestId("name")).toHaveTextContent("Test");
+
+            act(() => screen.getByTestId("update-count").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+
+            act(() => screen.getByTestId("update-name").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("name")).toHaveTextContent("Test");
+        });
+
+        it("should not re-render when enabled is never with mutation", () => {
+            let renderCount = 0;
+            let mutationCallCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const result = useStore(TestStore, {
+                    keys: ["count"],
+                    mutation: (store) => {
+                        mutationCallCount++;
+                        return store.count * 2;
+                    },
+                    enabled: "never",
+                });
+                return <span data-testid="result">{result}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStore);
+                return (
+                    <>
+                        <button data-testid="update-count" onClick={() => update({ count: 10 })}>
+                            Update Count
+                        </button>
+                        <button data-testid="update-name" onClick={() => update({ name: "New" })}>
+                            Update Name
+                        </button>
+                    </>
+                );
+            };
+
+            render(
+                <TestStore.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStore.Provider>,
+            );
+
+            const initialMutationCalls = mutationCallCount;
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("0");
+
+            act(() => screen.getByTestId("update-count").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("0");
+            expect(mutationCallCount).toBe(initialMutationCalls);
+
+            act(() => screen.getByTestId("update-name").click());
+            expect(renderCount).toBe(1);
+            expect(mutationCallCount).toBe(initialMutationCalls);
+        });
+
         it("should re-render when enabled is after-hydration", () => {
             let renderCount = 0;
             const TestComponent = () => {
