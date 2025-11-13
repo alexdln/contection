@@ -1,5 +1,5 @@
 /**
- * Type tests for Contection
+ * Type tests for contection
  * These tests verify TypeScript type safety and inference.
  * Run with: pnpm test:types
  */
@@ -33,7 +33,6 @@ const Store = createStore<TestStore>({
 function testUseStoreReducer() {
     const [storeData, update, listen, unlisten] = useStoreReducer(Store);
 
-    // Store should have correct type
     const count: number = storeData.count;
     const name: string = storeData.name;
     // @ts-expect-error - should not have invalid key
@@ -52,17 +51,11 @@ function testUseStoreReducer() {
     update((prev) => ({ count: prev.count + 1, items: undefined }));
     update((prev) => ({ count: prev.count + 1, items: [] }));
 
-    // Listen should be typed correctly
-    const unsubscribe = listen("count", (value: number) => {
-        // value should be number
-    });
-    listen("name", (value: string) => {
-        // value should be string
-    });
+    const unsubscribe = listen("count", (value: number) => {});
+    listen("name", (value: string) => {});
     // @ts-expect-error - should not accept invalid key
     listen("invalidKey", () => {});
 
-    // Unlisten should work
     unlisten("count", () => {});
 }
 
@@ -70,7 +63,6 @@ function testUseStoreReducer() {
 function testUseStoreNoOptions() {
     const storeData = useStore(Store);
 
-    // Should return full store type
     const count: number = storeData.count;
     const name: string = storeData.name;
     // @ts-expect-error - should not have invalid key
@@ -81,7 +73,6 @@ function testUseStoreNoOptions() {
 function testUseStoreWithKeys() {
     const data = useStore(Store, { keys: ["count", "name"] });
 
-    // Should return only selected keys
     const count: number = data.count;
     const name: string = data.name;
     // @ts-expect-error - should not have unselected keys
@@ -92,20 +83,17 @@ function testUseStoreWithKeys() {
 
 // Test 5: useStore with mutation
 function testUseStoreWithMutation() {
-    // Mutation without keys
     const doubled = useStore(Store, {
         mutation: (Store) => Store.count * 2,
     });
     const doubledType: number = doubled;
 
-    // Mutation with keys
     const computed = useStore(Store, {
         keys: ["count", "name"],
         mutation: (Store) => `${Store.name}: ${Store.count}`,
     });
     const computedType: string = computed;
 
-    // Mutation should receive correct types
     useStore(Store, {
         keys: ["count"],
         mutation: (newStore, prevStore) => {
@@ -118,7 +106,6 @@ function testUseStoreWithMutation() {
         },
     });
 
-    // Mutation should receive arguments with correct inferred type
     const accumulatedCount = useStore<TestStore, number, ["count"]>(Store, {
         keys: ["count"],
         mutation: (newStore, prevStore, prevMutatedStore: number | undefined) => {
@@ -134,22 +121,14 @@ function testUseStoreWithMutation() {
 
 // Test 6: Store instance structure
 function testStoreInstance() {
-    // Should have _initial
     const initial: TestStore = Store._initial;
-
-    // Should have _context
     const context = Store._context;
-
-    // Should be callable as Provider
     const Provider = Store.Provider;
-
-    // Should have Consumer
     const Consumer = Store.Consumer;
 }
 
 // Test 7: Provider value prop
 function testProviderValue() {
-    // Should accept optional value prop
     <Store.Provider>
         <div>Test</div>
     </Store.Provider>;
@@ -174,12 +153,10 @@ function testProviderValue() {
 
 // Test 10: Provider options prop
 function testProviderOptions() {
-    // Should accept optional options prop
     <Store.Provider>
         <div>Test</div>
     </Store.Provider>;
 
-    // Should accept options with lifecycle hooks
     <Store.Provider
         options={{
             lifecycleHooks: {
@@ -205,12 +182,10 @@ function testProviderOptions() {
         <div>Test</div>
     </Store.Provider>;
 
-    // Should accept empty options object
     <Store.Provider options={{}}>
         <div>Test</div>
     </Store.Provider>;
 
-    // Should accept partial lifecycle hooks
     <Store.Provider
         options={{
             lifecycleHooks: {
@@ -241,15 +216,11 @@ function testProviderOptions() {
 
 // Test 8: Consumer options
 function testConsumerOptions() {
-    // No options
     <Store.Consumer>{(data: TestStore) => <div>{data.count}</div>}</Store.Consumer>;
-
-    // With keys
     <Store.Consumer options={{ keys: ["count", "name"] }}>
         {(data: { count: number; name?: string }) => <div>{data.count}</div>}
     </Store.Consumer>;
 
-    // With keys check unexpect error
     <Store.Consumer
         options={{
             keys: ["count"],
@@ -259,7 +230,6 @@ function testConsumerOptions() {
         {(data) => <div>{data.name}</div>}
     </Store.Consumer>;
 
-    // With mutation
     <Store.Consumer
         options={{
             mutation: (Store) => Store.count * 2,
@@ -268,7 +238,6 @@ function testConsumerOptions() {
         {(doubled: number) => <div>{doubled}</div>}
     </Store.Consumer>;
 
-    // With keys and mutation
     <Store.Consumer
         options={{
             keys: ["count"],
@@ -292,12 +261,10 @@ function testLifecycleHooks() {
         {
             lifecycleHooks: {
                 storeWillMount: (Store, update, listen, unlisten) => {
-                    // All parameters should be correctly typed
                     const count: number = Store.count;
                     update({ count: 1 });
                     const unsubscribe = listen("count", (value: number) => {});
                     unlisten("count", () => {});
-                    // Can return cleanup function
                     return (Store) => {};
                 },
                 storeDidMount: (Store, update, listen, unlisten) => {
@@ -314,5 +281,62 @@ function testLifecycleHooks() {
     );
 }
 
-// All tests should compile without errors if types are correct
+// Test 10: enabled option
+function testEnabledOption() {
+    const store1 = useStore(Store, { enabled: "always" });
+    const store2 = useStore(Store, { enabled: "never" });
+    const store3 = useStore(Store, { enabled: "after-hydration" });
+    const store4 = useStore(Store, { enabled: (store) => store.count > 0 });
+    const count1: number = store1.count;
+    const count2: number = store2.count;
+    const count3: number = store3.count;
+    const count4: number = store4.count;
+
+    // @ts-expect-error - should not accept invalid enabled value
+    const invalid1 = useStore(Store, { enabled: "invalid" });
+
+    const data1 = useStore(Store, { keys: ["count", "name"], enabled: "always" });
+    const data2 = useStore(Store, { keys: ["count", "name"], enabled: "never" });
+    const data3 = useStore(Store, { keys: ["count", "name"], enabled: "after-hydration" });
+    const data4 = useStore(Store, { keys: ["count", "name"], enabled: (store) => store.count > 0 });
+    const count5: number = data1.count;
+    const count6: number = data2.count;
+    const count7: number = data3.count;
+    const count8: number = data4.count;
+
+    const doubled1 = useStore(Store, {
+        keys: ["count"],
+        mutation: (store) => store.count * 2,
+        enabled: "always",
+    });
+    const doubled2 = useStore(Store, {
+        keys: ["count"],
+        mutation: (store) => store.count * 2,
+        enabled: "never",
+    });
+    const doubled3String = useStore(Store, {
+        keys: ["count"],
+        mutation: (store) => String(store.count * 2),
+        enabled: "after-hydration",
+    });
+    const doubled4String = useStore(Store, {
+        keys: ["count"],
+        mutation: (store) => String(store.count * 2),
+        enabled: (store) => store.count > 0,
+    });
+    const doubledType1: number = doubled1;
+    const doubledType2: number = doubled2;
+    const doubledType3: string = doubled3String;
+    const doubledType4: string = doubled4String;
+
+    const [, , listen] = useStoreReducer(Store);
+    const unsubscribe1 = listen("count", (value: number) => {}, { enabled: "always" });
+    const unsubscribe2 = listen("count", (value: number) => {}, { enabled: "never" });
+    const unsubscribe3 = listen("count", (value: number) => {}, { enabled: "after-hydration" });
+    const unsubscribe4 = listen("count", (value: number) => {}, { enabled: (store) => store.count > 0 });
+
+    // @ts-expect-error - should not accept invalid enabled value
+    const invalid2 = listen("count", (value: number) => {}, { enabled: "invalid" });
+}
+
 export {};
