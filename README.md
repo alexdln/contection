@@ -341,61 +341,30 @@ function AnalyticsTracker() {
 }
 ```
 
-Manual subscription management with `unlisten`:
+You can also use `listen` in a `ref` callback to set up subscriptions when you have direct access to a DOM node. This pattern is useful for imperative DOM manipulation that needs to react to store changes:
 
 ```tsx
-import { useStoreReducer } from "contection";
-import { useRef } from "react";
-
-function CustomSubscription() {
-  const [store, dispatch, listen, unlisten] = useStoreReducer(AppStore);
-  const listenerRef = useRef<((value: number) => void) | null>(null);
-
-  const startTracking = () => {
-    const listener = (count: number) => {
-      console.log(`Count changed to: ${count}`);
-      if (count > 10) {
-        alert("Count exceeded 10!");
-      }
-    };
-
-    listenerRef.current = listener;
-    listen("count", listener);
-  };
-
-  const stopTracking = () => {
-    if (listenerRef.current) {
-      unlisten("count", listenerRef.current);
-      listenerRef.current = null;
-    }
-  };
-
+const Header = () => {
+  const [store, , listen] = useStoreReducer(AppStore);
   return (
-    <div>
-      <button onClick={startTracking}>Start Tracking</button>
-      <button onClick={stopTracking}>Stop Tracking</button>
-    </div>
+    <header>
+      {/* ... */}
+      <nav
+        {/* Default state for first render and future renders in conditional blocks */}
+        aria-hidden={store.device === "desktop"}
+        className="aria-hidden:hidden"
+        {/* listen returns unlisten which will automatically run on ref unmount (from react v19) */}
+        ref={(node) =>
+          listen("device", (device) => {
+            node?.setAttribute("aria-hidden", String(device === "desktop"));
+          })
+        }
+      >
+        {/* ... */}
+      </nav>
+    </header>
   );
-}
-```
-
-Using the returned unlisten function:
-
-```tsx
-import { useStoreReducer } from "contection";
-import { useEffect } from "react";
-
-function AutoCleanupSubscription() {
-  const [, , listen] = useStoreReducer(AppStore);
-
-  useEffect(() => {
-    const unlisten = listen("count", (count) => {
-      console.log("Current count:", count);
-    });
-
-    return unlisten;
-  }, [listen]);
-}
+};
 ```
 
 ### Conditional Listen Subscriptions
