@@ -426,4 +426,167 @@ describe("createViewportStore", () => {
             expect(screen.getByTestId("height")).toHaveTextContent("768");
         });
     });
+
+    describe("node option", () => {
+        it("should use custom HTMLElement node when provided", () => {
+            const customElement = document.createElement("div");
+            Object.defineProperty(customElement, "clientWidth", {
+                writable: true,
+                configurable: true,
+                value: 500,
+            });
+            Object.defineProperty(customElement, "clientHeight", {
+                writable: true,
+                configurable: true,
+                value: 300,
+            });
+
+            const Store = createViewportStore({
+                node: () => customElement,
+            });
+
+            const TestComponent = () => {
+                const viewport = useStore(Store, { keys: ["width", "height"] });
+                return (
+                    <div>
+                        <span data-testid="width">{viewport.width}</span>
+                        <span data-testid="height">{viewport.height}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("500");
+            expect(screen.getByTestId("height")).toHaveTextContent("300");
+        });
+
+        it("should use Window node when node function returns window", () => {
+            Object.defineProperty(window, "innerWidth", {
+                writable: true,
+                configurable: true,
+                value: 1200,
+            });
+            Object.defineProperty(window, "innerHeight", {
+                writable: true,
+                configurable: true,
+                value: 900,
+            });
+
+            const Store = createViewportStore({
+                node: () => window,
+            });
+
+            const TestComponent = () => {
+                const viewport = useStore(Store, { keys: ["width", "height"] });
+                return (
+                    <div>
+                        <span data-testid="width">{viewport.width}</span>
+                        <span data-testid="height">{viewport.height}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1200");
+            expect(screen.getByTestId("height")).toHaveTextContent("900");
+        });
+
+        it("should handle node function returning null", () => {
+            const Store = createViewportStore({
+                node: () => null,
+            });
+
+            const TestComponent = () => {
+                const viewport = useStore(Store, { keys: ["width", "height", "mounted"] });
+                return (
+                    <div>
+                        <span data-testid="width">{String(viewport.width)}</span>
+                        <span data-testid="height">{String(viewport.height)}</span>
+                        <span data-testid="mounted">{String(viewport.mounted)}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("null");
+            expect(screen.getByTestId("height")).toHaveTextContent("null");
+            expect(screen.getByTestId("mounted")).toHaveTextContent("true");
+        });
+
+        it("should handle node option set to null", () => {
+            const Store = createViewportStore({
+                node: null,
+            });
+
+            const TestComponent = () => {
+                const viewport = useStore(Store, { keys: ["width", "height"] });
+                return (
+                    <div>
+                        <span data-testid="width">{String(viewport.width)}</span>
+                        <span data-testid="height">{String(viewport.height)}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("null");
+            expect(screen.getByTestId("height")).toHaveTextContent("null");
+        });
+
+        it("should add event listener to custom node on mount", () => {
+            const customElement = document.createElement("div");
+            Object.defineProperty(customElement, "clientWidth", {
+                writable: true,
+                configurable: true,
+                value: 500,
+            });
+
+            const addEventListenerSpy = jest.spyOn(customElement, "addEventListener");
+            const removeEventListenerSpy = jest.spyOn(customElement, "removeEventListener");
+
+            const Store = createViewportStore({
+                node: () => customElement,
+            });
+
+            const TestComponent = () => {
+                const viewport = useStore(Store, { keys: ["width"] });
+                return <span data-testid="width">{viewport.width}</span>;
+            };
+
+            const { unmount } = render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(addEventListenerSpy).toHaveBeenCalledWith("resize", expect.any(Function));
+
+            unmount();
+
+            expect(removeEventListenerSpy).toHaveBeenCalledWith("resize", expect.any(Function));
+
+            addEventListenerSpy.mockRestore();
+            removeEventListenerSpy.mockRestore();
+        });
+    });
 });

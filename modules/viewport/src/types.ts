@@ -29,6 +29,7 @@ export interface ViewportStoreType<
               [Key in keyof BreakpointHeightOptions]: Option<Exclude<BreakpointHeightOptions, undefined>, Key>;
           };
     mounted: boolean;
+    node: HTMLElement | Window | null | undefined;
 }
 
 export type ViewportEnabled<

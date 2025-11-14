@@ -1230,13 +1230,14 @@ describe("viewport hooks", () => {
     });
 
     describe("useViewportStorage", () => {
-        it("should return store, listen, and unlisten functions", () => {
+        it("should return store, registerNode, listen, and unlisten functions", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
-                const [store, listen, unlisten] = useViewportStorage(Store);
+                const [store, registerNode, listen, unlisten] = useViewportStorage(Store);
                 return (
                     <div>
                         <span data-testid="width">{String(store.width)}</span>
+                        <span data-testid="has-register-node">{String(typeof registerNode === "function")}</span>
                         <span data-testid="has-listen">{String(typeof listen === "function")}</span>
                         <span data-testid="has-unlisten">{String(typeof unlisten === "function")}</span>
                     </div>
@@ -1250,8 +1251,158 @@ describe("viewport hooks", () => {
             );
 
             expect(screen.getByTestId("width")).toHaveTextContent("1024");
+            expect(screen.getByTestId("has-register-node")).toHaveTextContent("true");
             expect(screen.getByTestId("has-listen")).toHaveTextContent("true");
             expect(screen.getByTestId("has-unlisten")).toHaveTextContent("true");
+        });
+
+        it("should update dimensions when registered node changes size", () => {
+            const Store = createViewportStore();
+
+            const TestComponent = () => {
+                const [, registerNode] = useViewportStorage(Store);
+                const width = useViewportWidth(Store);
+                const height = useViewportHeight(Store);
+
+                return (
+                    <div
+                        data-testid="container"
+                        ref={(node) => {
+                            jest.spyOn(node!, "clientHeight", "get").mockImplementation(() => 400);
+                            jest.spyOn(node!, "clientWidth", "get").mockImplementation(() => 600);
+                            return registerNode(node);
+                        }}
+                        style={{ width: 600, height: 400 }}
+                    >
+                        <span data-testid="width">{String(width)}</span>
+                        <span data-testid="height">{String(height)}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("600");
+            expect(screen.getByTestId("height")).toHaveTextContent("400");
+        });
+
+        it("should register Window node and use window dimensions", () => {
+            Object.defineProperty(window, "innerWidth", {
+                writable: true,
+                configurable: true,
+                value: 1400,
+            });
+            Object.defineProperty(window, "innerHeight", {
+                writable: true,
+                configurable: true,
+                value: 1000,
+            });
+
+            const Store = createViewportStore({ node: null });
+            const TestComponent = () => {
+                const [store, registerNode] = useViewportStorage(Store);
+                React.useMemo(() => {
+                    registerNode(window);
+                }, []);
+
+                return (
+                    <div>
+                        <span data-testid="width">{String(store.width)}</span>
+                        <span data-testid="height">{String(store.height)}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("1400");
+            expect(screen.getByTestId("height")).toHaveTextContent("1000");
+        });
+
+        it("should handle registering null node", () => {
+            const Store = createViewportStore();
+            const TestComponent = () => {
+                const [store, registerNode] = useViewportStorage(Store);
+                React.useMemo(() => {
+                    registerNode(null);
+                }, []);
+
+                return (
+                    <div>
+                        <span data-testid="width">{String(store.width)}</span>
+                        <span data-testid="height">{String(store.height)}</span>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("width")).toHaveTextContent("null");
+            expect(screen.getByTestId("height")).toHaveTextContent("null");
+        });
+
+        it("should remove event listener from previous node when switching nodes", () => {
+            const Store = createViewportStore({ node: null });
+            const customElement1 = document.createElement("div");
+            const customElement2 = document.createElement("div");
+
+            const addEventListenerSpy1 = jest.spyOn(customElement1, "addEventListener");
+            const removeEventListenerSpy1 = jest.spyOn(customElement1, "removeEventListener");
+            const addEventListenerSpy2 = jest.spyOn(customElement2, "addEventListener");
+
+            const TestComponent = () => {
+                const [store, registerNode] = useViewportStorage(Store);
+                const [currentNode, setCurrentNode] = React.useState(customElement1);
+
+                React.useEffect(() => {
+                    registerNode(currentNode);
+                }, [registerNode, currentNode]);
+
+                return (
+                    <div>
+                        <span data-testid="width">{String(store.width)}</span>
+                        <button
+                            data-testid="switch-node"
+                            onClick={() => {
+                                setCurrentNode(customElement2);
+                            }}
+                        >
+                            Switch
+                        </button>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(addEventListenerSpy1).toHaveBeenCalledWith("resize", expect.any(Function));
+
+            act(() => {
+                screen.getByTestId("switch-node").click();
+            });
+
+            expect(removeEventListenerSpy1).toHaveBeenCalledWith("resize", expect.any(Function));
+            expect(addEventListenerSpy2).toHaveBeenCalledWith("resize", expect.any(Function));
+
+            addEventListenerSpy1.mockRestore();
+            removeEventListenerSpy1.mockRestore();
+            addEventListenerSpy2.mockRestore();
         });
     });
 });
