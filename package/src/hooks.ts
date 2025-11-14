@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useCallback, useContext, useMemo, useRef, useSyncExternalStore } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, ListenOptions } from "./types";
 
@@ -39,7 +39,7 @@ export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstan
  * @param options - The options for the store subscription
  * @param options.keys - The keys to subscribe to
  * @param options.mutation - The mutation function to apply to the subscribed state, if provided, the hook will return the result of the mutation function
- * @param options.enabled - The condition to subscribe to the store. The hook will only subscribe to the store if the condition is true
+ * @param options.enabled - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the hook will automatically resubscribe.
  * @returns The subscribed store state
  * @example
  * const store = useStore(Store);
@@ -51,7 +51,7 @@ export function useStore<
     ResultType = unknown,
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
-    instance: Pick<StoreInstance<Store>, "_context">,
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">,
     options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] },
 ): ResultType;
 export function useStore<
@@ -59,7 +59,7 @@ export function useStore<
     ResultType = unknown,
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
-    instance: Pick<StoreInstance<Store>, "_context">,
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">,
     options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] },
 ): Pick<Store, Keys[number]>;
 export function useStore<
@@ -67,21 +67,35 @@ export function useStore<
     ResultType = unknown,
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
-    instance: Pick<StoreInstance<Store>, "_context">,
+    instance: Pick<StoreInstance<Store>, "_context" | "_initial">,
     {
         keys,
         mutation,
-        enabled,
+        enabled = "always",
     }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] } = {},
 ): ResultType {
     const [store, , listen] = useStoreReducer<Store>(instance);
+    const mounted = useRef(false);
+    const internalListen = useRef<(() => void) | undefined>(undefined);
     const storeKeys = useMemo(() => keys || (Object.keys(store) as unknown as Keys), [keys]);
-    const prevStore = useRef<Store | undefined>(
-        Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store,
+    const prevStore = useRef<Store>(
+        Object.fromEntries(storeKeys.map((key) => [key, instance._initial[key as keyof Store]])) as Store,
     );
-    const prevMutatedStore = useRef<ResultType | undefined>(mutation ? mutation(store) : undefined);
+    const prevMutatedStore = useRef<ResultType | undefined>(
+        mutation ? mutation(prevStore.current as Store) : undefined,
+    );
 
     const getSnapshot = useCallback(() => {
+        let disabled = false;
+        if (enabled === "always") disabled = false;
+        else if (enabled === "after-hydration") disabled = !mounted.current;
+        else if (typeof enabled === "function") disabled = !enabled(store);
+        else if (enabled === "never") disabled = true;
+
+        if (disabled) {
+            if (mutation) return prevMutatedStore.current;
+            return prevStore.current;
+        }
         const newStore = Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store;
 
         const isStoreEqual = Object.entries(newStore).every(
@@ -108,13 +122,24 @@ export function useStore<
             const unlistens = storeKeys.map((key) =>
                 listen<Store[typeof key], typeof key>(key, onStoreChange, { enabled }),
             );
+            internalListen.current = onStoreChange;
 
             return () => {
                 unlistens.forEach((unlisten) => unlisten());
+                internalListen.current = undefined;
             };
         },
         [storeKeys, enabled],
     );
+
+    // We listen to the mount state at the component level to avoid prematurely updating new components,
+    // especially for PPR or suspense
+    useEffect(() => {
+        if (!mounted.current) {
+            mounted.current = true;
+            internalListen.current?.();
+        }
+    }, [enabled === "after-hydration"]);
 
     const data = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     return data as ResultType;

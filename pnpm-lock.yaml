@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  contection-viewport>contection: workspace:*
+
 importers:
 
   .:
@@ -37,8 +40,8 @@ importers:
         specifier: 19.2.2
         version: 19.2.2
       contection:
-        specifier: 1.4.2
-        version: 1.4.2(react@19.2.0)
+        specifier: workspace:*
+        version: link:../../package
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1405,11 +1408,6 @@ packages:
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
-
-  contection@1.4.2:
-    resolution: {integrity: sha512-/fpvoWNzLdpKtc0LcLEXZN6DXW9/3DFpNarZZvnjo+My6uE9HGAfgVmVW2u3B4fUdeIlDLhaXzMH5vnT0CitQA==}
-    peerDependencies:
-      react: '>= 19.0.0'
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -4186,10 +4184,6 @@ snapshots:
   color-name@1.1.4: {}
 
   concat-map@0.0.1: {}
-
-  contection@1.4.2(react@19.2.0):
-    dependencies:
-      react: 19.2.0
 
   convert-source-map@2.0.0: {}
 

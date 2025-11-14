@@ -1,5 +1,5 @@
 /**
- * Type tests for Contection Viewport
+ * Type tests for contection-viewport
  * These tests verify TypeScript type safety and inference for viewport functionality.
  * Run with: pnpm test:types
  */
@@ -22,20 +22,13 @@ import {
 // Test 1: createViewportStore with no options (default breakpoints)
 function testCreateViewportStoreDefault() {
     const Store = createViewportStore();
-
-    // Should have default width breakpoints
     const width: number | null = Store._initial.width;
     const height: number | null = Store._initial.height;
     const mounted: boolean = Store._initial.mounted;
 
-    // Should have default widthOptions
     const defaultBreakpoint = Store._initial.widthOptions.default;
     const current: "mobile" | "tablet" | "desktop" | null = defaultBreakpoint.current;
     const lowerBreakpoints: ("mobile" | "tablet" | "desktop")[] | null = defaultBreakpoint.lowerBreakpoints;
-
-    // Should not have heightOptions when not provided
-    // Note: heightOptions is typed as 'never' when height is undefined, so accessing it would cause a type error
-    // This is tested implicitly by TypeScript's type system
 }
 
 // Test 2: createViewportStore with custom width breakpoints
@@ -55,7 +48,6 @@ function testCreateViewportStoreWithWidth() {
         },
     });
 
-    // Should have correct width options
     const baseBreakpoint = Store._initial.widthOptions.base;
     const baseCurrent: "mobile" | "tablet" | "desktop" | null = baseBreakpoint.current;
     const baseLower: ("mobile" | "tablet" | "desktop")[] | null = baseBreakpoint.lowerBreakpoints;
@@ -64,12 +56,8 @@ function testCreateViewportStoreWithWidth() {
     const customCurrent: "small" | "medium" | "large" | null = customBreakpoint.current;
     const customLower: ("small" | "medium" | "large")[] | null = customBreakpoint.lowerBreakpoints;
 
-    // Should not have default when custom width is provided
     // @ts-expect-error - default should not exist when custom width is provided
     const defaultOpt = Store._initial.widthOptions.default;
-
-    // Should not have heightOptions
-    // Note: heightOptions is typed as 'never' when height is undefined
 }
 
 // Test 3: createViewportStore with height breakpoints
@@ -84,10 +72,8 @@ function testCreateViewportStoreWithHeight() {
         },
     });
 
-    // Should have default widthOptions
     const defaultBreakpoint = Store._initial.widthOptions.default;
 
-    // Should have heightOptions
     const heightBase = Store._initial.heightOptions.base;
     const heightCurrent: "small" | "medium" | "large" | null = heightBase.current;
     const heightLower: ("small" | "medium" | "large")[] | null = heightBase.lowerBreakpoints;
@@ -110,7 +96,6 @@ function testCreateViewportStoreWithBoth() {
         },
     });
 
-    // Should have both width and height options
     const widthBase = Store._initial.widthOptions.base;
     const heightBase = Store._initial.heightOptions.base;
 
@@ -124,7 +109,6 @@ function testCreateViewportStoreWithThrottle() {
         throttleMs: 100,
     });
 
-    // Should work with throttle option
     const width: number | null = Store._initial.width;
 }
 
@@ -142,7 +126,6 @@ function testUseViewportWidth() {
 
     function Component() {
         const width = useViewportWidth(Store);
-        // Should return number | null
         const widthType: number | null = width;
         // @ts-expect-error - should not be string
         const invalid: string = width;
@@ -162,9 +145,7 @@ function testUseViewportWidthCompare() {
     });
 
     function Component() {
-        // Should accept valid breakpoint name
         const result1 = useViewportWidthCompare(Store, { compareWith: "mobile", type: "base", mode: ["equal"] });
-        // Result should be boolean | null
         if (result1 !== null) {
             const isTrue: boolean = result1;
         }
@@ -174,7 +155,6 @@ function testUseViewportWidthCompare() {
             type: "base",
             mode: ["greater", "less"],
         });
-        // Result should be boolean | null
         if (result2 !== null) {
             const isTrue: boolean = result2;
         }
@@ -185,19 +165,16 @@ function testUseViewportWidthCompare() {
         // @ts-expect-error - should not accept invalid type
         const invalid2 = useViewportWidthCompare(Store, { compareWith: "mobile", type: "invalid", mode: ["equal"] });
 
-        // Should work with optional type (defaults to first key)
         const result3 = useViewportWidthCompare(Store, { compareWith: "mobile", mode: ["equal"] });
         if (result3 !== null) {
             const isTrue: boolean = result3;
         }
 
-        // Should work with optional mode (defaults to ["equal"])
         const result4 = useViewportWidthCompare(Store, { compareWith: "tablet", type: "base" });
         if (result4 !== null) {
             const isTrue: boolean = result4;
         }
 
-        // Should work with both optional parameters
         const result5 = useViewportWidthCompare(Store, { compareWith: "desktop" });
         if (result5 !== null) {
             const isTrue: boolean = result5;
@@ -222,12 +199,10 @@ function testUseViewportWidthBreakpoint() {
     });
 
     function Component() {
-        // Should return correct option type for base
         const baseBreakpoint = useViewportWidthBreakpoint(Store, { type: "base" });
         const baseCurrent: "mobile" | "tablet" | "desktop" | null = baseBreakpoint.current;
         const baseLower: ("mobile" | "tablet" | "desktop")[] | null = baseBreakpoint.lowerBreakpoints;
 
-        // Should return correct option type for custom
         const customBreakpoint = useViewportWidthBreakpoint(Store, { type: "custom" });
         const customCurrent: "small" | "large" | null = customBreakpoint.current;
         const customLower: ("small" | "large")[] | null = customBreakpoint.lowerBreakpoints;
@@ -251,14 +226,10 @@ function testUseViewportHeight() {
 
     function Component() {
         const height = useViewportHeight(Store);
-        // Should return number | null
         const heightType: number | null = height;
         // @ts-expect-error - should not be string
         const invalid: string = height;
     }
-
-    // Note: useViewportHeight requires height options, so it won't work with stores without height
-    // This is tested implicitly by TypeScript's type system
 }
 
 // Test 10: useViewportHeightCompare
@@ -274,9 +245,7 @@ function testUseViewportHeightCompare() {
     });
 
     function Component() {
-        // Should accept valid breakpoint name
         const result1 = useViewportHeightCompare(Store, { compareWith: "small", type: "base", mode: ["equal"] });
-        // Result type is inferred from the hook implementation
         const result1Value = result1;
 
         const result2 = useViewportHeightCompare(Store, {
@@ -284,7 +253,6 @@ function testUseViewportHeightCompare() {
             type: "base",
             mode: ["greater", "less"],
         });
-        // Result type is inferred from the hook implementation
         const result2Value = result2;
 
         // @ts-expect-error - should not accept invalid breakpoint name
@@ -293,27 +261,21 @@ function testUseViewportHeightCompare() {
         // @ts-expect-error - should not accept invalid type
         const invalid2 = useViewportHeightCompare(Store, { compareWith: "small", type: "invalid", mode: ["equal"] });
 
-        // Should work with optional type (defaults to first key)
         const result3 = useViewportHeightCompare(Store, { compareWith: "small", mode: ["equal"] });
         if (result3 !== null) {
             const isTrue: boolean = result3;
         }
 
-        // Should work with optional mode (defaults to ["equal"])
         const result4 = useViewportHeightCompare(Store, { compareWith: "medium", type: "base" });
         if (result4 !== null) {
             const isTrue: boolean = result4;
         }
 
-        // Should work with both optional parameters
         const result5 = useViewportHeightCompare(Store, { compareWith: "large" });
         if (result5 !== null) {
             const isTrue: boolean = result5;
         }
     }
-
-    // Note: useViewportHeightCompare requires height options
-    // TypeScript will enforce this constraint
 }
 
 // Test 11: useViewportHeightBreakpoint
@@ -333,12 +295,10 @@ function testUseViewportHeightBreakpoint() {
     });
 
     function Component() {
-        // Should return correct option type for base
         const baseBreakpoint = useViewportHeightBreakpoint(Store, { type: "base" });
         const baseCurrent: "small" | "medium" | "large" | null = baseBreakpoint.current;
         const baseLower: ("small" | "medium" | "large")[] | null = baseBreakpoint.lowerBreakpoints;
 
-        // Should return correct option type for custom
         const customBreakpoint = useViewportHeightBreakpoint(Store, { type: "custom" });
         const customCurrent: "tiny" | "huge" | null = customBreakpoint.current;
         const customLower: ("tiny" | "huge")[] | null = customBreakpoint.lowerBreakpoints;
@@ -346,9 +306,6 @@ function testUseViewportHeightBreakpoint() {
         // @ts-expect-error - should not accept invalid type
         const invalid = useViewportHeightBreakpoint(Store, { type: "invalid" });
     }
-
-    // Note: useViewportHeightBreakpoint requires height options
-    // TypeScript will enforce this constraint
 }
 
 // Test 12: useViewportStorage
@@ -371,14 +328,12 @@ function testUseViewportStorage() {
     function Component() {
         const [store, listen, unlisten] = useViewportStorage(Store);
 
-        // Store should have correct type
         const width: number | null = store.width;
         const height: number | null = store.height;
         const mounted: boolean = store.mounted;
         const widthBase = store.widthOptions.base;
         const heightBase = store.heightOptions.base;
 
-        // Listen should accept valid keys
         const unsubscribe1 = listen("width", (value: number | null) => {});
         const unsubscribe2 = listen("height", (value: number | null) => {});
         const unsubscribe3 = listen("mounted", (value: boolean) => {});
@@ -386,7 +341,6 @@ function testUseViewportStorage() {
         // @ts-expect-error - should not accept invalid key
         const invalid1 = listen("invalid", () => {});
 
-        // Unlisten should accept valid keys
         unlisten("width", () => {});
         unlisten("height", () => {});
         unlisten("mounted", () => {});
@@ -415,7 +369,6 @@ function testUseViewport() {
     });
 
     function Component() {
-        // Basic usage - should return full store state
         const store = useViewport(Store);
         const width: number | null = store.width;
         const height: number | null = store.height;
@@ -423,7 +376,6 @@ function testUseViewport() {
         const widthBase = store.widthOptions.base;
         const heightBase = store.heightOptions.base;
 
-        // Usage with keys option - should return only selected keys
         const partial = useViewport(Store, { keys: ["width", "mounted"] });
         const partialWidth: number | null = partial.width;
         const partialMounted: boolean = partial.mounted;
@@ -443,12 +395,10 @@ function testStoreProviderConsumer() {
         },
     });
 
-    // Provider should work
     <Store.Provider>
         <div>Test</div>
     </Store.Provider>;
 
-    // Consumer should work with correct types
     <Store.Consumer>
         {(data) => {
             const width: number | null = data.width;
@@ -485,7 +435,6 @@ function testTypeInferenceWithConst() {
         width: breakpoints,
     });
 
-    // Types should be inferred correctly
     const baseCurrent: "mobile" | "tablet" | "desktop" | null = Store._initial.widthOptions.base.current;
 }
 
@@ -515,12 +464,10 @@ function testMultipleBreakpointGroups() {
         },
     });
 
-    // Should have all breakpoint groups
     const responsive = Store._initial.widthOptions.responsive;
     const semantic = Store._initial.widthOptions.semantic;
     const vertical = Store._initial.heightOptions.vertical;
 
-    // Types should be correct for each group
     const responsiveCurrent: "xs" | "sm" | "md" | "lg" | "xl" | null = responsive.current;
     const semanticCurrent: "mobile" | "tablet" | "desktop" | null = semantic.current;
     const verticalCurrent: "short" | "medium" | "tall" | null = vertical.current;
@@ -530,17 +477,10 @@ function testMultipleBreakpointGroups() {
 function testStoreInstanceStructure() {
     const Store = createViewportStore();
 
-    // Should have _initial
     const initial = Store._initial;
     const width: number | null = initial.width;
-
-    // Should have _context
     const context = Store._context;
-
-    // Should be callable as Provider
     const Provider = Store.Provider;
-
-    // Should have Consumer
     const Consumer = Store.Consumer;
 }
 
@@ -554,11 +494,41 @@ function testSingleBreakpoint() {
         },
     });
 
-    // Should handle single breakpoint
     const single = Store._initial.widthOptions.single;
     const current: "only" | null = single.current;
     const lower: "only"[] | null = single.lowerBreakpoints;
 }
 
-// All tests should compile without errors if types are correct
+// Test 19: enabled option
+function testEnabledOption() {
+    const Store = createViewportStore({
+        width: {
+            base: {
+                mobile: 0,
+                tablet: 600,
+                desktop: 1024,
+            },
+        },
+    });
+
+    function Component() {
+        const store1 = useViewport(Store, { enabled: "always" });
+        const store2 = useViewport(Store, { enabled: "never" });
+        const store3String = useViewport(Store, {
+            enabled: "after-hydration",
+            mutation: (store) => String(store.width),
+        });
+        const store4 = useViewport(Store, { enabled: (store) => store.mounted });
+        const width1: number | null = store1.width;
+        const width2: number | null = store2.width;
+        const width3: string = store3String;
+        const width4: number | null = store4.width;
+
+        const width5 = useViewportWidth(Store, { enabled: "always" });
+        const width6 = useViewportWidth(Store, { enabled: (store) => store.mounted });
+        const widthType5: number | null = width5;
+        const widthType6: number | null = width6;
+    }
+}
+
 export {};

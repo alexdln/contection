@@ -9,9 +9,9 @@ module.exports = {
   moduleNameMapper: {
     "@src/(.*)$": "<rootDir>/src/$1",
     "^contection$": "<rootDir>/../package/src/index.tsx",
-    "^contection/(.*)$": "<rootDir>/../package/src/$1",
+    "^contection/(.*)$": "<rootDir>/../package/$1",
     "^contection-viewport$": "<rootDir>/../modules/viewport/src/index.tsx",
-    "^contection-viewport/(.*)$": "<rootDir>/../modules/viewport/src/$1",
+    "^contection-viewport/(.*)$": "<rootDir>/../modules/viewport/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/src/setup/jest.setup.ts"],
   collectCoverageFrom: [

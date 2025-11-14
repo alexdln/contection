@@ -4,7 +4,7 @@ type NonFunction<T> = T extends Function ? never : T extends object ? T : never;
 export type StoreKey = string | number | symbol;
 
 export type ListenOptions<Store extends BaseStore = BaseStore> = {
-    enabled?: boolean | ((store: Store) => boolean);
+    enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean);
 };
 
 export type InternalStoreType<Store extends BaseStore = BaseStore> = {
@@ -72,12 +72,12 @@ export type GlobalStore<Store extends BaseStore> = {
      * Subscribes to changes for a specific store key
      * @template DataType - The type of the value for the listened key
      * @template Key - The listened key in the store
-     * @param options.enabled - The condition to subscribe to the store. The hook will only subscribe to the store if the condition is true
+     * @param options.enabled - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the subscription will automatically resubscribe.
      * @returns A function to unsubscribe from the listener
      * @example
      * const unlisten = listen("count", (value) => {
      *     console.log(value);
-     * }, { enabled: true });
+     * }, { enabled: "always" });
      */
     listen: <DataType extends Store[Key], Key extends keyof Store>(
         key: Key,
