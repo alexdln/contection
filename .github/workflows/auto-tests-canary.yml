@@ -23,8 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm --filter contection-tests --filter contection add react@canary react-dom@canary --no-lockfile
-          pnpm --filter contection-tests --filter contection add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
+          pnpm --filter contection-tests --filter contection --filter "./modules/*" add react@canary react-dom@canary --no-lockfile
+          pnpm --filter contection-tests --filter contection --filter "./modules/*" add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
 
       - name: Build package
         run: |
