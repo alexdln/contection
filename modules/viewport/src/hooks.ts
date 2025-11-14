@@ -9,7 +9,7 @@ export const useViewportWidth = <
     ViewportWidthOptions extends ViewportBreakpoints,
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     { enabled }: { enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
@@ -23,7 +23,7 @@ export const useViewportWidthCompare = <
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
     Type extends keyof ViewportWidthOptions,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     {
         compareWith,
         type,
@@ -65,7 +65,7 @@ export const useViewportWidthBreakpoint = <
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
     Type extends keyof ViewportWidthOptions,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     { type, enabled }: { type?: Type; enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
@@ -85,7 +85,7 @@ export const useViewportHeight = <
     ViewportWidthOptions extends ViewportBreakpoints,
     ViewportHeightOptions extends ViewportBreakpoints | undefined,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     { enabled }: { enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
@@ -100,7 +100,7 @@ export const useViewportHeightCompare = <
     ViewportHeightOptions extends ViewportBreakpoints,
     Type extends keyof ViewportHeightOptions = keyof ViewportHeightOptions,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     {
         compareWith,
         type,
@@ -143,7 +143,7 @@ export const useViewportHeightBreakpoint = <
     ViewportHeightOptions extends ViewportBreakpoints,
     Type extends keyof ViewportHeightOptions,
 >(
-    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
+    ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context" | "_initial">,
     { type, enabled }: { type?: Type; enabled?: ViewportEnabled<ViewportWidthOptions, ViewportHeightOptions> } = {},
 ) => {
     return useStore(ViewportStore, {
