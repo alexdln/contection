@@ -168,9 +168,16 @@ export const useViewportStorage = <
 >(
     ViewportStore: Pick<StoreInstance<ViewportWidthOptions, ViewportHeightOptions>, "_context">,
 ) => {
-    const [store, , listen, unlisten] = useStoreReducer(ViewportStore);
+    const [store, dispatch, listen, unlisten] = useStoreReducer(ViewportStore);
 
     return useMemo(() => {
-        return [store, listen, unlisten] as const;
+        const registerNode = (node: HTMLElement | Window | null) => {
+            dispatch({ node });
+
+            return () => {
+                dispatch({ node: null });
+            };
+        };
+        return [store, registerNode, listen, unlisten] as const;
     }, []);
 };

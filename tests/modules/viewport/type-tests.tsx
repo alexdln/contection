@@ -326,7 +326,7 @@ function testUseViewportStorage() {
     });
 
     function Component() {
-        const [store, listen, unlisten] = useViewportStorage(Store);
+        const [store, registerNode, listen, unlisten] = useViewportStorage(Store);
 
         const width: number | null = store.width;
         const height: number | null = store.height;
@@ -338,6 +338,11 @@ function testUseViewportStorage() {
         const unsubscribe2 = listen("height", (value: number | null) => {});
         const unsubscribe3 = listen("mounted", (value: boolean) => {});
 
+        const cleanup = registerNode(document.body);
+        cleanup();
+
+        // @ts-expect-error - should not accept anything other than HTMLElement or Window
+        registerNode(document);
         // @ts-expect-error - should not accept invalid key
         const invalid1 = listen("invalid", () => {});
 

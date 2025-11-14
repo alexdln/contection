@@ -4,13 +4,18 @@ import React from "react";
 
 import { type DetectViewportType, type ViewportStoreType, type ViewportBreakpoints } from "./types";
 import { defaultViewportWidthBreakpoint } from "./constants";
-import { calculateCurrentBreakpoint, formatOptions, throttle } from "./utils";
+import { calculateCurrentBreakpoint, defaultGetNode, formatOptions, throttle } from "./utils";
 
 export function createViewportStore<
     BreakpointWidthOptions extends ViewportBreakpoints | undefined = undefined,
     BreakpointHeightOptions extends ViewportBreakpoints | undefined = undefined,
->(settings?: { width?: BreakpointWidthOptions; height?: BreakpointHeightOptions; throttleMs?: number }) {
-    const { width, height, throttleMs } = settings ?? {};
+>(settings?: {
+    width?: BreakpointWidthOptions;
+    height?: BreakpointHeightOptions;
+    throttleMs?: number;
+    node?: (() => HTMLElement | Window | null) | null;
+}) {
+    const { width, height, throttleMs, node: getNode = defaultGetNode } = settings ?? {};
     const { formattedOptions: formattedWidthOptions, currentOptions: widthOptions } = formatOptions(
         width ?? { default: defaultViewportWidthBreakpoint },
     );
@@ -30,13 +35,32 @@ export function createViewportStore<
             widthOptions,
             heightOptions,
             mounted: false,
+            node: undefined,
         },
         {
             lifecycleHooks: {
-                storeWillMount: (store, dispatch) => {
+                storeWillMount: (store, dispatch, listen) => {
+                    let node: HTMLElement | Window | null = null;
+                    if (store.node) {
+                        node = store.node;
+                    } else if (typeof getNode === "function") {
+                        node = getNode();
+                    }
+
                     const onSizeChange = () => {
-                        const nodeWidth = window.innerWidth;
-                        const nodeHeight = window.innerHeight;
+                        if (!node) {
+                            return dispatch({
+                                width: null,
+                                height: null,
+                                widthOptions,
+                                heightOptions,
+                                mounted: false,
+                                node: undefined,
+                            });
+                        }
+
+                        const nodeWidth = node instanceof Window ? node.innerWidth : node.clientWidth;
+                        const nodeHeight = node instanceof Window ? node.innerHeight : node.clientHeight;
                         const dispatchedData: any = {};
                         if (store.width !== nodeWidth) {
                             dispatchedData.width = nodeWidth;
@@ -63,11 +87,20 @@ export function createViewportStore<
                         dispatch(dispatchedData);
                     };
                     const onSizeChangeThrottled = throttleMs ? throttle(onSizeChange, throttleMs) : onSizeChange;
-                    window.addEventListener("resize", onSizeChangeThrottled);
+
+                    node?.addEventListener("resize", onSizeChangeThrottled);
                     onSizeChangeThrottled();
 
+                    const unlisten = listen("node", (newNode) => {
+                        node?.removeEventListener("resize", onSizeChangeThrottled);
+                        node = newNode || null;
+                        node?.addEventListener("resize", onSizeChangeThrottled);
+                        onSizeChangeThrottled();
+                    });
+
                     return () => {
-                        window.removeEventListener("resize", onSizeChangeThrottled);
+                        unlisten();
+                        node?.removeEventListener("resize", onSizeChangeThrottled);
                     };
                 },
                 storeDidMount: (_data, dispatch) => {

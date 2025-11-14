@@ -78,3 +78,5 @@ export const throttle = <Callback extends (...args: unknown[]) => unknown>(
         }
     };
 };
+
+export const defaultGetNode = () => window;

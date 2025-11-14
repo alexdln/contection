@@ -9,6 +9,7 @@ A performance-based viewport management module built on top of [contection](http
 - **Selective Re-renders** - Components re-render only when their subscribed field (size, breakpoint, comparison result, etc.) actually change
 - **Memoization** - Breakpoint values are memoized to prevent unnecessary re-renders when breakpoint state remains unchanged
 - **Throttling Support** - Configurable throttling for resize events to optimize performance even more
+- **Element Monitoring** - Monitor any DOM element or the window, with support for multiple independent Providers
 - **TypeScript Support** - Full type safety with type inference for breakpoint keys and comparisons
 
 ## Installation
@@ -264,6 +265,66 @@ const breakpoint = useViewportWidthBreakpoint(ViewportStore, {
 //   (e.g., ["mobile", "tablet"] when current is "desktop")
 ```
 
+### Node Registration
+
+By default, `contection-viewport` monitors the `window` object for resize events. However, you can create a separate Provider instance to monitor any specific DOM element instead. This is useful when you need to track the size of a particular container, sidebar, or any other element in your application.
+
+To subscribe to a specific element:
+
+1. **Create a viewport store with `node: null`** - This prevents the store from automatically using the window
+2. **Register the desired node** - Use `registerNode` from `useViewportStorage` to register any `HTMLElement` or `Window` object
+
+**Example: Registering via ref**
+
+```tsx
+import { createViewportStore, useViewportStorage } from "contection-viewport";
+
+const ContainerStore = createViewportStore({
+  node: null,
+});
+
+function ContainerComponent() {
+  const [, registerNode] = useViewportStorage(ContainerStore);
+
+  return (
+    <ContainerStore>
+      <div
+        ref={(node) => {
+          if (node) return registerNode(node);
+        }}
+      >
+        {/* ... */}
+      </div>
+    </ContainerStore>
+  );
+}
+```
+
+**Example: Registering via useEffect with DOM APIs**
+
+```tsx
+import { createViewportStore, useViewportStorage } from "contection-viewport";
+import { useEffect } from "react";
+
+const SidebarStore = createViewportStore({
+  node: null,
+});
+
+function SidebarTracker() {
+  const [, registerNode] = useViewportStorage(SidebarStore);
+
+  useEffect(() => {
+    const sidebarElement = document.getElementById("sidebar");
+    if (sidebarElement) {
+      const cleanup = registerNode(sidebarElement);
+      return cleanup; // Cleanup sets node to null
+    }
+  }, [registerNode]);
+
+  return null;
+}
+```
+
 ### Imperative Subscriptions
 
 Use `useViewportStorage` for imperative subscriptions outside React's render cycle:
@@ -273,7 +334,7 @@ import { useViewportStorage } from "contection-viewport";
 import { useEffect } from "react";
 
 function AnalyticsTracker() {
-  const [store, listen, unlisten] = useViewportStorage(ViewportStore);
+  const [store, , listen, unlisten] = useViewportStorage(ViewportStore);
 
   useEffect(() => {
     const unlistenBreakpoint = listen("widthOptions", (widthOptions) => {
@@ -302,6 +363,7 @@ Creates a new viewport store instance with Provider and Consumer components.
   - `width?: ViewportBreakpoints` - Width breakpoint definitions
   - `height?: ViewportBreakpoints` - Height breakpoint definitions (optional)
   - `throttleMs?: number` - Throttle delay in milliseconds for resize events (optional)
+  - `node?: (() => HTMLElement | Window | null) | null` - Function that returns the element to monitor, or `null` to disable automatic node selection. Defaults to `() => window`. If set to `null`, you must manually register a node using `registerNode` from `useViewportStorage`.
 
 **Returns:**
 
@@ -322,6 +384,17 @@ const ViewportStore = createViewportStore({
     },
   },
   throttleMs: 100,
+});
+
+// Custom node function: dynamically determines the node
+const DynamicStore = createViewportStore({
+  width: {
+    default: {
+      mobile: 0,
+      tablet: 600,
+    },
+  },
+  node: () => document.body,
 });
 ```
 
@@ -464,13 +537,14 @@ _Re-renders:_ Only when comparison result changes
 
 ### `useViewportStorage(ViewportStore)`
 
-Hook that returns store state and imperative subscription functions.
+Hook that returns store state, node registration function, and imperative subscription functions.
 
 _Re-renders:_ never
 
-**Returns:** `[store, listen, unlisten]` tuple where:
+**Returns:** `[store, registerNode, listen, unlisten]` tuple where:
 
 - `store` - Store state reference
+- `registerNode` - Function to register a DOM element or Window to monitor. Accepts `HTMLElement | Window | null` and returns a cleanup function that sets the node to `null`
 - `listen` - Function to subscribe to store key changes
 - `unlisten` - Function to unsubscribe from store key changes
 
