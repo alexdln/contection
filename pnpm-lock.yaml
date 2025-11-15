@@ -6,6 +6,7 @@ settings:
 
 overrides:
   contection-viewport>contection: workspace:*
+  contection-top-layer>contection: workspace:*
 
 importers:
 
@@ -29,6 +30,22 @@ importers:
       typescript-eslint:
         specifier: 8.46.3
         version: 8.46.3(eslint@9.39.1)(typescript@5.9.3)
+
+  modules/top-layer:
+    dependencies:
+      react:
+        specifier: '>= 19.0.0'
+        version: 19.2.0
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
+      contection:
+        specifier: workspace:*
+        version: link:../../package
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
 
   modules/viewport:
     dependencies:
