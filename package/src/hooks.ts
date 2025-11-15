@@ -81,9 +81,7 @@ export function useStore<
     const prevStore = useRef<Store>(
         Object.fromEntries(storeKeys.map((key) => [key, instance._initial[key as keyof Store]])) as Store,
     );
-    const prevMutatedStore = useRef<ResultType | undefined>(
-        mutation ? mutation(prevStore.current as Store) : undefined,
-    );
+    const prevMutatedStore = useRef<ResultType | undefined>(mutation ? mutation(store as Store) : undefined);
 
     const getSnapshot = useCallback(() => {
         let disabled = false;

@@ -12,6 +12,8 @@ module.exports = {
     "^contection/(.*)$": "<rootDir>/../package/$1",
     "^contection-viewport$": "<rootDir>/../modules/viewport/src/index.tsx",
     "^contection-viewport/(.*)$": "<rootDir>/../modules/viewport/$1",
+    "^contection-top-layer$": "<rootDir>/../modules/top-layer/src/index.tsx",
+    "^contection-top-layer/(.*)$": "<rootDir>/../modules/top-layer/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/src/setup/jest.setup.ts"],
   collectCoverageFrom: [

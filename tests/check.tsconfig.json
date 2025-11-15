@@ -12,7 +12,9 @@
     "paths": {
       "@src/*": ["./src/*"],
       "contection-viewport": ["../modules/viewport/src/index.tsx"],
-      "contection-viewport/*": ["../modules/viewport/*"]
+      "contection-viewport/*": ["../modules/viewport/*"],
+      "contection-top-layer": ["../modules/top-layer/src/index.tsx"],
+      "contection-top-layer/*": ["../modules/top-layer/*"]
     }
   },
   "include": ["**/type-tests.tsx"]
