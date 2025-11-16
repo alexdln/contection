@@ -156,6 +156,101 @@ function GlobalBackdrop() {
 }
 ```
 
+### Blocking Overflow
+
+Block page scrolling when isolated layers are active:
+
+```tsx
+import { useTopLayer } from "contection-top-layer";
+import { useEffect } from "react";
+
+function OverflowBlocker() {
+  const { hasActiveIsolatedLayers } = useTopLayer(TopLayer, {
+    keys: ["hasActiveIsolatedLayers"],
+  });
+
+  useEffect(() => {
+    if (hasActiveIsolatedLayers) {
+      document.documentElement.style.overflow = "hidden";
+      // Or use data attribute for CSS
+      // document.documentElement.dataset.isolatedLayer = "true";
+    } else {
+      document.documentElement.style.overflow = "";
+      // document.documentElement.dataset.isolatedLayer = "";
+    }
+  }, [hasActiveIsolatedLayers]);
+
+  return null;
+}
+```
+
+### Dialog Styling
+
+For dialogs, it's recommended to specify global styles:
+
+```css
+dialog {
+  width: 100%;
+  height: 100%;
+  background: none;
+  max-width: none;
+  max-height: none;
+  border: none;
+  padding: unset;
+}
+```
+
+### Backdrop Management
+
+**Best Practice:** Add a darkening backdrop element globally to the body using `useTopLayer` and checking for `hasActiveIsolatedLayers`. For closed dialogs, create a transparent backdrop within each upper layer or dialog.
+
+```tsx
+// Global backdrop for isolated layers
+function GlobalBackdrop() {
+  const { hasActiveIsolatedLayers } = useTopLayer(TopLayer, {
+    keys: ["hasActiveIsolatedLayers"],
+  });
+
+  if (!hasActiveIsolatedLayers) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        zIndex: 9998,
+        pointerEvents: "auto",
+      }}
+    />
+  );
+}
+
+// Transparent backdrop within dialog/upper layer
+function MyDialog() {
+  const [dialog] = useDialogStatus(ConfirmDialog);
+
+  return (
+    <ConfirmDialog>
+      {dialog.open && (
+        <>
+          {/* Transparent backdrop for closed dialog state */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "transparent",
+              zIndex: -1,
+            }}
+          />
+          <div>{/* Dialog content */}</div>
+        </>
+      )}
+    </ConfirmDialog>
+  );
+}
+```
+
 ### Context-Aware Hooks
 
 Dialog and upper layer hooks support the current element when used deeper in the tree from `UpperLayer` and `Dialog` components. For this, it's enough to pass the `topLayerStore`, but in this case the data will lose its typing. This can be used, for example, for a single close button or components that are repeated from layer to layer.

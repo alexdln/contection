@@ -23,7 +23,7 @@ export const useDialogStatus = <Store extends TopLayerStore, Data>(
     const store = useStore("_instance" in instance ? instance._instance : instance, {
         keys: index ? [index] : [],
         mutation: (store, prevStore, prevMutatedStore) => {
-            if (!index) return { data: undefined, open: false };
+            if (!index || !store[index]) return { data: undefined, open: false };
             if (
                 prevMutatedStore &&
                 (prevMutatedStore as { data: Data; open: boolean }).data === store[index].data &&
@@ -55,7 +55,7 @@ export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFu
     const [origStore, origDispatch] = useStoreReducer("_instance" in instance ? instance._instance : instance);
 
     return useMemo(() => {
-        if (!index)
+        if (!index || !origStore[index])
             return [{ data: undefined as Data, open: false } as { data: Data; open: boolean }, () => {}] as const;
 
         const dialog = {
