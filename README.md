@@ -8,7 +8,8 @@ A state management library that extends React Context API with fine-grained subs
 - **Granular Subscriptions** - Built on `useSyncExternalStore` for efficient, per-key subscription updates
 - **Selective Re-renders** - Subscribe to specific store keys to minimize component re-renders
 - **Computed Values** - Transform and derive state with mutation functions
-- **TypeScript Support** - Full type safety with type inference for store keys and mutations
+- **Type Safety** - Full type safety with type inference for store keys and mutations
+- **Additional Modules** - Extended functionality through specialized modules like [viewport management](https://github.com/alexdln/contection/tree/main/modules/viewport) and [top-layer management](https://github.com/alexdln/contection/tree/main/modules/top-layer)
 
 ## Installation
 
@@ -741,16 +742,9 @@ Component that consumes the store using render props pattern.
 
 A performance-based viewport management module built on top of Contection. Provides efficient screen size tracking with granular subscriptions, memoization, and a single global resize listener.
 
-**Features:**
+### [contection-top-layer](https://github.com/alexdln/contection/tree/main/modules/top-layer)
 
-- Custom width and height breakpoints with multiple breakpoint types
-- Single global resize listener per Provider instance
-- Selective re-renders only when subscribed option change (e.g. breakpoint, width, height, etc.)
-- Memoization to prevent unnecessary re-renders
-
-```bash
-npm install contection-viewport
-```
+A layer management module built on top of Contection. Provides efficient management of dialogs and upper layers with granular subscriptions, type safety, and support for isolated layers.
 
 ## License
 

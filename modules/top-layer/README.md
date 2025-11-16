@@ -7,7 +7,7 @@ A layer management module built on top of [contection](https://github.com/alexdl
 - **HTML Native Dialogs** - Full support for HTML `<dialog>` elements;
 - **Upper Layers** - Manage modals, notifications, tooltips, and other overlay components;
 - **Global Layer Management** - Global layer state for working between elements (backdrops, overflow blocking, etc.);
-- **Type Safety** - Full TypeScript support with type inference for dialog and layer data;
+- **Type Safety** - Full type safety with type inference for dialog and layer data;
 - **Granular Subscriptions** - Built on contection for efficient, selective re-renders;
 - **Context-Aware Hooks** - Hooks automatically detect the current dialog/layer when used within their context.
 
