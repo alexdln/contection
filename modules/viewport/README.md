@@ -10,7 +10,7 @@ A performance-based viewport management module built on top of [contection](http
 - **Memoization** - Breakpoint values are memoized to prevent unnecessary re-renders when breakpoint state remains unchanged
 - **Throttling Support** - Configurable throttling for resize events to optimize performance even more
 - **Element Monitoring** - Monitor any DOM element or the window, with support for multiple independent Providers
-- **TypeScript Support** - Full type safety with type inference for breakpoint keys and comparisons
+- **Type Safety** - Full type safety with type inference for breakpoint keys and comparisons
 
 ## Installation
 
