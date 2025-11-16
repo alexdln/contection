@@ -103,9 +103,9 @@ function testCreateUpperLayer() {
     const upperLayerContext = UpperLayer1._context;
     const upperLayerSymbol = UpperLayer1.$$typeof;
 
-    <UpperLayer1.UpperLayer index={UpperLayer1._index}>
+    <UpperLayer1>
         <div>Upper Layer Content</div>
-    </UpperLayer1.UpperLayer>;
+    </UpperLayer1>;
 
     <UpperLayer1.Consumer>
         {({ data }) => {

@@ -27,7 +27,7 @@ export const useUpperLayerStatus = <Store extends TopLayerStore, Data>(
     const store = useStore("_instance" in instance ? instance._instance : instance, {
         keys: index ? [index] : [],
         mutation: (store, prevStore, prevMutatedStore) => {
-            if (!index || !store[index]) return { data: undefined };
+            if (!index || !store[index]) return { data: "_instance" in instance ? instance._initial : undefined };
             if ((prevMutatedStore as { data: Data })?.data === store[index].data) {
                 return prevMutatedStore as { data: Data };
             }
@@ -51,7 +51,11 @@ export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends N
     const [origStore, origDispatch] = useStoreReducer("_instance" in instance ? instance._instance : instance);
 
     return useMemo(() => {
-        if (!index || !origStore[index]) return [{ data: undefined as Data } as { data: Data }, () => {}] as const;
+        if (!index || !origStore[index])
+            return [
+                { data: "_instance" in instance ? instance._initial : (undefined as Data) } as { data: Data },
+                () => {},
+            ] as const;
 
         const upperLayer = {
             get data() {

@@ -8,7 +8,6 @@ import { UpperLayerContext } from "./contexts";
 
 export interface UpperLayerProps extends React.HTMLAttributes<HTMLDialogElement> {
     children: React.ReactNode;
-    index: string;
 }
 
 export const UpperLayer =

@@ -168,7 +168,7 @@ describe("createUpperLayer", () => {
 
         const TestComponent = () => (
             <TopLayer.Provider>
-                <UpperLayer.UpperLayer index={UpperLayer._index}>
+                <UpperLayer.UpperLayer>
                     <div>Upper Layer Content</div>
                 </UpperLayer.UpperLayer>
             </TopLayer.Provider>
