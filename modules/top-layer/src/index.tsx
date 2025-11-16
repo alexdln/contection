@@ -72,12 +72,12 @@ export const createTopLayer = (options?: Parameters<typeof createStore<TopLayerS
 export const createDialog = <DialogData extends unknown>({
     instance,
     data,
-    isolated,
+    isolated = false,
     checkIsActive = (store) => store.open,
 }: {
     instance: ReturnType<typeof createTopLayer>;
     data: DialogType<DialogData>["data"];
-    isolated: DialogType<DialogData>["isolated"];
+    isolated?: DialogType<DialogData>["isolated"];
     checkIsActive?: DialogType<DialogData>["checkIsActive"];
 }) => {
     const index = instance[CONTECTION_SYMBOL].registerDialog<DialogData>({
@@ -104,12 +104,12 @@ export const createDialog = <DialogData extends unknown>({
 export const createUpperLayer = <UpperLayerData extends unknown>({
     instance,
     data,
-    isolated,
+    isolated = false,
     checkIsActive = (store) => Boolean(store.data),
 }: {
     instance: ReturnType<typeof createTopLayer>;
     data: UpperLayerData;
-    isolated: boolean;
+    isolated?: boolean;
     checkIsActive?: UpperLayerType<UpperLayerData>["checkIsActive"];
 }) => {
     const index = instance[CONTECTION_SYMBOL].registerUpperLayer<UpperLayerData>({
