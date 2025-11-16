@@ -1,3 +1,3 @@
 export type DialogWrapperContext = {
-    index?: string;
+    id?: string;
 };

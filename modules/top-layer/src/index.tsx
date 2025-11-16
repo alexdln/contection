@@ -1,32 +1,25 @@
 import { createStore } from "contection";
 import React from "react";
 
-import {
-    type TopLayerStore,
-    type Dialog as DialogType,
-    type UpperLayer as UpperLayerType,
-    type RegisterDialogProps,
-    type RegisterUpperLayerProps,
-} from "./types";
-import { Dialog } from "./dialogs";
-import { UpperLayer } from "./upper-layers";
-import { UpperLayerContext } from "./upper-layers/contexts";
-import { DialogWrapperContext } from "./dialogs/contexts";
-import { DialogConsumer } from "./dialogs/consumer";
-import { UpperLayerConsumer } from "./upper-layers/consumer";
+import { type TopLayerStore, type ConfigurationDialogLayer, type ConfigurationUpperLayerLayer } from "./types";
+import { createDialogInstance, createUpperLayerInstance, formatStore } from "./utils";
 
-const CONTECTION_SYMBOL = Symbol("contection-internal");
-
-export const createTopLayer = (options?: Parameters<typeof createStore<TopLayerStore>>[1]) => {
-    const initialState: TopLayerStore = {};
+export const createTopLayer = <
+    Dialogs extends { [Key in keyof Dialogs]: ConfigurationDialogLayer<Dialogs[Key]["data"]> },
+    UpperLayers extends { [Key in keyof UpperLayers]: ConfigurationUpperLayerLayer<UpperLayers[Key]["data"]> },
+>(
+    configuration: { dialogs?: Dialogs; upperLayers?: UpperLayers },
+    options?: Parameters<typeof createStore<TopLayerStore>>[1],
+) => {
+    const { dialogs, upperLayers } = configuration;
+    const initialState: TopLayerStore = formatStore(configuration);
     const Store = createStore<TopLayerStore>(initialState, options);
     const { Provider: StoreProvider, $$typeof, _context, _initial, displayName } = Store;
 
     const Provider = ({ children }: { children: React.ReactNode }) => {
         return <StoreProvider>{children}</StoreProvider>;
     };
-
-    return Object.assign(Provider, {
+    const TopLayerStore = Object.assign(Provider, {
         Provider,
         $$typeof,
         _context,
@@ -35,102 +28,45 @@ export const createTopLayer = (options?: Parameters<typeof createStore<TopLayerS
                 return target[prop as keyof typeof target];
             },
         }),
-        [CONTECTION_SYMBOL]: {
-            registerDialog: <Data extends DialogType["data"]>({
-                type,
-                data,
-                isolated,
-                checkIsActive,
-            }: RegisterDialogProps<Data>) => {
-                const index = `dialog_${Object.keys(_initial).length}` as keyof typeof _initial;
-                _initial[index] = {
-                    open: false,
-                    data,
-                    isolated,
-                    node: null,
-                    type,
-                    checkIsActive,
-                } as DialogType<unknown>;
-                return index;
-            },
-            registerUpperLayer: <Data extends UpperLayerType["data"]>({
-                type,
-                data,
-                isolated,
-                checkIsActive,
-            }: RegisterUpperLayerProps<Data>) => {
-                const index = `upperlayer_${Object.keys(_initial).length}` as keyof typeof _initial;
-                _initial[index] = { data, isolated, type, checkIsActive } as UpperLayerType<unknown>;
-                return index;
-            },
-        },
         displayName,
     });
+
+    const Dialogs = Object.fromEntries(
+        Object.entries(dialogs ?? {}).map(([key, value]) => createDialogInstance(TopLayerStore, key, value)),
+    ) as { [Key in keyof Dialogs]: ReturnType<typeof createDialogInstance<Dialogs[Key]["data"]>>[1] };
+
+    const UpperLayers = Object.fromEntries(
+        Object.entries(upperLayers ?? {}).map(([key, value]) => createUpperLayerInstance(TopLayerStore, key, value)),
+    ) as { [Key in keyof UpperLayers]: ReturnType<typeof createUpperLayerInstance<UpperLayers[Key]["data"]>>[1] };
+
+    return { TopLayerStore, Dialogs, UpperLayers };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
-export const createDialog = <DialogData extends unknown>({
-    instance,
-    data,
-    isolated = false,
-    checkIsActive = (store) => store.open,
-}: {
-    instance: ReturnType<typeof createTopLayer>;
-    data: DialogType<DialogData>["data"];
-    isolated?: DialogType<DialogData>["isolated"];
-    checkIsActive?: DialogType<DialogData>["checkIsActive"];
-}) => {
-    const index = instance[CONTECTION_SYMBOL].registerDialog<DialogData>({
-        type: "dialog",
-        data,
-        isolated,
-        checkIsActive,
-    });
-    const TopLayerDialog = Dialog({ instance, index, context: DialogWrapperContext });
-    const TopLayerDialogConsumer = DialogConsumer({ _instance: instance, _index: index, _initial: data });
+// const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
+//     dialogs: {
+//         MyDialog: {
+//             data: "Hello",
+//         } as const,
+//         MyDialog2: {
+//             data: "Hello22",
+//         } as const,
+//     },
+// });
 
-    return Object.assign(TopLayerDialog, {
-        Dialog: TopLayerDialog,
-        Consumer: TopLayerDialogConsumer,
-        _instance: instance,
-        _context: DialogWrapperContext,
-        _initial: data,
-        _index: index,
-        $$typeof: Symbol.for("contection.dialog"),
-    });
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
-export const createUpperLayer = <UpperLayerData extends unknown>({
-    instance,
-    data,
-    isolated = false,
-    checkIsActive = (store) => Boolean(store.data),
-}: {
-    instance: ReturnType<typeof createTopLayer>;
-    data: UpperLayerData;
-    isolated?: boolean;
-    checkIsActive?: UpperLayerType<UpperLayerData>["checkIsActive"];
-}) => {
-    const index = instance[CONTECTION_SYMBOL].registerUpperLayer<UpperLayerData>({
-        type: "upperLayer",
-        data,
-        isolated,
-        checkIsActive,
-    });
-    const TopLayerUpperLayer = UpperLayer({ instance, index, context: UpperLayerContext });
-    const TopLayerUpperLayerConsumer = UpperLayerConsumer({ _instance: instance, _index: index, _initial: data });
-
-    return Object.assign(TopLayerUpperLayer, {
-        UpperLayer: TopLayerUpperLayer,
-        Consumer: TopLayerUpperLayerConsumer,
-        _instance: instance,
-        _context: UpperLayerContext,
-        _initial: data,
-        _index: index,
-        $$typeof: Symbol.for("contection.upperLayer"),
-    });
-};
+// const Example = () => {
+//     const [data] = useDialogStatus(Dialogs.MyDialog);
+//     return (
+//         <TopLayerStore>
+//             <Dialogs.MyDialog>Welcome {data}</Dialogs.MyDialog>
+//             <Dialogs.MyDialog2.Consumer>
+//                 {(data) => {
+//                     return <div>MyDialog</div>;
+//                 }}
+//             </Dialogs.MyDialog2.Consumer>
+//             {/* <UpperLayers.MyUpperLayer /> */}
+//         </TopLayerStore>
+//     );
+// };
 
 export * from "./hooks";
 export * from "./dialogs/hooks";

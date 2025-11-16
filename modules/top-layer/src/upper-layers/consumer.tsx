@@ -12,7 +12,7 @@ export interface UpperLayerConsumerProps<Data extends NonFunction<unknown>> {
 
 export const UpperLayerConsumer =
     <Store extends TopLayerStore, Data extends NonFunction<unknown>>(
-        instance: InheritedStore<Store> & { _index: string; _initial: Data },
+        instance: InheritedStore<Store> & { _id: string; _initial: Data },
     ) =>
     ({ children, options }: UpperLayerConsumerProps<Data>) => {
         const [store] = useUpperLayerStatus(instance, options);

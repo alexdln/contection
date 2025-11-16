@@ -1,4 +1,4 @@
-import { createTopLayer, createDialog, createUpperLayer } from "contection-top-layer";
+import { createTopLayer } from "contection-top-layer";
 import { useTopLayer, useTopLayerImperative } from "contection-top-layer/src/hooks";
 import React from "react";
 
@@ -6,15 +6,17 @@ import { render, screen, act } from "@src/setup/test-utils";
 
 describe("useTopLayer", () => {
     it("should return dialogs, upperLayers, hasActiveIsolatedLayers, and hasActiveLayers", () => {
-        const TopLayer = createTopLayer();
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Test" },
-            isolated: false,
+        const { TopLayerStore } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test" },
+                    isolated: false,
+                },
+            },
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayer);
+            const store = useTopLayer(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -26,9 +28,9 @@ describe("useTopLayer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("dialogs-count")).toHaveTextContent("1");
@@ -38,25 +40,27 @@ describe("useTopLayer", () => {
     });
 
     it("should filter dialogs correctly", () => {
-        const TopLayer = createTopLayer();
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Dialog 1" },
-            isolated: false,
-        });
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Dialog 2" },
-            isolated: false,
-        });
-        createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Layer 1" },
-            isolated: false,
+        const { TopLayerStore } = createTopLayer({
+            dialogs: {
+                Dialog1: {
+                    data: { title: "Dialog 1" },
+                    isolated: false,
+                },
+                Dialog2: {
+                    data: { title: "Dialog 2" },
+                    isolated: false,
+                },
+            },
+            upperLayers: {
+                UpperLayer1: {
+                    data: { content: "Layer 1" },
+                    isolated: false,
+                },
+            },
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayer);
+            const store = useTopLayer(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -66,9 +70,9 @@ describe("useTopLayer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("dialogs-count")).toHaveTextContent("2");
@@ -76,15 +80,19 @@ describe("useTopLayer", () => {
     });
 
     it("should detect active layers", () => {
-        const TopLayer = createTopLayer();
-        const Dialog = createDialog({
-            instance: TopLayer,
-            data: { title: "Test" },
-            isolated: false,
+        const { TopLayerStore, Dialogs } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test" },
+                    isolated: false,
+                },
+            },
         });
 
+        const Dialog = Dialogs.MyDialog;
+
         const TestComponent = () => {
-            const store = useTopLayer(TopLayer);
+            const store = useTopLayer(TopLayerStore);
             return (
                 <div>
                     <span data-testid="has-active">{String(store.hasActiveLayers)}</span>
@@ -93,15 +101,15 @@ describe("useTopLayer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("has-active")).toHaveTextContent("false");
 
         act(() => {
-            const dialogStore = TopLayer._initial[Dialog._index];
+            const dialogStore = TopLayerStore._initial[Dialog._id];
             if (dialogStore.type === "dialog") {
                 dialogStore.open = true;
             }
@@ -112,15 +120,17 @@ describe("useTopLayer", () => {
     });
 
     it("should support selective keys", () => {
-        const TopLayer = createTopLayer();
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Test" },
-            isolated: false,
+        const { TopLayerStore } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test" },
+                    isolated: false,
+                },
+            },
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayer, { keys: ["dialogs"] });
+            const store = useTopLayer(TopLayerStore, { keys: ["dialogs"] });
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -131,9 +141,9 @@ describe("useTopLayer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("dialogs-count")).toHaveTextContent("1");
@@ -142,15 +152,17 @@ describe("useTopLayer", () => {
 
 describe("useTopLayerImperative", () => {
     it("should return store proxy with dialogs, upperLayers, hasActiveIsolatedLayers, and hasActiveLayers", () => {
-        const TopLayer = createTopLayer();
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Test" },
-            isolated: false,
+        const { TopLayerStore } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test" },
+                    isolated: false,
+                },
+            },
         });
 
         const TestComponent = () => {
-            const store = useTopLayerImperative(TopLayer);
+            const store = useTopLayerImperative(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -162,9 +174,9 @@ describe("useTopLayerImperative", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("dialogs-count")).toHaveTextContent("1");
@@ -174,20 +186,23 @@ describe("useTopLayerImperative", () => {
     });
 
     it("should filter dialogs and upper layers correctly", () => {
-        const TopLayer = createTopLayer();
-        createDialog({
-            instance: TopLayer,
-            data: { title: "Dialog 1" },
-            isolated: false,
-        });
-        createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Layer 1" },
-            isolated: false,
+        const { TopLayerStore } = createTopLayer({
+            dialogs: {
+                Dialog1: {
+                    data: { title: "Dialog 1" },
+                    isolated: false,
+                },
+            },
+            upperLayers: {
+                UpperLayer1: {
+                    data: { content: "Layer 1" },
+                    isolated: false,
+                },
+            },
         });
 
         const TestComponent = () => {
-            const store = useTopLayerImperative(TopLayer);
+            const store = useTopLayerImperative(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -197,9 +212,9 @@ describe("useTopLayerImperative", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("dialogs-count")).toHaveTextContent("1");

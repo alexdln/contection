@@ -15,27 +15,27 @@ type InheritedStore<Store extends TopLayerStore> = {
 export const useUpperLayerStatus = <Store extends TopLayerStore, Data>(
     instance:
         | Pick<StoreInstance<Store>, "_context" | "_initial">
-        | (InheritedStore<Store> & { _index: string; _initial: Data }),
+        | (InheritedStore<Store> & { _id: string; _initial: Data }),
     {
         enabled = "always",
     }: {
         enabled?: "always" | "never" | "after-hydration" | ((store: { data: Data }) => boolean);
     } = {},
 ) => {
-    const index = "_index" in instance ? instance._index : use(UpperLayerContext).index;
+    const id = "_id" in instance ? instance._id : use(UpperLayerContext).id;
 
     const store = useStore("_instance" in instance ? instance._instance : instance, {
-        keys: index ? [index] : [],
+        keys: id ? [id] : [],
         mutation: (store, prevStore, prevMutatedStore) => {
-            if (!index || !store[index]) return { data: "_instance" in instance ? instance._initial : undefined };
-            if ((prevMutatedStore as { data: Data })?.data === store[index].data) {
+            if (!id || !store[id]) return { data: "_instance" in instance ? instance._initial : undefined };
+            if ((prevMutatedStore as { data: Data })?.data === store[id].data) {
                 return prevMutatedStore as { data: Data };
             }
-            return { data: store[index].data as Data };
+            return { data: store[id].data as Data };
         },
-        enabled: index
+        enabled: id
             ? typeof enabled === "function"
-                ? (store) => enabled({ data: store[index].data as Data })
+                ? (store) => enabled({ data: store[id].data as Data })
                 : enabled
             : "never",
     });
@@ -45,13 +45,13 @@ export const useUpperLayerStatus = <Store extends TopLayerStore, Data>(
 export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends NonFunction<unknown>>(
     instance:
         | Pick<StoreInstance<Store>, "_context" | "_initial">
-        | (InheritedStore<Store> & { _index: string; _initial: Data }),
+        | (InheritedStore<Store> & { _id: string; _initial: Data }),
 ) => {
-    const index = "_index" in instance ? instance._index : use(UpperLayerContext).index;
+    const id = "_id" in instance ? instance._id : use(UpperLayerContext).id;
     const [origStore, origDispatch] = useStoreReducer("_instance" in instance ? instance._instance : instance);
 
     return useMemo(() => {
-        if (!index || !origStore[index])
+        if (!id || !origStore[id])
             return [
                 { data: "_instance" in instance ? instance._initial : (undefined as Data) } as { data: Data },
                 () => {},
@@ -59,21 +59,21 @@ export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends N
 
         const upperLayer = {
             get data() {
-                return origStore[index].data;
+                return origStore[id].data;
             },
         } as { data: Data };
         function update(store: (store: { data: Data }) => { data: Data }): void;
         function update(store: { data: NonFunction<Data> }): void;
         function update(store: unknown) {
-            if (!index) return;
+            if (!id) return;
 
             let newPart: { data: Data };
             if (typeof store === "function") {
-                newPart = store({ data: origStore[index].data });
+                newPart = store({ data: origStore[id].data });
             } else {
                 newPart = store as { data: Data };
             }
-            origDispatch((prev) => ({ [index]: { ...prev[index], ...newPart } }) as any);
+            origDispatch((prev) => ({ [id]: { ...prev[id], ...newPart } }) as any);
         }
         return [upperLayer, update] as const;
     }, []);

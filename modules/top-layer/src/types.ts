@@ -21,6 +21,30 @@ export type UpperLayer<Data extends unknown = unknown> = {
     type: "upperLayer";
 };
 
+export type ConfigurationDialogLayer<Data extends unknown = unknown> = {
+    isolated?: boolean;
+    data?: Data;
+    checkIsActive?: (data: Omit<Dialog<Data>, "checkIsActive" | "type">) => boolean;
+};
+
+export type ConfigurationUpperLayerLayer<Data extends unknown = unknown> = {
+    isolated?: boolean;
+    data?: Data;
+    checkIsActive?: (data: Omit<UpperLayer<Data>, "checkIsActive" | "type">) => boolean;
+};
+
+export type Configuration<
+    DialogData extends { [Key in keyof DialogData]: ConfigurationDialogLayer<DialogData[Key]["data"]> } = {
+        [Key: string]: ConfigurationDialogLayer;
+    },
+    UpperLayerData extends {
+        [Key in keyof UpperLayerData]: ConfigurationUpperLayerLayer<UpperLayerData[Key]["data"]>;
+    } = { [Key: string]: ConfigurationUpperLayerLayer },
+> = {
+    dialogs?: { [Key in keyof DialogData]: ConfigurationDialogLayer<DialogData[Key]["data"]> };
+    upperLayers?: { [Key in keyof UpperLayerData]: ConfigurationUpperLayerLayer<UpperLayerData[Key]["data"]> };
+};
+
 export type TopLayerStore = Record<string, Dialog<unknown> | UpperLayer<unknown>>;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type

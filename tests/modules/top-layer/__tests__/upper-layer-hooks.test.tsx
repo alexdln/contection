@@ -1,4 +1,4 @@
-import { createTopLayer, createUpperLayer } from "contection-top-layer";
+import { createTopLayer } from "contection-top-layer";
 import { useUpperLayerStatus, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
 import React from "react";
 
@@ -6,12 +6,16 @@ import { render, screen, act } from "@src/setup/test-utils";
 
 describe("useUpperLayerStatus", () => {
     it("should return upper layer status with data", () => {
-        const TopLayer = createTopLayer();
-        const UpperLayer = createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Test Layer" },
-            isolated: false,
+        const { TopLayerStore, UpperLayers } = createTopLayer({
+            upperLayers: {
+                MyUpperLayer: {
+                    data: { content: "Test Layer" },
+                    isolated: false,
+                },
+            },
         });
+
+        const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
             const [status] = useUpperLayerStatus(UpperLayer);
@@ -19,38 +23,42 @@ describe("useUpperLayerStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("content")).toHaveTextContent("Test Layer");
     });
 
     it("should return undefined when index is not provided", () => {
-        const TopLayer = createTopLayer();
+        const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [status] = useUpperLayerStatus(TopLayer);
+            const [status] = useUpperLayerStatus(TopLayerStore);
             return <span data-testid="data">{String(status.data)}</span>;
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("data")).toHaveTextContent("undefined");
     });
 
     it("should support enabled option", () => {
-        const TopLayer = createTopLayer();
-        const UpperLayer = createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Test" },
-            isolated: false,
+        const { TopLayerStore, UpperLayers } = createTopLayer({
+            upperLayers: {
+                MyUpperLayer: {
+                    data: { content: "Test" },
+                    isolated: false,
+                },
+            },
         });
+
+        const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
             const [status] = useUpperLayerStatus(UpperLayer, {
@@ -60,21 +68,25 @@ describe("useUpperLayerStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("content")).toHaveTextContent("Test");
     });
 
     it("should support function-based enabled option", () => {
-        const TopLayer = createTopLayer();
-        const UpperLayer = createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Test" },
-            isolated: false,
+        const { TopLayerStore, UpperLayers } = createTopLayer({
+            upperLayers: {
+                MyUpperLayer: {
+                    data: { content: "Test" },
+                    isolated: false,
+                },
+            },
         });
+
+        const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
             const [status] = useUpperLayerStatus(UpperLayer, {
@@ -84,9 +96,9 @@ describe("useUpperLayerStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("content")).toHaveTextContent("Test");
@@ -95,12 +107,16 @@ describe("useUpperLayerStatus", () => {
 
 describe("useUpperLayerReducer", () => {
     it("should return upper layer state and update function", () => {
-        const TopLayer = createTopLayer();
-        const UpperLayer = createUpperLayer({
-            instance: TopLayer,
-            data: { content: "Test Layer", count: 0 },
-            isolated: false,
+        const { TopLayerStore, UpperLayers } = createTopLayer({
+            upperLayers: {
+                MyUpperLayer: {
+                    data: { content: "Test Layer", count: 0 },
+                    isolated: false,
+                },
+            },
         });
+
+        const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
             const [, update] = useUpperLayerReducer(UpperLayer);
@@ -128,9 +144,9 @@ describe("useUpperLayerReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("content")).toHaveTextContent("Test Layer");
@@ -145,12 +161,16 @@ describe("useUpperLayerReducer", () => {
     });
 
     it("should support function-based data updates", () => {
-        const TopLayer = createTopLayer();
-        const UpperLayer = createUpperLayer({
-            instance: TopLayer,
-            data: { count: 0 },
-            isolated: false,
+        const { TopLayerStore, UpperLayers } = createTopLayer({
+            upperLayers: {
+                MyUpperLayer: {
+                    data: { count: 0 },
+                    isolated: false,
+                },
+            },
         });
+
+        const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
             const [, update] = useUpperLayerReducer(UpperLayer);
@@ -175,9 +195,9 @@ describe("useUpperLayerReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("count")).toHaveTextContent("0");
@@ -190,10 +210,10 @@ describe("useUpperLayerReducer", () => {
     });
 
     it("should return empty state when index is not provided", () => {
-        const TopLayer = createTopLayer();
+        const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [upperLayer, update] = useUpperLayerReducer(TopLayer);
+            const [upperLayer, update] = useUpperLayerReducer(TopLayerStore);
             return (
                 <div>
                     <span data-testid="data">{String(upperLayer.data)}</span>
@@ -205,9 +225,9 @@ describe("useUpperLayerReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("data")).toHaveTextContent("undefined");

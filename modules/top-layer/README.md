@@ -28,43 +28,38 @@ pnpm add contection contection-top-layer
 ```tsx
 import { createTopLayer } from "contection-top-layer";
 
-const TopLayer = createTopLayer();
-```
-
-### 2. Create Dialogs and Upper Layers
-
-```tsx
-import { createDialog, createUpperLayer } from "contection-top-layer";
-
-const ConfirmDialog = createDialog({
-  instance: TopLayer,
-  data: { message: "", onConfirm: () => {} },
-  isolated: true,
-});
-
-const NotificationLayer = createUpperLayer({
-  instance: TopLayer,
-  data: { message: "", type: "info" },
+const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
+  dialogs: {
+    ConfirmDialog: {
+      data: { message: "", onConfirm: () => {} },
+      isolated: true,
+    },
+  },
+  upperLayers: {
+    NotificationLayer: {
+      data: { message: "", type: "info" },
+    },
+  },
 });
 ```
 
-### 3. Provide the Store
+### 2. Provide the Store
 
 ```tsx
 function App() {
   return (
-    <TopLayer>
+    <TopLayerStore>
       <YourComponents />
-    </TopLayer>
+    </TopLayerStore>
   );
 }
 ```
 
-### 4. Use Dialogs and Layers
+### 3. Use Dialogs and Layers
 
 ```tsx
 function ConfirmButton() {
-  const [dialog, setDialog] = useDialogReducer(ConfirmDialog);
+  const [dialog, setDialog] = useDialogReducer(Dialogs.ConfirmDialog);
 
   const handleClick = () => {
     setDialog({
@@ -72,7 +67,7 @@ function ConfirmButton() {
       data: {
         message: "Are you sure?",
         onConfirm: () => {
-          setDialog({ open: false });
+          setDialog({ open: false, data: dialog.data });
         },
       },
     });
@@ -81,13 +76,15 @@ function ConfirmButton() {
   return (
     <>
       <button onClick={handleClick}>Delete</button>
-      <ConfirmDialog>
+      <Dialogs.ConfirmDialog>
         <div>
           <p>{dialog.data.message}</p>
-          <button onClick={() => setDialog({ open: false })}>Cancel</button>
+          <button onClick={() => setDialog({ open: false, data: dialog.data })}>
+            Cancel
+          </button>
           <button onClick={dialog.data.onConfirm}>Confirm</button>
         </div>
-      </ConfirmDialog>
+      </Dialogs.ConfirmDialog>
     </>
   );
 }
@@ -137,7 +134,7 @@ Use `useTopLayer` to access global layer state for managing backdrops and overfl
 import { useTopLayer } from "contection-top-layer";
 
 function GlobalBackdrop() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayer, {
+  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -165,7 +162,7 @@ import { useTopLayer } from "contection-top-layer";
 import { useEffect } from "react";
 
 function OverflowBlocker() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayer, {
+  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -186,7 +183,7 @@ function OverflowBlocker() {
 
 ### Dialog Styling
 
-For dialogs, it's recommended to specify global styles:
+For dialogs, it is recommended to specify global styles to ensure correct rendering and to gain flexibility in styles by styling only elements within the dialog box:
 
 ```css
 dialog {
@@ -202,12 +199,12 @@ dialog {
 
 ### Backdrop Management
 
-**Best Practice:** Add a darkening backdrop element globally to the body using `useTopLayer` and checking for `hasActiveIsolatedLayers`. For closed dialogs, create a transparent backdrop within each upper layer or dialog.
+**Best Practice:** Add a darkening backdrop element globally to the body using `useTopLayer` and checking for `hasActiveIsolatedLayers`. To close layer on-click-outside, create a transparent backdrop within each upper layer or dialog.
 
 ```tsx
-// Global backdrop for isolated layers
+// Global backdrop for all isolated layers
 function GlobalBackdrop() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayer, {
+  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -219,7 +216,7 @@ function GlobalBackdrop() {
         position: "fixed",
         inset: 0,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
-        zIndex: 9998,
+        zIndex: 8000,
         pointerEvents: "auto",
       }}
     />
@@ -228,25 +225,21 @@ function GlobalBackdrop() {
 
 // Transparent backdrop within dialog/upper layer
 function MyDialog() {
-  const [dialog] = useDialogStatus(ConfirmDialog);
+  const [, dispatch] = useDialogStatus(Dialogs.ConfirmDialog);
 
   return (
-    <ConfirmDialog>
-      {dialog.open && (
-        <>
-          {/* Transparent backdrop for closed dialog state */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundColor: "transparent",
-              zIndex: -1,
-            }}
-          />
-          <div>{/* Dialog content */}</div>
-        </>
-      )}
-    </ConfirmDialog>
+    <Dialogs.ConfirmDialog>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "transparent",
+          zIndex: -1,
+        }}
+        onClick={() => dispatch({ open: false, data: null })}
+      />
+      <div>{/* Dialog content */}</div>
+    </Dialogs.ConfirmDialog>
   );
 }
 ```
@@ -258,16 +251,16 @@ Dialog and upper layer hooks support the current element when used deeper in the
 ```tsx
 function DialogContent() {
   // Full type safety: dialog.data has correct types
-  const [dialog, setDialog] = useDialogStatus(ConfirmDialog);
+  const [dialog, setDialog] = useDialogStatus(Dialogs.ConfirmDialog);
 }
 
 function DialogCloseButton({
   topLayerStore,
 }: {
-  topLayerStore: typeof TopLayer;
+  topLayerStore: typeof TopLayerStore;
 }) {
   // Works with any dialog, but loses type safety - dialog.data is unknown
-  const [dialog] = useDialogStatus(topLayerStore);
+  const [dialog, dispatch] = useDialogStatus(topLayerStore);
 }
 ```
 
@@ -276,11 +269,14 @@ function DialogCloseButton({
 Customize when a layer is considered active:
 
 ```tsx
-const CustomDialog = createDialog({
-  instance: TopLayer,
-  data: { ready: false, message: "" },
-  isolated: true,
-  checkIsActive: (store) => store.open && store.data.ready,
+const { TopLayerStore, Dialogs } = createTopLayer({
+  dialogs: {
+    CustomDialog: {
+      data: { ready: false, message: "" },
+      isolated: true,
+      checkIsActive: (store) => store.open && store.data.ready,
+    },
+  },
 });
 ```
 
@@ -289,8 +285,8 @@ const CustomDialog = createDialog({
 Use the `enabled` option to conditionally enable or disable subscriptions:
 
 ```tsx
-const [dialog] = useDialogStatus(ConfirmDialog, {
-  enabled: (store) => store.open && store.data.message.length > 2,
+const [dialog] = useDialogStatus(Dialogs.ConfirmDialog, {
+  enabled: (store) => store.open && store.data.message.length > 0,
 });
 ```
 
@@ -299,7 +295,7 @@ const [dialog] = useDialogStatus(ConfirmDialog, {
 Access dialog/layer state using the Consumer pattern:
 
 ```tsx
-<ConfirmDialog.Consumer>
+<Dialogs.ConfirmDialog.Consumer>
   {({ data }) =>
     data.shouldConfirm && (
       <div>
@@ -308,7 +304,7 @@ Access dialog/layer state using the Consumer pattern:
       </div>
     )
   }
-</ConfirmDialog.Consumer>
+</Dialogs.ConfirmDialog.Consumer>
 ```
 
 ### Imperative Access
@@ -319,7 +315,7 @@ Use `useTopLayerImperative` for imperative access without triggering re-renders:
 import { useTopLayerImperative } from "contection-top-layer";
 
 function AnalyticsTracker() {
-  const store = useTopLayerImperative(TopLayer);
+  const store = useTopLayerImperative(TopLayerStore);
 
   useEffect(
     () => () => {
@@ -341,89 +337,61 @@ If you need UpperLayer elements visible within a dialog, duplicate them within t
 ```tsx
 <body>
   {/* Page content */}
-  <Confiramation />
+  <ConfirmDialog />
   <Notifications />
 </body>
 ```
 
 ```tsx
-const Confiramation = () => (
-  <ConfirmDialog>
+const ConfirmDialog = () => (
+  <Dialogs.ConfirmDialog>
     {/* Dialog content */}
     <Notifications />
-  </ConfirmDialog>
+  </Dialogs.ConfirmDialog>
 );
 ```
 
 ## API Reference
 
-### `createTopLayer(options?)`
+### `createTopLayer(configuration, options?)`
 
-Creates a new top layer store instance.
+Creates a new top layer store instance with dialogs and upper layers.
 
 **Parameters:**
 
+- `configuration` - Configuration object:
+  - `dialogs?` - Object mapping dialog names to dialog configurations:
+    - `data` - Initial dialog data
+    - `isolated?` - Whether this dialog creates an isolated layer (default: `false`)
+    - `checkIsActive?` - Custom function to determine if dialog is active (defaults to `(store) => store.open`)
+  - `upperLayers?` - Object mapping upper layer names to upper layer configurations:
+    - `data?` - Initial layer data
+    - `isolated?` - Whether this layer creates an isolated layer (default: `false`)
+    - `checkIsActive?` - Custom function to determine if layer is active (defaults to `(store) => Boolean(store.data)`)
 - `options?` - Optional contection store options (lifecycle hooks, etc.)
 
 **Returns:**
 
-- `Provider` - React component to wrap scope
+- `TopLayerStore` - Global store instance with `Provider`
+- `Dialogs` - Object containing all configured dialog instances
+- `UpperLayers` - Object containing all configured upper layer instances
 
 **Example:**
 
 ```tsx
-const TopLayer = createTopLayer();
-```
-
-### `createDialog(options)`
-
-Creates a new dialog instance for HTML native dialogs.
-
-**Parameters:**
-
-- `instance` - Top layer store instance
-- `data` - Initial dialog data
-- `isolated` - Whether this dialog creates an isolated layer
-- `checkIsActive?` - Custom function to determine if dialog is active (defaults to `(store) => store.open`)
-
-**Returns:**
-
-- `Dialog` - React component (HTML `<dialog>` element)
-- `Consumer` - React component for render props pattern
-
-**Example:**
-
-```tsx
-const ConfirmDialog = createDialog({
-  instance: TopLayer,
-  data: { message: "", onConfirm: () => {} },
-  isolated: true,
-});
-```
-
-### `createUpperLayer(options)`
-
-Creates a new upper layer instance.
-
-**Parameters:**
-
-- `instance` - Top layer store instance
-- `data` - Initial layer data
-- `isolated` - Whether this layer creates an isolated layer
-- `checkIsActive?` - Custom function to determine if layer is active (defaults to `(store) => Boolean(store.data)`)
-
-**Returns:**
-
-- `UpperLayer` - React component
-- `Consumer` - React component for render props pattern
-
-**Example:**
-
-```tsx
-const NotificationLayer = createUpperLayer({
-  instance: TopLayer,
-  data: { message: "", type: "info" },
-  isolated: false,
+const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
+  dialogs: {
+    ConfirmDialog: {
+      data: { message: "", onConfirm: () => {} },
+      isolated: true,
+    },
+  },
+  upperLayers: {
+    NotificationLayer: {
+      data: { message: "", type: "info" },
+      isolated: false,
+    },
+  },
 });
 ```
 
@@ -449,7 +417,7 @@ _Re-renders:_ Only when subscribed keys change
 **Example:**
 
 ```tsx
-const store = useTopLayer(TopLayer, {
+const store = useTopLayer(TopLayerStore, {
   keys: ["hasActiveIsolatedLayers"],
 });
 store.hasActiveIsolatedLayers;
@@ -484,7 +452,7 @@ _Re-renders:_ Only when dialog state (open or data) changes
 **Example:**
 
 ```tsx
-const [dialog] = useDialogStatus(ConfirmDialog);
+const [dialog] = useDialogStatus(Dialogs.ConfirmDialog);
 // dialog.open - boolean
 // dialog.data - Dialog data with full type safety
 ```
@@ -504,11 +472,11 @@ _Re-renders:_ never
 **Example:**
 
 ```tsx
-const [dialog, setDialog] = useDialogReducer(ConfirmDialog);
+const [dialog, setDialog] = useDialogReducer(Dialogs.ConfirmDialog);
 
 setDialog({ open: true, data: { message: "Hello" } });
 // Or with function
-setDialog((prev) => ({ ...prev, open: false }));
+setDialog((prev) => ({ open: false, data: prev.data }));
 ```
 
 ### `useUpperLayerStatus(upperLayer, options?)`
@@ -528,7 +496,7 @@ _Re-renders:_ Only when layer data changes
 **Example:**
 
 ```tsx
-const [layer] = useUpperLayerStatus(NotificationLayer);
+const [layer] = useUpperLayerStatus(UpperLayers.NotificationLayer);
 // layer.data - Layer data with full type safety
 ```
 
@@ -547,11 +515,11 @@ _Re-renders:_ never
 **Example:**
 
 ```tsx
-const [layer, setLayer] = useUpperLayerReducer(NotificationLayer);
+const [layer, setLayer] = useUpperLayerReducer(UpperLayers.NotificationLayer);
 
 setLayer({ data: { message: "Hello", type: "info" } });
 // Or with function
-setLayer((prev) => ({ data: undefined }));
+setLayer((prev) => ({ message: prev.message, type: "warning" }));
 ```
 
 ### `Dialog` Component
@@ -565,9 +533,10 @@ HTML native `<dialog>` element component with automatic show/hide management.
 **Example:**
 
 ```tsx
-<ConfirmDialog onClose={() => console.log("Dialog closed")}>
+// Same as <Dialogs.ConfirmDialog.Dialog>
+<Dialogs.ConfirmDialog onClose={() => console.log("Dialog closed")}>
   <div>Dialog content</div>
-</ConfirmDialog>
+</Dialogs.ConfirmDialog>
 ```
 
 ### `UpperLayer` Component
@@ -581,10 +550,10 @@ Wrapper component that provides context for internal upper layer hooks.
 **Example:**
 
 ```tsx
-// Same as <NotificationLayer.UpperLayer>
-<NotificationLayer>
+// Same as <UpperLayers.NotificationLayer.UpperLayer>
+<UpperLayers.NotificationLayer>
   <div>Layer content</div>
-</NotificationLayer>
+</UpperLayers.NotificationLayer>
 ```
 
 ### `Consumer` Components
@@ -597,7 +566,9 @@ Components that consume dialog/layer state using render props pattern.
 - `options?: { enabled?: ... }` - Same as `useDialogStatus` enabled option
 
 ```tsx
-<ConfirmDialog.Consumer>{(data) => data.message}</ConfirmDialog.Consumer>
+<Dialogs.ConfirmDialog.Consumer>
+  {(data) => data.message}
+</Dialogs.ConfirmDialog.Consumer>
 ```
 
 **Upper Layer Consumer Props:**
@@ -606,9 +577,9 @@ Components that consume dialog/layer state using render props pattern.
 - `options?: { enabled?: ... }` - Same as `useUpperLayerStatus` enabled option
 
 ```tsx
-<NotificationLayer.Consumer>
+<UpperLayers.NotificationLayer.Consumer>
   {(data) => data.message}
-</NotificationLayer.Consumer>
+</UpperLayers.NotificationLayer.Consumer>
 ```
 
 ## License

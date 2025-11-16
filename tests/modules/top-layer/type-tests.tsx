@@ -8,48 +8,46 @@
 import React from "react";
 
 import { type Dialog, type UpperLayer } from "contection-top-layer/src/types";
-import { createTopLayer, createDialog, createUpperLayer } from "contection-top-layer";
+import { createTopLayer } from "contection-top-layer";
 import { useTopLayer, useTopLayerImperative } from "contection-top-layer/src/hooks";
 import { useDialogStatus, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
 import { useUpperLayerStatus, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
 
 // Test 1: createTopLayer basic structure
 function testCreateTopLayer() {
-    const TopLayer = createTopLayer();
-    const initial = TopLayer._initial;
-    const context = TopLayer._context;
-    const Provider = TopLayer.Provider;
-    const $$typeof = TopLayer.$$typeof;
-    const displayName = TopLayer.displayName;
+    const { TopLayerStore } = createTopLayer({});
+    const initial = TopLayerStore._initial;
+    const context = TopLayerStore._context;
+    const Provider = TopLayerStore.Provider;
+    const $$typeof = TopLayerStore.$$typeof;
+    const displayName = TopLayerStore.displayName;
 
-    <TopLayer.Provider>
+    <TopLayerStore.Provider>
         <div>Test</div>
-    </TopLayer.Provider>;
+    </TopLayerStore.Provider>;
 
-    <TopLayer>
+    <TopLayerStore>
         <div>Test</div>
-    </TopLayer>;
+    </TopLayerStore>;
 }
 
 // Test 2: createDialog with typed data
 function testCreateDialog() {
-    const TopLayer = createTopLayer();
-
-    const Dialog1 = createDialog({
-        instance: TopLayer,
-        data: { title: "Test", count: 0 },
-        isolated: false,
+    const { TopLayerStore, Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog1: {
+                data: { title: "Test", count: 0 },
+                isolated: false,
+            },
+        },
     });
 
-    const dialogIndex: string = Dialog1._index;
+    const Dialog1 = Dialogs.Dialog1;
+    const dialogId: string = Dialog1._id;
     const dialogInitial: { title: string; count: number } = Dialog1._initial;
     const dialogInstance = Dialog1._instance;
     const dialogContext = Dialog1._context;
     const dialogSymbol = Dialog1.$$typeof;
-
-    <Dialog1>
-        <div>Dialog Content</div>
-    </Dialog1>;
 
     <Dialog1.Dialog>
         <div>Dialog Content</div>
@@ -69,43 +67,52 @@ function testCreateDialog() {
 
 // Test 3: createDialog with custom checkIsActive
 function testCreateDialogWithCheckIsActive() {
-    const TopLayer = createTopLayer();
-
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: { visible: false },
-        isolated: true,
-        checkIsActive: (store) => store.open && store.data.visible,
+    const { TopLayerStore, Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: { visible: false },
+                isolated: true,
+                checkIsActive: (store: {
+                    data: { visible: boolean };
+                    isolated: boolean;
+                    open: boolean;
+                    node: HTMLDialogElement | null;
+                }) => store.open && store.data.visible,
+            },
+        },
     });
 
+    const Dialog = Dialogs.Dialog;
     const checkIsActive: (store: {
         data: { visible: boolean };
         isolated: boolean;
         open: boolean;
         node: HTMLDialogElement | null;
-    }) => boolean = TopLayer._initial[Dialog._index].checkIsActive;
+    }) => boolean = TopLayerStore._initial[Dialog._id].checkIsActive;
     checkIsActive({ data: { visible: true }, isolated: true, open: true, node: null });
 }
 
 // Test 4: createUpperLayer with typed data
 function testCreateUpperLayer() {
-    const TopLayer = createTopLayer();
-
-    const UpperLayer1 = createUpperLayer({
-        instance: TopLayer,
-        data: { content: "Test", active: true },
-        isolated: false,
+    const { TopLayerStore, UpperLayers } = createTopLayer({
+        upperLayers: {
+            UpperLayer1: {
+                data: { content: "Test", active: true },
+                isolated: false,
+            },
+        },
     });
 
-    const upperLayerIndex: string = UpperLayer1._index;
+    const UpperLayer1 = UpperLayers.UpperLayer1;
+    const upperLayerId: string = UpperLayer1._id;
     const upperLayerInitial: { content: string; active: boolean } = UpperLayer1._initial;
     const upperLayerInstance = UpperLayer1._instance;
     const upperLayerContext = UpperLayer1._context;
     const upperLayerSymbol = UpperLayer1.$$typeof;
 
-    <UpperLayer1>
+    <UpperLayer1.UpperLayer>
         <div>Upper Layer Content</div>
-    </UpperLayer1>;
+    </UpperLayer1.UpperLayer>;
 
     <UpperLayer1.Consumer>
         {({ data }) => {
@@ -118,39 +125,44 @@ function testCreateUpperLayer() {
 
 // Test 5: createUpperLayer with optional data
 function testCreateUpperLayerWithOptionalData() {
-    const TopLayer = createTopLayer();
-
-    const UpperLayer = createUpperLayer({
-        instance: TopLayer,
-        data: undefined,
-        isolated: true,
+    const { UpperLayers } = createTopLayer({
+        upperLayers: {
+            UpperLayer: {
+                data: undefined,
+                isolated: true,
+            },
+        },
     });
 
+    const UpperLayer = UpperLayers.UpperLayer;
     const data: undefined = UpperLayer._initial;
 }
 
 // Test 6: useTopLayer
 function testUseTopLayer() {
-    const TopLayer = createTopLayer();
-    createDialog({
-        instance: TopLayer,
-        data: { title: "Test" },
-        isolated: false,
-    });
-    createUpperLayer({
-        instance: TopLayer,
-        data: { content: "Test" },
-        isolated: false,
+    const { TopLayerStore } = createTopLayer({
+        dialogs: {
+            MyDialog: {
+                data: { title: "Test" },
+                isolated: false,
+            },
+        },
+        upperLayers: {
+            MyUpperLayer: {
+                data: { content: "Test" },
+                isolated: false,
+            },
+        },
     });
 
     function Component() {
-        const store = useTopLayer(TopLayer);
+        const store = useTopLayer(TopLayerStore);
         const dialogs: Dialog[] = store.dialogs;
         const upperLayers: UpperLayer[] = store.upperLayers;
         const hasActiveIsolatedLayers: boolean = store.hasActiveIsolatedLayers;
         const hasActiveLayers: boolean = store.hasActiveLayers;
 
-        const partial = useTopLayer(TopLayer, { keys: ["dialogs", "hasActiveLayers"] });
+        const partial = useTopLayer(TopLayerStore, { keys: ["dialogs", "hasActiveLayers"] });
         const partialDialogs: Dialog[] = partial.dialogs;
         const partialHasActive: boolean = partial.hasActiveLayers;
         // @ts-expect-error - should not have unselected keys
@@ -160,15 +172,17 @@ function testUseTopLayer() {
 
 // Test 7: useTopLayerImperative
 function testUseTopLayerImperative() {
-    const TopLayer = createTopLayer();
-    createDialog({
-        instance: TopLayer,
-        data: { title: "Test" },
-        isolated: false,
+    const { TopLayerStore } = createTopLayer({
+        dialogs: {
+            MyDialog: {
+                data: { title: "Test" },
+                isolated: false,
+            },
+        },
     });
 
     function Component() {
-        const store = useTopLayerImperative(TopLayer);
+        const store = useTopLayerImperative(TopLayerStore);
         const dialogs: Dialog[] = store.dialogs;
         const upperLayers: UpperLayer[] = store.upperLayers;
         const hasActiveIsolatedLayers: boolean = store.hasActiveIsolatedLayers;
@@ -180,12 +194,16 @@ function testUseTopLayerImperative() {
 
 // Test 8: useDialogStatus
 function testUseDialogStatus() {
-    const TopLayer = createTopLayer();
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: { title: "Test", count: 0 },
-        isolated: false,
+    const { Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: { title: "Test", count: 0 },
+                isolated: false,
+            },
+        },
     });
+
+    const Dialog = Dialogs.Dialog;
 
     function Component() {
         const [status] = useDialogStatus(Dialog);
@@ -205,12 +223,16 @@ function testUseDialogStatus() {
 
 // Test 9: useDialogReducer
 function testUseDialogReducer() {
-    const TopLayer = createTopLayer();
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: { title: "Test", count: 0 },
-        isolated: false,
+    const { Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: { title: "Test", count: 0 },
+                isolated: false,
+            },
+        },
     });
+
+    const Dialog = Dialogs.Dialog;
 
     function Component() {
         const [dialog, update] = useDialogReducer(Dialog);
@@ -230,12 +252,16 @@ function testUseDialogReducer() {
 
 // Test 10: useUpperLayerStatus
 function testUseUpperLayerStatus() {
-    const TopLayer = createTopLayer();
-    const UpperLayer = createUpperLayer({
-        instance: TopLayer,
-        data: { content: "Test", active: true },
-        isolated: false,
+    const { UpperLayers } = createTopLayer({
+        upperLayers: {
+            UpperLayer: {
+                data: { content: "Test", active: true },
+                isolated: false,
+            },
+        },
     });
+
+    const UpperLayer = UpperLayers.UpperLayer;
 
     function Component() {
         const [status] = useUpperLayerStatus(UpperLayer);
@@ -254,12 +280,16 @@ function testUseUpperLayerStatus() {
 
 // Test 11: useUpperLayerReducer
 function testUseUpperLayerReducer() {
-    const TopLayer = createTopLayer();
-    const UpperLayer = createUpperLayer({
-        instance: TopLayer,
-        data: { content: "Test", count: 0 },
-        isolated: false,
+    const { UpperLayers } = createTopLayer({
+        upperLayers: {
+            UpperLayer: {
+                data: { content: "Test", count: 0 },
+                isolated: false,
+            },
+        },
     });
+
+    const UpperLayer = UpperLayers.UpperLayer;
 
     function Component() {
         const [upperLayer, update] = useUpperLayerReducer(UpperLayer);
@@ -276,60 +306,68 @@ function testUseUpperLayerReducer() {
 
 // Test 12: Type inference with const data
 function testTypeInferenceWithConst() {
-    const TopLayer = createTopLayer();
-
     const dialogData = {
         title: "Test",
         count: 0,
     } as const;
 
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: dialogData,
-        isolated: false,
+    const { Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: dialogData,
+                isolated: false,
+            },
+        },
     });
 
+    const Dialog = Dialogs.Dialog;
     const title: "Test" = Dialog._initial.title;
     const count: 0 = Dialog._initial.count;
 }
 
 // Test 13: Multiple dialogs and upper layers
 function testMultipleLayers() {
-    const TopLayer = createTopLayer();
-
-    const Dialog1 = createDialog({
-        instance: TopLayer,
-        data: { title: "Dialog 1" },
-        isolated: false,
+    const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
+        dialogs: {
+            Dialog1: {
+                data: { title: "Dialog 1" },
+                isolated: false,
+            },
+            Dialog2: {
+                data: { title: "Dialog 2" },
+                isolated: true,
+            },
+        },
+        upperLayers: {
+            UpperLayer1: {
+                data: { content: "Layer 1" },
+                isolated: false,
+            },
+        },
     });
 
-    const Dialog2 = createDialog({
-        instance: TopLayer,
-        data: { title: "Dialog 2" },
-        isolated: true,
-    });
+    const Dialog1 = Dialogs.Dialog1;
+    const Dialog2 = Dialogs.Dialog2;
+    const UpperLayer1 = UpperLayers.UpperLayer1;
 
-    const UpperLayer1 = createUpperLayer({
-        instance: TopLayer,
-        data: { content: "Layer 1" },
-        isolated: false,
-    });
-
-    const store = useTopLayer(TopLayer);
+    const store = useTopLayer(TopLayerStore);
     const dialogsCount: number = store.dialogs.length;
     const upperLayersCount: number = store.upperLayers.length;
 }
 
 // Test 14: Store instance structure
 function testStoreInstanceStructure() {
-    const TopLayer = createTopLayer();
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: { test: "value" },
-        isolated: false,
+    const { TopLayerStore, Dialogs } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: { test: "value" },
+                isolated: false,
+            },
+        },
     });
 
-    const dialogStore = TopLayer._initial[Dialog._index];
+    const Dialog = Dialogs.Dialog;
+    const dialogStore = TopLayerStore._initial[Dialog._id];
     if (dialogStore.type === "dialog") {
         const open: boolean = dialogStore.open;
         const data: unknown = dialogStore.data;
@@ -340,23 +378,26 @@ function testStoreInstanceStructure() {
 
 // Test 15: NonFunction type constraint
 function testNonFunctionConstraint() {
-    const TopLayer = createTopLayer();
-
-    const Dialog = createDialog({
-        instance: TopLayer,
-        data: { value: 42 },
-        isolated: false,
+    const { Dialogs, UpperLayers } = createTopLayer({
+        dialogs: {
+            Dialog: {
+                data: { value: 42 },
+                isolated: false,
+            },
+        },
+        upperLayers: {
+            UpperLayer: {
+                data: { value: 42 },
+                isolated: false,
+            },
+        },
     });
 
+    const Dialog = Dialogs.Dialog;
     const [dialog, update] = useDialogReducer(Dialog);
     update((prev) => ({ open: prev.open, data: { value: prev.data.value + 1 } }));
 
-    const UpperLayer = createUpperLayer({
-        instance: TopLayer,
-        data: { value: 42 },
-        isolated: false,
-    });
-
+    const UpperLayer = UpperLayers.UpperLayer;
     const [upperLayer, updateUpper] = useUpperLayerReducer(UpperLayer);
     updateUpper((prev) => ({ data: { value: (prev.data?.value || 0) + 1 } }));
     // @ts-expect-error - should not have other property

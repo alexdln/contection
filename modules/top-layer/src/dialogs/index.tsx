@@ -15,19 +15,19 @@ export interface DialogProps
 export const Dialog =
     <Store extends TopLayerStore>({
         instance,
-        index,
+        id,
         context: Context = DialogWrapperContext,
     }: {
-        instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
-        index: string;
-        context?: React.Context<{ index?: string }>;
+        instance: Pick<StoreInstance<Store>, "_context">;
+        id: string;
+        context?: React.Context<{ id?: string }>;
     }) =>
     ({ children, onClose, ...props }: DialogProps) => {
         const [store, dispatch, listen] = useStoreReducer(instance);
 
         const registerDialog = useCallback((node: HTMLDialogElement | null) => {
-            if (!node || !store[index]) return;
-            const dialogStore = store[index] as DialogType;
+            if (!node || !store[id]) return;
+            const dialogStore = store[id] as DialogType;
 
             if (dialogStore.open) {
                 node.showModal();
@@ -35,12 +35,12 @@ export const Dialog =
                 node.close();
             }
             dispatch((prev) => {
-                (prev[index] as DialogType).node = node;
+                (prev[id] as DialogType).node = node;
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return prev as any;
             });
 
-            return listen(String(index) as keyof Store, (newDialog) => {
+            return listen(String(id) as keyof Store, (newDialog) => {
                 if ((newDialog as DialogType).open) {
                     node.showModal();
                 } else if (node.open) {
@@ -55,9 +55,9 @@ export const Dialog =
 
                 if (e.defaultPrevented) return;
 
-                const dialogStore = store[index] as DialogType;
+                const dialogStore = store[id] as DialogType;
                 dispatch({
-                    [index]: { ...dialogStore, open: false },
+                    [id]: { ...dialogStore, open: false },
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any);
             },
@@ -65,7 +65,7 @@ export const Dialog =
         );
 
         return (
-            <Context.Provider value={{ index }}>
+            <Context.Provider value={{ id }}>
                 <dialog onClose={closeHandler} ref={registerDialog} {...props}>
                     {children}
                 </dialog>

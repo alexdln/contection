@@ -1,4 +1,4 @@
-import { createTopLayer, createDialog } from "contection-top-layer";
+import { createTopLayer } from "contection-top-layer";
 import { useDialogStatus, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
 import React from "react";
 
@@ -6,12 +6,16 @@ import { render, screen, act } from "@src/setup/test-utils";
 
 describe("useDialogStatus", () => {
     it("should return dialog status with data and open state", () => {
-        const TopLayer = createTopLayer();
-        const Dialog = createDialog({
-            instance: TopLayer,
-            data: { title: "Test Dialog" },
-            isolated: false,
+        const { TopLayerStore, Dialogs } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test Dialog" },
+                    isolated: false,
+                },
+            },
         });
+
+        const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
             const [status] = useDialogStatus(Dialog);
@@ -24,9 +28,9 @@ describe("useDialogStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("open")).toHaveTextContent("false");
@@ -34,10 +38,10 @@ describe("useDialogStatus", () => {
     });
 
     it("should return undefined when index is not provided", () => {
-        const TopLayer = createTopLayer();
+        const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [status] = useDialogStatus(TopLayer);
+            const [status] = useDialogStatus(TopLayerStore);
             return (
                 <div>
                     <span data-testid="open">{String(status.open)}</span>
@@ -47,9 +51,9 @@ describe("useDialogStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("open")).toHaveTextContent("false");
@@ -57,12 +61,16 @@ describe("useDialogStatus", () => {
     });
 
     it("should support enabled option", () => {
-        const TopLayer = createTopLayer();
-        const Dialog = createDialog({
-            instance: TopLayer,
-            data: { title: "Test" },
-            isolated: false,
+        const { TopLayerStore, Dialogs } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test" },
+                    isolated: false,
+                },
+            },
         });
+
+        const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
             const [status] = useDialogStatus(Dialog, { enabled: "always" });
@@ -70,9 +78,9 @@ describe("useDialogStatus", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("title")).toHaveTextContent("Test");
@@ -81,12 +89,16 @@ describe("useDialogStatus", () => {
 
 describe("useDialogReducer", () => {
     it("should return dialog state and update function", () => {
-        const TopLayer = createTopLayer();
-        const Dialog = createDialog({
-            instance: TopLayer,
-            data: { title: "Test Dialog", count: 0 },
-            isolated: false,
+        const { TopLayerStore, Dialogs } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { title: "Test Dialog", count: 0 },
+                    isolated: false,
+                },
+            },
         });
+
+        const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
             const [dialog, update] = useDialogReducer(Dialog);
@@ -115,9 +127,9 @@ describe("useDialogReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("open")).toHaveTextContent("false");
@@ -137,12 +149,16 @@ describe("useDialogReducer", () => {
     });
 
     it("should support function-based data updates", () => {
-        const TopLayer = createTopLayer();
-        const Dialog = createDialog({
-            instance: TopLayer,
-            data: { count: 0 },
-            isolated: false,
+        const { TopLayerStore, Dialogs } = createTopLayer({
+            dialogs: {
+                MyDialog: {
+                    data: { count: 0 },
+                    isolated: false,
+                },
+            },
         });
+
+        const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
             const [dialog, update] = useDialogReducer(Dialog);
@@ -168,9 +184,9 @@ describe("useDialogReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("count")).toHaveTextContent("0");
@@ -183,10 +199,10 @@ describe("useDialogReducer", () => {
     });
 
     it("should return empty state when index is not provided", () => {
-        const TopLayer = createTopLayer();
+        const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [dialog, update] = useDialogReducer(TopLayer);
+            const [dialog, update] = useDialogReducer(TopLayerStore);
             return (
                 <div>
                     <span data-testid="open">{String(dialog.open)}</span>
@@ -199,9 +215,9 @@ describe("useDialogReducer", () => {
         };
 
         render(
-            <TopLayer.Provider>
+            <TopLayerStore.Provider>
                 <TestComponent />
-            </TopLayer.Provider>,
+            </TopLayerStore.Provider>,
         );
 
         expect(screen.getByTestId("open")).toHaveTextContent("false");
