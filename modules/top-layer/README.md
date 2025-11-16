@@ -351,6 +351,24 @@ const ConfirmDialog = () => (
 );
 ```
 
+If you don't want elements to exist in duplicate, you can create a condition within your `UpperLayer`. For example, the condition below will render content only if it's in a dialog and the dialog is open, or if it's outside a dialog and no dialogs are open.
+
+```tsx
+const Notifications = () => {
+  const [currentDialogStore] = useDialogStatus(TopLayerStore);
+  const topLayerStore = useTopLayer(TopLayerStore, { keys: ["hasActiveIsolatedLayers"] });
+  if (
+    (currentDialogStore.data !== undefined && !currentDialogStore.open) ||
+    (currentDialogStore.data === undefined && topLayerStore.hasActiveIsolatedLayers)
+  )
+    return null;
+
+  return (
+    // ...
+  )
+}
+```
+
 ## API Reference
 
 ### `createTopLayer(configuration, options?)`
