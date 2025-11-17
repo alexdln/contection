@@ -19,9 +19,8 @@ describe("createViewportStore", () => {
             const Store = createViewportStore();
             expect(Store._initial.width).toBeNull();
             expect(Store._initial.height).toBeNull();
-            expect(Store._initial.mounted).toBe(false);
-            expect(Store._initial.widthOptions).toBeDefined();
-            expect(Store._initial.widthOptions.default).toBeDefined();
+            expect(Store._initial.widthCategories).toBeDefined();
+            expect(Store._initial.widthCategories.default).toBeDefined();
         });
 
         it("should create a store with custom width breakpoints", () => {
@@ -35,9 +34,9 @@ describe("createViewportStore", () => {
                 },
             });
 
-            expect(Store._initial.widthOptions).toBeDefined();
-            expect(Store._initial.widthOptions.base).toBeDefined();
-            expect(Store._initial.heightOptions).toBeUndefined();
+            expect(Store._initial.widthCategories).toBeDefined();
+            expect(Store._initial.widthCategories.base).toBeDefined();
+            expect(Store._initial.heightCategories).toMatchObject({});
         });
 
         it("should create a store with custom height breakpoints", () => {
@@ -51,10 +50,10 @@ describe("createViewportStore", () => {
                 },
             });
 
-            expect(Store._initial.widthOptions).toBeDefined();
-            expect(Store._initial.widthOptions.default).toBeDefined();
-            expect(Store._initial.heightOptions).toBeDefined();
-            expect(Store._initial.heightOptions.base).toBeDefined();
+            expect(Store._initial.widthCategories).toBeDefined();
+            expect(Store._initial.widthCategories.default).toBeDefined();
+            expect(Store._initial.heightCategories).toBeDefined();
+            expect(Store._initial.heightCategories.base).toBeDefined();
         });
 
         it("should create a store with both width and height breakpoints", () => {
@@ -73,14 +72,14 @@ describe("createViewportStore", () => {
                 },
             });
 
-            expect(Store._initial.widthOptions).toBeDefined();
-            expect(Store._initial.widthOptions.base).toBeDefined();
+            expect(Store._initial.widthCategories).toBeDefined();
+            expect(Store._initial.widthCategories.base).toBeDefined();
             // @ts-expect-error - default is not defined
-            expect(Store._initial.widthOptions.default).not.toBeDefined();
-            expect(Store._initial.heightOptions).toBeDefined();
-            expect(Store._initial.heightOptions.base).toBeDefined();
+            expect(Store._initial.widthCategories.default).not.toBeDefined();
+            expect(Store._initial.heightCategories).toBeDefined();
+            expect(Store._initial.heightCategories.base).toBeDefined();
             // @ts-expect-error - default is not defined
-            expect(Store._initial.heightOptions.default).not.toBeDefined();
+            expect(Store._initial.heightCategories.default).not.toBeDefined();
         });
 
         it("should allow Provider to be called as component", () => {
@@ -197,10 +196,10 @@ describe("createViewportStore", () => {
         it("should calculate correct breakpoints for default width breakpoints", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["widthOptions"] });
+                const viewport = useStore(Store, { keys: ["widthCategories"] });
                 return (
                     <div>
-                        <span data-testid="current">{viewport.widthOptions?.default?.current || "null"}</span>
+                        <span data-testid="current">{viewport.widthCategories?.default?.current || "null"}</span>
                     </div>
                 );
             };
@@ -226,10 +225,10 @@ describe("createViewportStore", () => {
             });
 
             const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["widthOptions"] });
+                const viewport = useStore(Store, { keys: ["widthCategories"] });
                 return (
                     <div>
-                        <span data-testid="current">{viewport.widthOptions?.base?.current || "null"}</span>
+                        <span data-testid="current">{viewport.widthCategories?.base?.current || "null"}</span>
                     </div>
                 );
             };
@@ -261,10 +260,10 @@ describe("createViewportStore", () => {
             });
 
             const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["heightOptions"] });
+                const viewport = useStore(Store, { keys: ["heightCategories"] });
                 return (
                     <div>
-                        <span data-testid="current">{viewport.heightOptions?.base?.current || "null"}</span>
+                        <span data-testid="current">{viewport.heightCategories?.base?.current || "null"}</span>
                     </div>
                 );
             };
@@ -276,28 +275,6 @@ describe("createViewportStore", () => {
             );
 
             expect(screen.getByTestId("current")).toHaveTextContent("medium");
-        });
-    });
-
-    describe("mounted state", () => {
-        it("should set mounted to true after mount", () => {
-            const Store = createViewportStore();
-            const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["mounted"] });
-                return (
-                    <div>
-                        <span data-testid="mounted">{String(viewport.mounted)}</span>
-                    </div>
-                );
-            };
-
-            expect(Store._initial.mounted).toBe(false);
-            render(
-                <Store.Provider>
-                    <TestComponent />
-                </Store.Provider>,
-            );
-            expect(screen.getByTestId("mounted")).toHaveTextContent("true");
         });
     });
 
@@ -368,12 +345,12 @@ describe("createViewportStore", () => {
             });
 
             const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["widthOptions"] });
+                const viewport = useStore(Store, { keys: ["widthCategories"] });
 
                 return (
                     <div>
-                        <span data-testid="base-current">{viewport.widthOptions?.base?.current || "null"}</span>
-                        <span data-testid="custom-current">{viewport.widthOptions?.custom?.current || "null"}</span>
+                        <span data-testid="base-current">{viewport.widthCategories?.base?.current || "null"}</span>
+                        <span data-testid="custom-current">{viewport.widthCategories?.custom?.current || "null"}</span>
                     </div>
                 );
             };
@@ -507,12 +484,11 @@ describe("createViewportStore", () => {
             });
 
             const TestComponent = () => {
-                const viewport = useStore(Store, { keys: ["width", "height", "mounted"] });
+                const viewport = useStore(Store, { keys: ["width", "height"] });
                 return (
                     <div>
                         <span data-testid="width">{String(viewport.width)}</span>
                         <span data-testid="height">{String(viewport.height)}</span>
-                        <span data-testid="mounted">{String(viewport.mounted)}</span>
                     </div>
                 );
             };
@@ -525,7 +501,6 @@ describe("createViewportStore", () => {
 
             expect(screen.getByTestId("width")).toHaveTextContent("null");
             expect(screen.getByTestId("height")).toHaveTextContent("null");
-            expect(screen.getByTestId("mounted")).toHaveTextContent("true");
         });
 
         it("should handle node option set to null", () => {

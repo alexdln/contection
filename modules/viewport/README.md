@@ -1,6 +1,6 @@
 # contection-viewport
 
-A performance-based viewport management module built on top of [contection](https://github.com/alexdln/contection) - a performance-focused state management package. Provides efficient screen size tracking with granular subscriptions, memoization, and a single global resize listener that triggers re-renders only where needed.
+A performance-based viewport management module built on top of [contection](https://github.com/alexdln/contection) - a performance-focused state management package. Provides efficient screen size tracking with granular subscriptions, memoization, and a single global resize subscribeer that triggers re-renders only where needed.
 
 ## Features
 
@@ -31,7 +31,7 @@ import { createViewportStore } from "contection-viewport";
 
 const ViewportStore = createViewportStore({
   width: {
-    device: {
+    default: {
       mobile: 0,
       tablet: 600,
       desktop: 1024,
@@ -173,7 +173,7 @@ import { useViewport } from "contection-viewport";
 
 function CustomComponent() {
   // Subscribe to specific keys
-  const store = useViewport(ViewportStore, { keys: ["width", "mounted"] });
+  const store = useViewport(ViewportStore, { keys: ["width", "height"] });
 
   // Or access full store state
   const fullStore = useViewport(ViewportStore);
@@ -187,7 +187,7 @@ function CustomComponent() {
   return (
     <div>
       <p>Width: {store.width}px</p>
-      <p>Mounted: {String(store.mounted)}</p>
+      <p>Height: {store.height}px</p>
     </div>
   );
 }
@@ -209,12 +209,6 @@ The `enabled` option accepts:
 const { width } = useViewport(ViewportStore, {
   keys: ["width"],
   enabled: (store) => store.width !== null && store.width > 1024,
-});
-
-// Track breakpoint changes only when component is mounted
-const breakpoint = useViewport(ViewportStore, {
-  keys: ["widthOptions"],
-  enabled: (store) => store.mounted,
 });
 
 // Disable subscription completely
@@ -272,7 +266,7 @@ By default, `contection-viewport` monitors the `window` object for resize events
 To subscribe to a specific element:
 
 1. **Create a viewport store with `node: null`** - This prevents the store from automatically using the window
-2. **Register the desired node** - Use `registerNode` from `useViewportStorage` to register any `HTMLElement` or `Window` object
+2. **Register the desired node** - Use `setNode` from `useViewportStorage` to register any `HTMLElement` or `Window` object
 
 **Example: Registering via ref**
 
@@ -284,13 +278,13 @@ const ContainerStore = createViewportStore({
 });
 
 function ContainerComponent() {
-  const [, registerNode] = useViewportStorage(ContainerStore);
+  const [, setNode] = useViewportStorage(ContainerStore);
 
   return (
     <ContainerStore>
       <div
         ref={(node) => {
-          if (node) return registerNode(node);
+          if (node) return setNode(node);
         }}
       >
         {/* ... */}
@@ -311,15 +305,15 @@ const SidebarStore = createViewportStore({
 });
 
 function SidebarTracker() {
-  const [, registerNode] = useViewportStorage(SidebarStore);
+  const [, setNode] = useViewportStorage(SidebarStore);
 
   useEffect(() => {
     const sidebarElement = document.getElementById("sidebar");
     if (sidebarElement) {
-      const cleanup = registerNode(sidebarElement);
+      const cleanup = setNode(sidebarElement);
       return cleanup; // Cleanup sets node to null
     }
-  }, [registerNode]);
+  }, [setNode]);
 
   return null;
 }
@@ -334,18 +328,21 @@ import { useViewportStorage } from "contection-viewport";
 import { useEffect } from "react";
 
 function AnalyticsTracker() {
-  const [store, , listen, unlisten] = useViewportStorage(ViewportStore);
+  const [store, , subscribe, unsubscribe] = useViewportStorage(ViewportStore);
 
   useEffect(() => {
-    const unlistenBreakpoint = listen("widthOptions", (widthOptions) => {
-      const current = widthOptions.default?.current;
-      if (current) {
-        analytics.track("breakpoint_changed", { breakpoint: current });
+    const unsubscribeBreakpoint = subscribe(
+      "widthCategories",
+      (widthCategories) => {
+        const current = widthCategories.default?.current;
+        if (current) {
+          analytics.track("breakpoint_changed", { breakpoint: current });
+        }
       }
-    });
+    );
 
-    return unlistenBreakpoint;
-  }, [listen]);
+    return unsubscribeBreakpoint;
+  }, []);
 
   return null;
 }
@@ -363,7 +360,7 @@ Creates a new viewport store instance with Provider and Consumer components.
   - `width?: ViewportBreakpoints` - Width breakpoint definitions
   - `height?: ViewportBreakpoints` - Height breakpoint definitions (optional)
   - `throttleMs?: number` - Throttle delay in milliseconds for resize events (optional)
-  - `node?: (() => HTMLElement | Window | null) | null` - Function that returns the element to monitor, or `null` to disable automatic node selection. Defaults to `() => window`. If set to `null`, you must manually register a node using `registerNode` from `useViewportStorage`.
+  - `node?: (() => HTMLElement | Window | null) | null` - Function that returns the element to monitor, or `null` to disable automatic node selection. Defaults to `() => window`. If set to `null`, you must manually register a node using `setNode` from `useViewportStorage`.
 
 **Returns:**
 
@@ -421,7 +418,7 @@ _Re-renders:_ Only when subscribed keys change (and when mutation result changes
 const store = useViewport(ViewportStore);
 
 // Subscribe to specific keys
-const partial = useViewport(ViewportStore, { keys: ["width", "mounted"] });
+const partial = useViewport(ViewportStore, { keys: ["width", "height"] });
 
 // Custom mutation
 const showbanner = useViewport(ViewportStore, {
@@ -432,8 +429,7 @@ const showbanner = useViewport(ViewportStore, {
 // Conditional subscription
 const { width } = useViewport(ViewportStore, {
   keys: ["width"],
-  enabled: (store) =>
-    store.mounted && store.width !== null && store.width > 1024,
+  enabled: (store) => store.width !== null && store.width > 1024,
 });
 ```
 
@@ -541,12 +537,12 @@ Hook that returns store state, node registration function, and imperative subscr
 
 _Re-renders:_ never
 
-**Returns:** `[store, registerNode, listen, unlisten]` tuple where:
+**Returns:** `[store, setNode, subscribe, unsubscribe]` tuple where:
 
 - `store` - Store state reference
-- `registerNode` - Function to register a DOM element or Window to monitor. Accepts `HTMLElement | Window | null` and returns a cleanup function that sets the node to `null`
-- `listen` - Function to subscribe to store key changes
-- `unlisten` - Function to unsubscribe from store key changes
+- `setNode` - Function to register a DOM element or Window to monitor. Accepts `HTMLElement | Window | null` and returns a cleanup function that sets the node to `null`
+- `subscribe` - Function to subscribe to store key changes
+- `unsubscribe` - Function to unsubscribe from store key changes
 
 ### `Provider`
 
@@ -559,7 +555,7 @@ Component that provides a scoped viewport store instance to child components.
 **Scoping Behavior:**
 
 - Each Provider instance creates its own isolated store scope
-- Multiple Providers create separate scopes with independent resize listeners
+- Multiple Providers create separate scopes with independent resize subscribeers
 - Nested Providers create nested scopes
 
 ### `Consumer`
@@ -569,25 +565,25 @@ Component that consumes the viewport store using render props pattern.
 **Props:**
 
 - `children: (data) => React.ReactNode` - Render function
-- `options?: { keys?: string[], mutation?: Function, enabled?: boolean | Function }`:
+- `options?: { keys?: string[], mutation?: Function, enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean) }`:
   - `keys?: string[]` - Array of store keys to subscribe to. If omitted, subscribes to all keys.
   - `mutation?: (newStore, prevStore?, prevMutatedStore?) => T` - Function to compute derived value from subscribed state. Receives:
     - `newStore` - Current store state (or selected keys if `keys` is provided)
     - `prevStore` - Previous store state (or selected keys). `undefined` on first call
     - `prevMutatedStore` - Previous result of the mutation function. `undefined` on first call
-  - `enabled?: boolean | ((store: Store) => boolean)` - Condition to enable or disable the subscription. If `true` or function returns `true`, the subscription is active (by default). When this value changes, the consumer will automatically resubscribe.
+  - `enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean)` - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the consumer will automatically resubscribe.
 
 ## Performance Optimizations
 
 ### Single Global Resize Listener
 
-Unlike traditional viewport libraries that create multiple resize listeners, `contection-viewport` uses a **single global resize listener** per Provider instance. This listener:
+Unlike traditional viewport libraries that create multiple resize subscribeers, `contection-viewport` uses a **single global resize subscribeer** per Provider instance. This subscribeer:
 
 - Analyzes all breakpoint changes in one place
 - Dispatches updates only when values actually change
 - Triggers re-renders only in components that subscribe to changed breakpoints
 
-This means if you have 100 components tracking viewport changes, you still have only **one resize event listener** instead of 100.
+This means if you have 100 components tracking viewport changes, you still have only **one resize event subscribeer** instead of 100.
 
 ### Memoization
 
@@ -628,9 +624,9 @@ The resize handler only dispatches updates when values actually change:
 // Only dispatches if width actually changed
 if (store.width !== nodeWidth) {
   newStore.width = nodeWidth;
-  // Only updates breakpoint options if breakpoint changed
-  if (widthOptionsChanged) {
-    newStore.widthOptions = newWidthOptions;
+  // Only updates breakpoint categories if current breakpoint changed
+  if (widthCategoriesChanged) {
+    newStore.widthCategories = newWidthCategories;
   }
 }
 ```
