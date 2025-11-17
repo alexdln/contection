@@ -9,9 +9,8 @@ import {
     type CreateStoreOptions,
     type GlobalStore,
     type InternalStoreType,
-    type ListenOptions,
 } from "./types";
-import { checkIsServer } from "./utils";
+import { checkIsServer, removeItemFromArray } from "./utils";
 
 /**
  * Props for the GlobalStoreProvider component.
@@ -36,66 +35,55 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     context: Context,
 }: GlobalStoreProviderProps<Store>) => {
     const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = options?.lifecycleHooks || {};
-    const store = useRef<InternalStoreType<Store>>(
+    const store = useRef<InternalStoreType>(
         defaultData
-            ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, listeners: [] }]))
+            ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, subscribers: [] }]))
             : {},
     );
     const mounted = useRef(false);
 
-    const update = useCallback((part: Partial<Store> | ((prevData: Store) => Partial<Store>)) => {
+    const setStore = useCallback((part: Partial<Store> | ((prevStore: Store) => Partial<Store>)) => {
         const newPart = typeof part === "function" ? part(storeProxy) : part;
-        const listenersToNotify: {
+        const subscribersToNotify: {
             callback: (value: any) => void;
-            enabled: ListenOptions<Store>["enabled"];
             value: unknown;
         }[] = [];
 
         Object.entries(newPart).forEach(([key, value]) => {
-            if (!store.current[key]) store.current[key] = { value: undefined, listeners: [] };
+            if (!store.current[key]) store.current[key] = { value, subscribers: [] };
 
-            const newValue = typeof value === "function" ? value(store.current[key].value) : value;
+            if (store.current[key].value === value) return;
 
-            if (store.current[key].value === newValue) return;
-
-            store.current[key].value = newValue;
-            store.current[key].listeners.forEach(({ callback, enabled }) => {
-                listenersToNotify.push({
+            store.current[key].value = value;
+            store.current[key].subscribers.forEach((callback) => {
+                subscribersToNotify.push({
                     callback,
-                    enabled,
-                    value: newValue,
+                    value,
                 });
             });
         });
-        // We first change all the values, and then call all the related listeners.
+        // We first change all the values, and then call all the related subscribers.
         // Otherwise, in batch updates, a race condition could occur, in which
-        // some listeners are checked and called with new values, and some with old ones
-        listenersToNotify.forEach(({ callback, enabled, value }) => {
-            let disabled = false;
-            if (enabled === "never") disabled = true;
-            else if (enabled === "after-hydration") disabled = !mounted.current;
-            else if (typeof enabled === "function") disabled = !enabled(storeProxy);
-            if (!disabled) {
-                callback(value);
-            }
+        // some subscribers are checked and called with new values, and some with old ones
+        subscribersToNotify.forEach(({ callback, value }) => {
+            callback(value);
         });
     }, []);
 
-    const listen = useCallback((key: StoreKey, listener: (value: any) => void, options: ListenOptions<Store> = {}) => {
-        if (!store.current[key]) store.current[key] = { value: undefined, listeners: [] };
+    const subscribe = useCallback((key: StoreKey, onStoreChange: (value: any) => void) => {
+        if (!store.current[key]) store.current[key] = { value: undefined, subscribers: [] };
 
-        const listenerEntry = { callback: listener, ...options };
-        store.current[key].listeners.push(listenerEntry);
+        store.current[key].subscribers.push(onStoreChange);
 
         return () => {
-            store.current[key].listeners = store.current[key].listeners.filter((entry) => entry !== listenerEntry);
+            store.current[key].subscribers = removeItemFromArray(store.current[key].subscribers, onStoreChange);
         };
     }, []);
 
-    const unlisten = useCallback((key: StoreKey, listener: (value: any) => void) => {
+    const unsubscribe = useCallback((key: StoreKey, onStoreChange: (value: any) => void) => {
         if (!store.current[key]) return;
 
-        store.current[key].listeners = store.current[key].listeners.filter(({ callback }) => callback !== listener);
+        store.current[key].subscribers = removeItemFromArray(store.current[key].subscribers, onStoreChange);
     }, []);
 
     const storeProxy = useMemo(() => {
@@ -115,9 +103,9 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     const storeData = useMemo(
         () => ({
             store: storeProxy,
-            update,
-            listen,
-            unlisten,
+            setStore,
+            subscribe,
+            unsubscribe,
         }),
         [],
     );
@@ -132,7 +120,7 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
 
         if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
         storeWillMountCallback.current = storeWillMount
-            ? storeWillMount(storeProxy, update, listen, unlisten)
+            ? storeWillMount(storeProxy, setStore, subscribe, unsubscribe)
             : undefined;
     }, []);
 
@@ -143,7 +131,9 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     }, []);
 
     useEffect(() => {
-        const storeDidMountCallback = storeDidMount ? storeDidMount(storeProxy, update, listen, unlisten) : undefined;
+        const storeDidMountCallback = storeDidMount
+            ? storeDidMount(storeProxy, setStore, subscribe, unsubscribe)
+            : undefined;
         mounted.current = true;
 
         return () => {

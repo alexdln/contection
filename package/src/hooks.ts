@@ -1,20 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
-import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, ListenOptions } from "./types";
+import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, StoreOptions } from "./types";
 
 /**
  * Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
  * Unlike `useStore`, the store returned from `useStoreReducer` does not trigger re-renders when it changes,
  * making it useful for reading values in handlers or effects.
- * @template Store - The store type
  * @param store - The store instance
- * @returns A tuple `[store, dispatch, listen, unlisten]`
+ * @returns A tuple `[store, setStore, subscribe, unsubscribe]`
  * @example
- * const [store, dispatch, listen, unlisten] = useStoreReducer(Store);
+ * const [store, setStore, subscribe, unsubscribe] = useStoreReducer(Store);
  * // ...
  * useEffect(() => {
- *   return listen("count", (count) => {
+ *   return subscribe("count", (count) => {
  *     console.log(count);
  *   });
  * }, []);
@@ -22,19 +21,16 @@ import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, 
  *   sendAnalyticsEvent("user_action", { userId: store.user.id });
  * }, []);
  * // ...
- * <button onClick={() => dispatch((prev) => ({ count: prev.count + 1 }))}>Increment</button>
+ * <button onClick={() => setStore((prev) => ({ count: prev.count + 1 }))}>Increment</button>
  */
 export const useStoreReducer = <Store extends BaseStore>(store: Pick<StoreInstance<Store>, "_context">) => {
     const data = useContext<GlobalStore<Store>>(store._context);
-    return useMemo(() => [data.store, data.update, data.listen, data.unlisten] as const, [data]);
+    return useMemo(() => [data.store, data.setStore, data.subscribe, data.unsubscribe] as const, [data]);
 };
 
 /**
  * Hook that subscribes to store state with optional key filtering and computed value derivation.
  * Component re-renders only when subscribed keys change (or when mutation result changes).
- * @template Store - The store type
- * @template Keys - Array of store keys to subscribe to
- * @template Mutation - Mutation function that transforms the subscribed state
  * @param instance - The store instance
  * @param options - The options for the store subscription
  * @param options.keys - The keys to subscribe to
@@ -52,7 +48,7 @@ export function useStore<
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context" | "_initial">,
-    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] },
+    options: { keys?: Keys; mutation: MutationFn<Store, Keys, ResultType>; enabled?: StoreOptions<Store>["enabled"] },
 ): ResultType;
 export function useStore<
     Store extends BaseStore = BaseStore,
@@ -60,7 +56,7 @@ export function useStore<
     Keys extends Array<keyof Store> = Array<keyof Store>,
 >(
     instance: Pick<StoreInstance<Store>, "_context" | "_initial">,
-    options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] },
+    options?: { keys?: Keys; mutation?: undefined; enabled?: StoreOptions<Store>["enabled"] },
 ): Pick<Store, Keys[number]>;
 export function useStore<
     Store extends BaseStore = BaseStore,
@@ -72,70 +68,71 @@ export function useStore<
         keys,
         mutation,
         enabled = "always",
-    }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType>; enabled?: ListenOptions<Store>["enabled"] } = {},
+    }: { keys?: Keys; mutation?: MutationFn<Store, Keys, ResultType>; enabled?: StoreOptions<Store>["enabled"] } = {},
 ): ResultType {
-    const [store, , listen] = useStoreReducer<Store>(instance);
+    const [store, , originalSubscribe] = useStoreReducer<Store>(instance);
     const mounted = useRef(false);
-    const internalListen = useRef<(() => void) | undefined>(undefined);
-    const storeKeys = useMemo(() => keys || (Object.keys(store) as unknown as Keys), [keys]);
-    const prevStore = useRef<Store>(
-        Object.fromEntries(storeKeys.map((key) => [key, instance._initial[key as keyof Store]])) as Store,
-    );
-    const prevMutatedStore = useRef<ResultType | undefined>(mutation ? mutation(store as Store) : undefined);
+    const localSubscriber = useRef<(() => void) | undefined>(undefined);
+    const prevStore = useRef<Store | undefined>(undefined);
+    const prevMutatedStore = useRef<ResultType | undefined>(undefined);
+    const storeKeys = useMemo(() => keys || (Object.keys(store) as unknown as Keys), []);
+    const enabledMemoized = useMemo(() => {
+        if (enabled === "always") return true;
+        else if (enabled === "after-hydration") return () => mounted.current;
+        else if (typeof enabled === "function") return enabled;
+        else if (enabled === "never") return false;
+    }, [enabled]);
 
     const getSnapshot = useCallback(() => {
-        let disabled = false;
-        if (enabled === "always") disabled = false;
-        else if (enabled === "after-hydration") disabled = !mounted.current;
-        else if (typeof enabled === "function") disabled = !enabled(store);
-        else if (enabled === "never") disabled = true;
-
-        if (disabled) {
-            if (mutation) return prevMutatedStore.current;
-            return prevStore.current;
-        }
         const newStore = Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store;
 
-        const isStoreEqual = Object.entries(newStore).every(
-            ([key, value]) => value === prevStore.current?.[key as keyof Store],
-        );
+        const isDisabled =
+            enabledMemoized === false || (typeof enabledMemoized === "function" && !enabledMemoized(store));
+        const isStoreEqual =
+            prevStore.current &&
+            Object.entries(newStore).every(([key, value]) => value === prevStore.current![key as keyof Store]);
 
-        if (mutation && prevStore.current && prevMutatedStore.current && isStoreEqual) return prevMutatedStore.current;
-
-        if (!mutation && prevStore.current && isStoreEqual) return prevStore.current;
-
-        prevStore.current = newStore;
+        if (isStoreEqual || isDisabled) {
+            if (mutation && prevMutatedStore.current) return prevMutatedStore.current;
+            else if (!mutation && prevStore.current) return prevStore.current;
+        }
 
         if (mutation) {
             const mutatedData = mutation(newStore, prevStore.current, prevMutatedStore.current);
             prevMutatedStore.current = mutatedData;
+            prevStore.current = newStore;
             return mutatedData;
         }
 
+        prevMutatedStore.current = undefined;
+        prevStore.current = newStore;
         return newStore;
-    }, [storeKeys]);
+    }, [storeKeys, enabledMemoized]);
 
     const subscribe = useCallback(
         (onStoreChange: () => void) => {
-            const unlistens = storeKeys.map((key) =>
-                listen<Store[typeof key], typeof key>(key, onStoreChange, { enabled }),
+            if (enabledMemoized === false) return () => {};
+
+            const unsubscribes = storeKeys.map((key) =>
+                originalSubscribe<Store[typeof key], typeof key>(key, onStoreChange),
             );
-            internalListen.current = onStoreChange;
+            localSubscriber.current = onStoreChange;
 
             return () => {
-                unlistens.forEach((unlisten) => unlisten());
-                internalListen.current = undefined;
+                unsubscribes.forEach((unsubscribe) => unsubscribe());
+                localSubscriber.current = undefined;
             };
         },
-        [storeKeys, enabled],
+        [storeKeys, enabledMemoized],
     );
 
-    // We listen to the mount state at the component level to avoid prematurely updating new components,
+    // We subscribe to the mount state at the component level to avoid prematurely updating new components,
     // especially for PPR or suspense
     useEffect(() => {
         if (!mounted.current) {
             mounted.current = true;
-            internalListen.current?.();
+
+            if (enabled === "after-hydration" && localSubscriber.current) localSubscriber.current();
         }
     }, [enabled === "after-hydration"]);
 

@@ -9,7 +9,7 @@ import {
     type GlobalStore,
     type MutationFn,
     type ProviderProps,
-    ListenOptions,
+    StoreOptions,
 } from "./types";
 export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
@@ -34,9 +34,9 @@ import { GlobalStoreConsumer } from "./consumer";
 export const createStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
     const GlobalStoreContext = createContext<GlobalStore<Store>>({
         store: initialData,
-        update: () => {},
-        listen: () => () => {},
-        unlisten: () => {},
+        setStore: () => {},
+        subscribe: () => () => {},
+        unsubscribe: () => {},
     });
 
     const Provider: React.FC<ProviderProps<Store>> = ({ children, value = initialData, options: providerOptions }) => (
@@ -53,12 +53,12 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         options: {
             keys?: Keys;
             mutation: MutationFn<Store, Keys, ResultType>;
-            enabled?: ListenOptions<Store>["enabled"];
+            enabled?: StoreOptions<Store>["enabled"];
         };
         children: (data: ResultType) => React.ReactNode;
     }): React.ReactNode;
     function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
-        options?: { keys?: Keys; mutation?: undefined; enabled?: ListenOptions<Store>["enabled"] };
+        options?: { keys?: Keys; mutation?: undefined; enabled?: StoreOptions<Store>["enabled"] };
         children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
     }): React.ReactNode;
     function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>({
@@ -68,7 +68,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         options?: {
             keys?: Keys;
             mutation?: MutationFn<Store, Keys, ResultType>;
-            enabled?: ListenOptions<Store>["enabled"];
+            enabled?: StoreOptions<Store>["enabled"];
         };
         children: (data: Store | ResultType) => React.ReactNode;
     }): React.ReactNode {
@@ -79,7 +79,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
                     options as {
                         keys: Keys;
                         mutation: MutationFn<Store, Keys, ResultType>;
-                        enabled?: ListenOptions<Store>["enabled"];
+                        enabled?: StoreOptions<Store>["enabled"];
                     }
                 }
             >
