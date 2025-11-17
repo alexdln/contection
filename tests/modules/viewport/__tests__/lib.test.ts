@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type ViewportBreakpoints } from "contection-viewport/src/types";
-import { formatOptions, calculateCurrentBreakpoint } from "contection-viewport/src/utils";
+import { type ViewportCategories } from "contection-viewport/src/core/types";
+import { formatCategories, calculateCurrentCategories } from "contection-viewport/src/core/lib";
 
 describe("formatOptions", () => {
     it("should format breakpoints correctly", () => {
-        const breakpoints: ViewportBreakpoints = {
+        const breakpoints: ViewportCategories = {
             base: {
                 mobile: 0,
                 tablet: 600,
@@ -12,25 +12,25 @@ describe("formatOptions", () => {
             },
         };
 
-        const { formattedOptions, currentOptions } = formatOptions(breakpoints);
+        const { formattedCategories, currentCategories } = formatCategories(breakpoints);
 
-        expect(formattedOptions).toHaveLength(1);
-        expect(formattedOptions[0][0]).toBe("base");
-        expect(formattedOptions[0][1]).toEqual([
+        expect(formattedCategories).toHaveLength(1);
+        expect(formattedCategories[0][0]).toBe("base");
+        expect(formattedCategories[0][1]).toEqual([
             ["mobile", 0],
             ["tablet", 600],
             ["desktop", 1024],
         ]);
 
-        expect(currentOptions).toHaveProperty("base");
-        expect(currentOptions.base).toEqual({
+        expect(currentCategories).toHaveProperty("base");
+        expect(currentCategories.base).toEqual({
             lowerBreakpoints: null,
             current: null,
         });
     });
 
     it("should sort breakpoints by size", () => {
-        const breakpoints: ViewportBreakpoints = {
+        const breakpoints: ViewportCategories = {
             base: {
                 desktop: 1024,
                 mobile: 0,
@@ -38,9 +38,9 @@ describe("formatOptions", () => {
             },
         };
 
-        const { formattedOptions } = formatOptions(breakpoints);
+        const { formattedCategories } = formatCategories(breakpoints);
 
-        expect(formattedOptions[0][1]).toEqual([
+        expect(formattedCategories[0][1]).toEqual([
             ["mobile", 0],
             ["tablet", 600],
             ["desktop", 1024],
@@ -48,7 +48,7 @@ describe("formatOptions", () => {
     });
 
     it("should handle multiple breakpoint groups", () => {
-        const breakpoints: ViewportBreakpoints = {
+        const breakpoints: ViewportCategories = {
             base: {
                 mobile: 0,
                 tablet: 600,
@@ -59,15 +59,15 @@ describe("formatOptions", () => {
             },
         };
 
-        const { formattedOptions, currentOptions } = formatOptions(breakpoints);
+        const { formattedCategories, currentCategories } = formatCategories(breakpoints);
 
-        expect(formattedOptions).toHaveLength(2);
-        expect(currentOptions).toHaveProperty("base");
-        expect(currentOptions).toHaveProperty("custom");
+        expect(formattedCategories).toHaveLength(2);
+        expect(currentCategories).toHaveProperty("base");
+        expect(currentCategories).toHaveProperty("custom");
     });
 
     it("should handle breakpoints with null values", () => {
-        const breakpoints: ViewportBreakpoints = {
+        const breakpoints: ViewportCategories = {
             base: {
                 mobile: 0,
                 tablet: 600,
@@ -75,9 +75,9 @@ describe("formatOptions", () => {
             },
         };
 
-        const { formattedOptions } = formatOptions(breakpoints);
+        const { formattedCategories } = formatCategories(breakpoints);
 
-        expect(formattedOptions[0][1]).toEqual([
+        expect(formattedCategories[0][1]).toEqual([
             ["mobile", 0],
             ["desktop", null],
             ["tablet", 600],
@@ -85,9 +85,9 @@ describe("formatOptions", () => {
     });
 });
 
-describe("calculateCurrentBreakpoint", () => {
+describe("calculateCurrentCategories", () => {
     it("should calculate current breakpoint for mobile viewport", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -98,14 +98,14 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(500, formattedOptions);
+        const result = calculateCurrentCategories(500, formattedCategories);
 
         expect(result.base.current).toBe("mobile");
         expect(result.base.lowerBreakpoints).toEqual([]);
     });
 
     it("should calculate current breakpoint for tablet viewport", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -116,14 +116,14 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(800, formattedOptions);
+        const result = calculateCurrentCategories(800, formattedCategories);
 
         expect(result.base.current).toBe("tablet");
         expect(result.base.lowerBreakpoints).toEqual(["mobile"]);
     });
 
     it("should calculate current breakpoint for desktop viewport", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -134,14 +134,14 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(1200, formattedOptions);
+        const result = calculateCurrentCategories(1200, formattedCategories);
 
         expect(result.base.current).toBe("desktop");
         expect(result.base.lowerBreakpoints).toEqual(["mobile", "tablet"]);
     });
 
     it("should handle viewport exactly at breakpoint", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -152,13 +152,13 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(600, formattedOptions);
+        const result = calculateCurrentCategories(600, formattedCategories);
 
         expect(result.base.current).toBe("tablet");
     });
 
     it("should handle multiple breakpoint groups", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -177,14 +177,14 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(800, formattedOptions);
+        const result = calculateCurrentCategories(800, formattedCategories);
 
         expect(result.base.current).toBe("tablet");
         expect(result.custom.current).toBe("medium");
     });
 
     it("should not handle viewport smaller than all breakpoints", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -194,13 +194,13 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(0, formattedOptions);
+        const result = calculateCurrentCategories(0, formattedCategories);
 
-        expect(result.base.current).toBeUndefined();
+        expect(result.base.current).toBeNull();
     });
 
     it("should handle viewport larger than all breakpoints", () => {
-        const formattedOptions = [
+        const formattedCategories = [
             [
                 "base",
                 [
@@ -211,16 +211,16 @@ describe("calculateCurrentBreakpoint", () => {
             ],
         ] as any;
 
-        const result = calculateCurrentBreakpoint(2000, formattedOptions);
+        const result = calculateCurrentCategories(2000, formattedCategories);
 
         expect(result.base.current).toBe("desktop");
         expect(result.base.lowerBreakpoints).toEqual(["mobile", "tablet"]);
     });
 
     it("should handle breakpoints with only one value", () => {
-        const formattedOptions = [["base", [["mobile", 0]]]] as any;
+        const formattedCategories = [["base", [["mobile", 0]]]] as any;
 
-        const result = calculateCurrentBreakpoint(500, formattedOptions);
+        const result = calculateCurrentCategories(500, formattedCategories);
 
         expect(result.base.current).toBe("mobile");
     });

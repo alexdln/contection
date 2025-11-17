@@ -24,9 +24,8 @@ function testCreateViewportStoreDefault() {
     const Store = createViewportStore();
     const width: number | null = Store._initial.width;
     const height: number | null = Store._initial.height;
-    const mounted: boolean = Store._initial.mounted;
 
-    const defaultBreakpoint = Store._initial.widthOptions.default;
+    const defaultBreakpoint = Store._initial.widthCategories.default;
     const current: "mobile" | "tablet" | "desktop" | null = defaultBreakpoint.current;
     const lowerBreakpoints: ("mobile" | "tablet" | "desktop")[] | null = defaultBreakpoint.lowerBreakpoints;
 }
@@ -48,16 +47,16 @@ function testCreateViewportStoreWithWidth() {
         },
     });
 
-    const baseBreakpoint = Store._initial.widthOptions.base;
+    const baseBreakpoint = Store._initial.widthCategories.base;
     const baseCurrent: "mobile" | "tablet" | "desktop" | null = baseBreakpoint.current;
     const baseLower: ("mobile" | "tablet" | "desktop")[] | null = baseBreakpoint.lowerBreakpoints;
 
-    const customBreakpoint = Store._initial.widthOptions.custom;
+    const customBreakpoint = Store._initial.widthCategories.custom;
     const customCurrent: "small" | "medium" | "large" | null = customBreakpoint.current;
     const customLower: ("small" | "medium" | "large")[] | null = customBreakpoint.lowerBreakpoints;
 
     // @ts-expect-error - default should not exist when custom width is provided
-    const defaultOpt = Store._initial.widthOptions.default;
+    const defaultOpt = Store._initial.widthCategories.default;
 }
 
 // Test 3: createViewportStore with height breakpoints
@@ -72,9 +71,9 @@ function testCreateViewportStoreWithHeight() {
         },
     });
 
-    const defaultBreakpoint = Store._initial.widthOptions.default;
+    const defaultBreakpoint = Store._initial.widthCategories.default;
 
-    const heightBase = Store._initial.heightOptions.base;
+    const heightBase = Store._initial.heightCategories.base;
     const heightCurrent: "small" | "medium" | "large" | null = heightBase.current;
     const heightLower: ("small" | "medium" | "large")[] | null = heightBase.lowerBreakpoints;
 }
@@ -96,8 +95,8 @@ function testCreateViewportStoreWithBoth() {
         },
     });
 
-    const widthBase = Store._initial.widthOptions.base;
-    const heightBase = Store._initial.heightOptions.base;
+    const widthBase = Store._initial.widthCategories.base;
+    const heightBase = Store._initial.heightCategories.base;
 
     const widthCurrent: "mobile" | "tablet" | null = widthBase.current;
     const heightCurrent: "small" | "medium" | null = heightBase.current;
@@ -330,13 +329,11 @@ function testUseViewportStorage() {
 
         const width: number | null = store.width;
         const height: number | null = store.height;
-        const mounted: boolean = store.mounted;
-        const widthBase = store.widthOptions.base;
-        const heightBase = store.heightOptions.base;
+        const widthBase = store.widthCategories.base;
+        const heightBase = store.heightCategories.base;
 
         const unsubscribe1 = listen("width", (value: number | null) => {});
         const unsubscribe2 = listen("height", (value: number | null) => {});
-        const unsubscribe3 = listen("mounted", (value: boolean) => {});
 
         const cleanup = registerNode(document.body);
         cleanup();
@@ -348,7 +345,6 @@ function testUseViewportStorage() {
 
         unlisten("width", () => {});
         unlisten("height", () => {});
-        unlisten("mounted", () => {});
 
         // @ts-expect-error - should not accept invalid key
         unlisten("invalid", () => {});
@@ -377,13 +373,11 @@ function testUseViewport() {
         const store = useViewport(Store);
         const width: number | null = store.width;
         const height: number | null = store.height;
-        const mounted: boolean = store.mounted;
-        const widthBase = store.widthOptions.base;
-        const heightBase = store.heightOptions.base;
+        const widthBase = store.widthCategories.base;
+        const heightBase = store.heightCategories.base;
 
-        const partial = useViewport(Store, { keys: ["width", "mounted"] });
+        const partial = useViewport(Store, { keys: ["width"] });
         const partialWidth: number | null = partial.width;
-        const partialMounted: boolean = partial.mounted;
         // @ts-expect-error - should not have unselected keys
         const partialHeight = partial.height;
     }
@@ -408,17 +402,15 @@ function testStoreProviderConsumer() {
         {(data) => {
             const width: number | null = data.width;
             const height: number | null = data.height;
-            const mounted: boolean = data.mounted;
-            const baseBreakpoint = data.widthOptions.base;
+            const baseBreakpoint = data.widthCategories.base;
             return <div>{width}</div>;
         }}
     </Store.Consumer>;
 
     // Consumer with keys
-    <Store.Consumer options={{ keys: ["width", "mounted"] }}>
+    <Store.Consumer options={{ keys: ["width"] }}>
         {(data) => {
             const width: number | null = data.width;
-            const mounted: boolean = data.mounted;
             // @ts-expect-error - should not have unselected keys
             const height = data.height;
             return <div>{width}</div>;
@@ -440,7 +432,7 @@ function testTypeInferenceWithConst() {
         width: breakpoints,
     });
 
-    const baseCurrent: "mobile" | "tablet" | "desktop" | null = Store._initial.widthOptions.base.current;
+    const baseCurrent: "mobile" | "tablet" | "desktop" | null = Store._initial.widthCategories.base.current;
 }
 
 // Test 16: Multiple breakpoint groups
@@ -469,9 +461,9 @@ function testMultipleBreakpointGroups() {
         },
     });
 
-    const responsive = Store._initial.widthOptions.responsive;
-    const semantic = Store._initial.widthOptions.semantic;
-    const vertical = Store._initial.heightOptions.vertical;
+    const responsive = Store._initial.widthCategories.responsive;
+    const semantic = Store._initial.widthCategories.semantic;
+    const vertical = Store._initial.heightCategories.vertical;
 
     const responsiveCurrent: "xs" | "sm" | "md" | "lg" | "xl" | null = responsive.current;
     const semanticCurrent: "mobile" | "tablet" | "desktop" | null = semantic.current;
@@ -499,7 +491,7 @@ function testSingleBreakpoint() {
         },
     });
 
-    const single = Store._initial.widthOptions.single;
+    const single = Store._initial.widthCategories.single;
     const current: "only" | null = single.current;
     const lower: "only"[] | null = single.lowerBreakpoints;
 }
@@ -523,14 +515,14 @@ function testEnabledOption() {
             enabled: "after-hydration",
             mutation: (store) => String(store.width),
         });
-        const store4 = useViewport(Store, { enabled: (store) => store.mounted });
+        const store4 = useViewport(Store, { enabled: (store) => Boolean(store.width) && store.width! > 0 });
         const width1: number | null = store1.width;
         const width2: number | null = store2.width;
         const width3: string = store3String;
         const width4: number | null = store4.width;
 
         const width5 = useViewportWidth(Store, { enabled: "always" });
-        const width6 = useViewportWidth(Store, { enabled: (store) => store.mounted });
+        const width6 = useViewportWidth(Store, { enabled: (store) => Boolean(store.width) && store.width! > 0 });
         const widthType5: number | null = width5;
         const widthType6: number | null = width6;
     }

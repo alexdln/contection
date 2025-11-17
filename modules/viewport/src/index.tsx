@@ -1,40 +1,38 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createStore } from "contection";
 import React from "react";
 
-import { type DetectViewportType, type ViewportStoreType, type ViewportBreakpoints } from "./types";
-import { defaultViewportWidthBreakpoint } from "./constants";
-import { calculateCurrentBreakpoint, defaultGetNode, formatOptions, throttle } from "./utils";
+import { type ViewportStore, type ViewportCategories } from "./core/types";
+import { defaultViewportCategories, defaultGetNode } from "./core/constants";
+import { calculateNewData, formatCategories } from "./core/lib";
+import { throttle } from "./core/utils";
 
 export function createViewportStore<
-    BreakpointWidthOptions extends ViewportBreakpoints | undefined = undefined,
-    BreakpointHeightOptions extends ViewportBreakpoints | undefined = undefined,
->(settings?: {
-    width?: BreakpointWidthOptions;
-    height?: BreakpointHeightOptions;
+    WidthCategories extends ViewportCategories = typeof defaultViewportCategories,
+    HeightCategories extends ViewportCategories = Record<string, never>,
+>(configuration?: {
+    width?: WidthCategories;
+    height?: HeightCategories;
     throttleMs?: number;
     node?: (() => HTMLElement | Window | null) | null;
 }) {
-    const { width, height, throttleMs, node: getNode = defaultGetNode } = settings ?? {};
-    const { formattedOptions: formattedWidthOptions, currentOptions: widthOptions } = formatOptions(
-        width ?? { default: defaultViewportWidthBreakpoint },
-    );
-    const { formattedOptions: formattedHeightOptions, currentOptions: heightOptions } = height
-        ? formatOptions(height)
-        : { formattedOptions: undefined, currentOptions: undefined };
+    const {
+        width: widthCategories = defaultViewportCategories,
+        height: heightCategories = {},
+        throttleMs,
+        node: getNode = defaultGetNode,
+    } = configuration ?? {};
 
-    const Store = createStore<
-        ViewportStoreType<
-            DetectViewportType<BreakpointWidthOptions, { default: typeof defaultViewportWidthBreakpoint }>,
-            DetectViewportType<BreakpointHeightOptions, undefined>
-        >
-    >(
+    const { formattedCategories: formattedWidthCategories, currentCategories: currentWidthCategories } =
+        formatCategories(widthCategories);
+    const { formattedCategories: formattedHeightCategories, currentCategories: currentHeightCategories } =
+        formatCategories(heightCategories);
+
+    const Store = createStore<ViewportStore<WidthCategories, HeightCategories>>(
         {
             width: null,
             height: null,
-            widthOptions,
-            heightOptions,
-            mounted: false,
+            widthCategories: currentWidthCategories,
+            heightCategories: currentHeightCategories,
             node: undefined,
         },
         {
@@ -52,38 +50,18 @@ export function createViewportStore<
                             return dispatch({
                                 width: null,
                                 height: null,
-                                widthOptions,
-                                heightOptions,
-                                mounted: false,
+                                widthCategories: currentWidthCategories,
+                                heightCategories: currentHeightCategories,
                                 node: undefined,
                             });
                         }
 
-                        const nodeWidth = node instanceof Window ? node.innerWidth : node.clientWidth;
-                        const nodeHeight = node instanceof Window ? node.innerHeight : node.clientHeight;
-                        const dispatchedData: any = {};
-                        if (store.width !== nodeWidth) {
-                            dispatchedData.width = nodeWidth;
-                            const newWidthOptions = calculateCurrentBreakpoint(nodeWidth, formattedWidthOptions);
-                            let widthOptionsChanged = false;
-                            Object.entries(store.widthOptions).forEach(([key, value]) => {
-                                if (newWidthOptions[key].current === value.current) newWidthOptions[key] = value;
-                                else widthOptionsChanged = true;
-                            });
-                            if (widthOptionsChanged) dispatchedData.widthOptions = newWidthOptions;
-                        }
-                        if (store.height !== nodeHeight) {
-                            dispatchedData.height = nodeHeight;
-                            if (formattedHeightOptions && store.heightOptions) {
-                                const newHeightOptions = calculateCurrentBreakpoint(nodeHeight, formattedHeightOptions);
-                                let heightOptionsChanged = false;
-                                Object.entries(store.heightOptions).forEach(([key, value]) => {
-                                    if (newHeightOptions[key].current === value.current) newHeightOptions[key] = value;
-                                    else heightOptionsChanged = true;
-                                });
-                                if (heightOptionsChanged) dispatchedData.heightOptions = newHeightOptions;
-                            }
-                        }
+                        const dispatchedData = calculateNewData(
+                            node,
+                            store,
+                            formattedWidthCategories,
+                            formattedHeightCategories,
+                        );
                         dispatch(dispatchedData);
                     };
                     const onSizeChangeThrottled = throttleMs ? throttle(onSizeChange, throttleMs) : onSizeChange;
@@ -101,13 +79,6 @@ export function createViewportStore<
                     return () => {
                         unlisten();
                         node?.removeEventListener("resize", onSizeChangeThrottled);
-                    };
-                },
-                storeDidMount: (_data, dispatch) => {
-                    dispatch({ mounted: true });
-
-                    return () => {
-                        dispatch({ mounted: false });
                     };
                 },
             },

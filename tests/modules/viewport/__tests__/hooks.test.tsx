@@ -135,8 +135,8 @@ describe("viewport hooks", () => {
                 },
             });
             const TestComponent = () => {
-                const store = useViewport(Store, { keys: ["widthOptions"] });
-                const breakpoint = store.widthOptions.base;
+                const store = useViewport(Store, { keys: ["widthCategories"] });
+                const breakpoint = store.widthCategories.base;
                 return (
                     <>
                         <div data-testid="current">{String(breakpoint.current)}</div>
@@ -234,8 +234,8 @@ describe("viewport hooks", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
                 const store = useViewport(Store, {
-                    keys: ["width", "mounted"],
-                    enabled: (store) => store.mounted,
+                    keys: ["width"],
+                    enabled: (store) => Boolean(store.width) && store.width! > 0,
                 });
                 return <div data-testid="width">{String(store.width)}</div>;
             };
@@ -497,7 +497,7 @@ describe("viewport hooks", () => {
             expect(screen.getByTestId("result")).toHaveTextContent("true");
         });
 
-        it("should return null when widthOptions is not available", () => {
+        it("should return null when widthCategories is not available", () => {
             const Store = createViewportStore();
             const TestComponent = () => {
                 const result = useViewportWidthCompare(Store, {
