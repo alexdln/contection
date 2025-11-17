@@ -1,5 +1,5 @@
 import { type createStore } from "contection";
-import { type GlobalStore, type ListenOptions } from "contection/dist/types";
+import { type GlobalStore, type StoreOptions } from "contection/dist/types";
 
 export type ViewportBreakpoint = {
     [name: string]: number;
@@ -35,7 +35,7 @@ export interface ViewportStoreType<
 export type ViewportEnabled<
     WidthOptions extends ViewportBreakpoints,
     HeightOptions extends ViewportBreakpoints | undefined,
-> = ListenOptions<ViewportStoreType<WidthOptions, HeightOptions>>["enabled"];
+> = StoreOptions<ViewportStoreType<WidthOptions, HeightOptions>>["enabled"];
 
 export type DetectViewportType<BreakpointOptions, DefaultBreakpoint> = BreakpointOptions extends undefined
     ? DefaultBreakpoint

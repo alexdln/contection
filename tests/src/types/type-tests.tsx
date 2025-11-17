@@ -330,10 +330,7 @@ function testEnabledOption() {
     const doubledType4: string = doubled4String;
 
     const [, , listen] = useStoreReducer(Store);
-    const unsubscribe1 = listen("count", (value: number) => {}, { enabled: "always" });
-    const unsubscribe2 = listen("count", (value: number) => {}, { enabled: "never" });
-    const unsubscribe3 = listen("count", (value: number) => {}, { enabled: "after-hydration" });
-    const unsubscribe4 = listen("count", (value: number) => {}, { enabled: (store) => store.count > 0 });
+    const unsubscribe1 = listen("count", (value: number) => {});
 
     // @ts-expect-error - should not accept invalid enabled value
     const invalid2 = listen("count", (value: number) => {}, { enabled: "invalid" });
