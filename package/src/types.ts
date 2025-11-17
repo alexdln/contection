@@ -3,14 +3,14 @@ type NonFunction<T> = T extends Function ? never : T extends object ? T : never;
 
 export type StoreKey = string | number | symbol;
 
-export type ListenOptions<Store extends BaseStore = BaseStore> = {
+export type StoreOptions<Store extends BaseStore = BaseStore> = {
     enabled?: "always" | "never" | "after-hydration" | ((store: Store) => boolean);
 };
 
-export type InternalStoreType<Store extends BaseStore = BaseStore> = {
+export type InternalStoreType = {
     [key: StoreKey]: {
         value: unknown;
-        listeners: ({ callback: (value: unknown) => void } & ListenOptions<Store>)[];
+        subscribers: ((value: unknown) => void)[];
     };
 };
 
@@ -62,36 +62,29 @@ export type GlobalStore<Store extends BaseStore> = {
     store: Store;
     /**
      * Updates the store state with a partial state or a callback function
-     * @template NewStorePart - The partial store state type for direct updates
-     * @template CallbackStorePart - The partial store state type for callback updates
      */
-    update: <NewStorePart extends Partial<Store>, CallbackStorePart extends Partial<Store>>(
+    setStore: <NewStorePart extends Partial<Store>, CallbackStorePart extends Partial<Store>>(
         newStorePart: ValidateNewStore<Store, NewStorePart> | CallbackStore<Store, CallbackStorePart>,
     ) => void;
     /**
      * Subscribes to changes for a specific store key
-     * @template DataType - The type of the value for the listened key
-     * @template Key - The listened key in the store
      * @param options.enabled - Condition to enable or disable the subscription. Accepts `"always"` (default), `"never"`, `"after-hydration"`, or a function `(store: Store) => boolean`. When this value changes, the subscription will automatically resubscribe.
-     * @returns A function to unsubscribe from the listener
+     * @returns A function to unsubscribe from the subscriber
      * @example
-     * const unlisten = listen("count", (value) => {
+     * const unsubscribe = subscribe("count", (value) => {
      *     console.log(value);
      * }, { enabled: "always" });
      */
-    listen: <DataType extends Store[Key], Key extends keyof Store>(
+    subscribe: <DataType extends Store[Key], Key extends keyof Store>(
         key: Key,
-        listener: (value: DataType) => void,
-        options?: ListenOptions<Store>,
+        onStoreChange: (value: DataType) => void,
     ) => () => void;
     /**
      * Unsubscribes from changes for a specific store key
-     * @template DataType - The type of the value for the listened key
-     * @template Key - The listened key in the store
      */
-    unlisten: <DataType extends Store[Key], Key extends keyof Store>(
+    unsubscribe: <DataType extends Store[Key], Key extends keyof Store>(
         key: Key,
-        listener: (value: DataType) => void,
+        onStoreChange: (value: DataType) => void,
     ) => void;
 };
 
@@ -104,9 +97,9 @@ export type GlobalStore<Store extends BaseStore> = {
 interface LifecycleMountHook<Store extends BaseStore> {
     (
         store: Store,
-        dispatch: GlobalStore<Store>["update"],
-        listen: GlobalStore<Store>["listen"],
-        unlisten: GlobalStore<Store>["unlisten"],
+        setStore: GlobalStore<Store>["setStore"],
+        subscribe: GlobalStore<Store>["subscribe"],
+        unsubscribe: GlobalStore<Store>["unsubscribe"],
     ): void | ((store: Store) => void);
 }
 

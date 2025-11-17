@@ -127,12 +127,12 @@ import { useStoreReducer } from "contection";
 
 function Counter() {
   // useStoreReducer never triggers re-render
-  const [store, dispatch] = useStoreReducer(AppStore);
+  const [store, setStore] = useStoreReducer(AppStore);
 
   return (
     <div>
       <button onClick={() => alert(store.count)}>Show count</button>
-      <button onClick={() => dispatch({ count: store.count + 1 })}>
+      <button onClick={() => setStore({ count: store.count + 1 })}>
         Increment
       </button>
     </div>
@@ -162,21 +162,21 @@ function UserProfile() {
 
 ### Updating the Store
 
-Use `useStoreReducer` to get the store state and dispatch function. Unlike `useStore`, the store returned from `useStoreReducer` does not trigger re-renders when it changes, making it useful for reading values without subscribing to updates:
+Use `useStoreReducer` to get the store state and setStore function. Unlike `useStore`, the store returned from `useStoreReducer` does not trigger re-renders when it changes, making it useful for reading values without subscribing to updates:
 
 ```tsx
 import { useStoreReducer } from "contection";
 
 function Counter() {
-  const [store, dispatch] = useStoreReducer(AppStore);
+  const [store, setStore] = useStoreReducer(AppStore);
 
   return (
     <div>
       <button onClick={() => alert(store.count)}>Show count</button>
-      <button onClick={() => dispatch({ count: store.count + 1 })}>
+      <button onClick={() => setStore({ count: store.count + 1 })}>
         Increment
       </button>
-      <button onClick={() => dispatch((prev) => ({ count: prev.count - 1 }))}>
+      <button onClick={() => setStore((prev) => ({ count: prev.count - 1 }))}>
         Decrement
       </button>
     </div>
@@ -313,40 +313,40 @@ const store = useStore(AppStore);
 
 ### Imperative Subscriptions
 
-Use `listen` and `unlisten` for imperative subscriptions outside React's render cycle. Useful for side effects, logging, or external system integrations:
+Use `subscribe` and `unsubscribe` for imperative subscriptions outside React's render cycle. Useful for side effects, logging, or external system integrations:
 
 ```tsx
 import { useStoreReducer } from "contection";
 import { useEffect } from "react";
 
 function AnalyticsTracker() {
-  const [store, dispatch, listen, unlisten] = useStoreReducer(AppStore);
+  const [store, setStore, subscribe, unsubscribe] = useStoreReducer(AppStore);
 
   useEffect(() => {
-    const unlistenUser = listen("user", (user) => {
+    const unsubscribeUser = subscribe("user", (user) => {
       analytics.track("user_updated", { userId: user.email });
     });
 
-    const unlistenTheme = listen("theme", (theme) => {
+    const unsubscribeTheme = subscribe("theme", (theme) => {
       document.documentElement.setAttribute("data-theme", theme);
     });
 
     // Cleanup subscriptions on unmount
     return () => {
-      unlistenUser();
-      unlistenTheme();
+      unsubscribeUser();
+      unsubscribeTheme();
     };
-  }, [listen]);
+  }, [subscribe]);
 
   return null;
 }
 ```
 
-You can also use `listen` in a `ref` callback to set up subscriptions when you have direct access to a DOM node. This pattern is useful for imperative DOM manipulation that needs to react to store changes:
+You can also use `subscribe` in a `ref` callback to set up subscriptions when you have direct access to a DOM node. This pattern is useful for imperative DOM manipulation that needs to react to store changes:
 
 ```tsx
 const Header = () => {
-  const [store, , listen] = useStoreReducer(AppStore);
+  const [store, , subscribe] = useStoreReducer(AppStore);
   return (
     <header>
       {/* ... */}
@@ -354,9 +354,9 @@ const Header = () => {
         {/* Default state for first render and future renders in conditional blocks */}
         aria-hidden={store.device === "desktop"}
         className="aria-hidden:hidden"
-        {/* listen returns unlisten which will automatically run on ref unmount (from react v19) */}
+        {/* subscribe returns unsubscribe which will automatically run on ref unmount (from react v19) */}
         ref={(node) =>
-          listen("device", (device) => {
+          subscribe("device", (device) => {
             node?.setAttribute("aria-hidden", String(device === "desktop"));
           })
         }
@@ -366,46 +366,6 @@ const Header = () => {
     </header>
   );
 };
-```
-
-### Conditional Listen Subscriptions
-
-The `listen` function also supports the `enabled` option for conditional subscriptions (_same as `useStore(Store, { enabled })`_):
-
-```tsx
-import { useStoreReducer } from "contection";
-import { useEffect } from "react";
-
-function ConditionalTracker() {
-  const [store, dispatch, listen] = useStoreReducer(AppStore);
-
-  useEffect(() => {
-    // Track account changes only if user is an admin
-    const unlistenAccount = listen(
-      "account",
-      (account) => {
-        analytics.track("account_updated", { accountId: account.id });
-      },
-      { enabled: (store) => store.user.role === "admin" }
-    );
-
-    // Track count only when it's less than 10
-    const unlistenCount = listen(
-      "count",
-      (count) => {
-        console.log("Count is low:", count);
-      },
-      { enabled: (store) => store.count < 10 }
-    );
-
-    return () => {
-      unlistenAccount();
-      unlistenCount();
-    };
-  }, [listen]);
-
-  return null;
-}
 ```
 
 ### Lifecycle Hooks
@@ -421,11 +381,11 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeWillMount: (store, dispatch, listen, unlisten) => {
+      storeWillMount: (store, setStore, subscribe, unsubscribe) => {
         // Initialization logic
         // Return cleanup function if needed
       },
-      storeDidMount: (store, dispatch, listen, unlisten) => {
+      storeDidMount: (store, setStore, subscribe, unsubscribe) => {
         // Post-mount logic
         // Return cleanup function if needed
       },
@@ -464,15 +424,15 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeWillMount: (store, dispatch, listen) => {
+      storeWillMount: (store, setStore, subscribe) => {
         const savedTheme = localStorage.getItem("theme");
         if (savedTheme) {
-          dispatch({ theme: savedTheme as "light" | "dark" });
+          setStore({ theme: savedTheme as "light" | "dark" });
         }
-        const unlisten = listen("count", (count) => {
+        const unsubscribe = subscribe("count", (count) => {
           console.log("Count changed:", count);
         });
-        return unlisten;
+        return unsubscribe;
       },
     },
   }
@@ -499,11 +459,11 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeDidMount: (store, dispatch, listen) => {
-        dispatch({ windowWidth: window.innerWidth });
+      storeDidMount: (store, setStore, subscribe) => {
+        setStore({ windowWidth: window.innerWidth });
 
         const handleResize = () => {
-          dispatch({ windowWidth: window.innerWidth });
+          setStore({ windowWidth: window.innerWidth });
         };
         window.addEventListener("resize", handleResize);
 
@@ -568,7 +528,7 @@ const AppStore = createStore<AppStoreType>(
   },
   {
     lifecycleHooks: {
-      storeDidMount: (store, dispatch, listen, unlisten) => {
+      storeDidMount: (store, setStore, subscribe, unsubscribe) => {
         const ws = new WebSocket("wss://example.com");
 
         return () => {
@@ -613,7 +573,7 @@ While lifecycle hooks can be passed to `createStore`, they are shared across all
 ```tsx
 const sharedOptions = {
   lifecycleHooks: {
-    storeDidMount: (store, dispatch) => {
+    storeDidMount: (store, setStore) => {
       console.log("Shared initialization");
     },
   },
@@ -640,8 +600,8 @@ function App() {
         options={{
           lifecycleHooks: {
             ...sharedOptions.lifecycleHooks,
-            storeWillMount: (store, dispatch) => {
-              dispatch({ count: 100 });
+            storeWillMount: (store, setStore) => {
+              setStore({ count: 100 });
             },
           },
         }}
@@ -695,14 +655,14 @@ Hook that subscribes to store state with optional key listening and computed val
 
 ### `useStoreReducer(instance)`
 
-Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
+Hook that returns a tuple containing the store state and setStore functions.
 
-**Returns:** `[store, dispatch, listen, unlisten]` tuple where:
+**Returns:** `[store, setStore, subscribe, unsubscribe]` tuple where:
 
 - `store` - Current store state object
-- `dispatch` - Function to update store state: `(partial: Partial<Store> | (prev: Store) => Partial<Store>) => void`
-- `listen` - Function to subscribe to store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void, options?: { enabled?: boolean | ((store: Store) => boolean) }) => () => void`. The `enabled` option conditionally enables or disables the subscription. When the `enabled` value changes, the subscription will automatically resubscribe.
-- `unlisten` - Function to unsubscribe from store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void) => void`
+- `setStore` - Function to update store state: `(partial: Partial<Store> | (prev: Store) => Partial<Store>) => void`
+- `subscribe` - Function to subscribe to store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void) => () => void`. Returns an unsubscribe function.
+- `unsubscribe` - Function to unsubscribe from store key changes: `<K extends keyof Store>(key: K, listener: (value: Store[K]) => void) => void`
 
 ### `Provider`
 
