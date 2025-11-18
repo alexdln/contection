@@ -2,6 +2,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { type StoreInstance, type BaseStore, type GlobalStore, type MutationFn, StoreOptions } from "./types";
+import { clone, cloneAndCompare } from "./utils";
 
 /**
  * Hook that returns a tuple containing the store state and dispatch functions, similar to `useReducer`.
@@ -84,17 +85,24 @@ export function useStore<
     }, [enabled]);
 
     const getSnapshot = useCallback(() => {
-        const newStore = Object.fromEntries(storeKeys.map((key) => [key, store[key as keyof Store]])) as Store;
-
         const isDisabled =
             enabledMemoized === false || (typeof enabledMemoized === "function" && !enabledMemoized(store));
-        const isStoreEqual =
-            prevStore.current &&
-            Object.entries(newStore).every(([key, value]) => value === prevStore.current![key as keyof Store]);
+        const { result: newStore, isEqual } = prevStore.current
+            ? cloneAndCompare(store, storeKeys, prevStore.current)
+            : { result: clone(store, storeKeys), isEqual: false };
 
-        if (isStoreEqual || isDisabled) {
-            if (mutation && prevMutatedStore.current) return prevMutatedStore.current;
-            else if (!mutation && prevStore.current) return prevStore.current;
+        if (isEqual || isDisabled) {
+            if (!mutation) {
+                prevStore.current ||= clone(instance._initial, storeKeys);
+                return prevStore.current;
+            } else if (prevMutatedStore.current) {
+                return prevMutatedStore.current;
+            } else if (isDisabled) {
+                const initialStore = clone(instance._initial, storeKeys);
+                prevMutatedStore.current = mutation(initialStore, prevStore.current, prevMutatedStore.current);
+                prevStore.current = initialStore;
+                return prevMutatedStore.current;
+            }
         }
 
         if (mutation) {
