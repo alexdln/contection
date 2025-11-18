@@ -1,10 +1,10 @@
 import { createTopLayer } from "contection-top-layer";
-import { useTopLayer, useTopLayerImperative } from "contection-top-layer/src/hooks";
+import { useTopLayerStore, useTopLayerImperative } from "contection-top-layer/src/hooks";
 import React from "react";
 
 import { render, screen, act } from "@src/setup/test-utils";
 
-describe("useTopLayer", () => {
+describe("useTopLayerStore", () => {
     it("should return dialogs, upperLayers, hasActiveIsolatedLayers, and hasActiveLayers", () => {
         const { TopLayerStore } = createTopLayer({
             dialogs: {
@@ -16,7 +16,7 @@ describe("useTopLayer", () => {
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayerStore);
+            const store = useTopLayerStore(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -60,7 +60,7 @@ describe("useTopLayer", () => {
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayerStore);
+            const store = useTopLayerStore(TopLayerStore);
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>
@@ -92,7 +92,7 @@ describe("useTopLayer", () => {
         const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayerStore);
+            const store = useTopLayerStore(TopLayerStore);
             return (
                 <div>
                     <span data-testid="has-active">{String(store.hasActiveLayers)}</span>
@@ -130,7 +130,7 @@ describe("useTopLayer", () => {
         });
 
         const TestComponent = () => {
-            const store = useTopLayer(TopLayerStore, { keys: ["dialogs"] });
+            const store = useTopLayerStore(TopLayerStore, { keys: ["dialogs"] });
             return (
                 <div>
                     <span data-testid="dialogs-count">{store.dialogs.length}</span>

@@ -1,10 +1,10 @@
 import { createTopLayer } from "contection-top-layer";
-import { useUpperLayerStatus, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
+import { useUpperLayerStore, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
 import React from "react";
 
 import { render, screen, act } from "@src/setup/test-utils";
 
-describe("useUpperLayerStatus", () => {
+describe("useUpperLayerStore", () => {
     it("should return upper layer status with data", () => {
         const { TopLayerStore, UpperLayers } = createTopLayer({
             upperLayers: {
@@ -18,8 +18,8 @@ describe("useUpperLayerStatus", () => {
         const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
-            const [status] = useUpperLayerStatus(UpperLayer);
-            return <span data-testid="content">{String(status.data?.content)}</span>;
+            const store = useUpperLayerStore(UpperLayer);
+            return <span data-testid="content">{String(store.data?.content)}</span>;
         };
 
         render(
@@ -35,8 +35,8 @@ describe("useUpperLayerStatus", () => {
         const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [status] = useUpperLayerStatus(TopLayerStore);
-            return <span data-testid="data">{String(status.data)}</span>;
+            const store = useUpperLayerStore(TopLayerStore);
+            return <span data-testid="data">{String(store.data)}</span>;
         };
 
         render(
@@ -61,10 +61,10 @@ describe("useUpperLayerStatus", () => {
         const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
-            const [status] = useUpperLayerStatus(UpperLayer, {
+            const store = useUpperLayerStore(UpperLayer, {
                 enabled: "always",
             });
-            return <span data-testid="content">{String(status.data?.content)}</span>;
+            return <span data-testid="content">{String(store.data?.content)}</span>;
         };
 
         render(
@@ -89,10 +89,10 @@ describe("useUpperLayerStatus", () => {
         const UpperLayer = UpperLayers.MyUpperLayer;
 
         const TestComponent = () => {
-            const [status] = useUpperLayerStatus(UpperLayer, {
+            const store = useUpperLayerStore(UpperLayer, {
                 enabled: (store) => Boolean(store.data),
             });
-            return <span data-testid="content">{String(status.data?.content)}</span>;
+            return <span data-testid="content">{String(store.data?.content)}</span>;
         };
 
         render(

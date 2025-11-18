@@ -1,13 +1,13 @@
 "use client";
 
-import { InheritedStore, NonFunction, TopLayerStore } from "../types";
-import { useUpperLayerStatus } from "./hooks";
+import { type StoreOptions } from "contection/dist/types";
+
+import { type InheritedStore, type NonFunction, type TopLayerStore } from "../types";
+import { useUpperLayerStore } from "./hooks";
 
 export interface UpperLayerConsumerProps<Data extends NonFunction<unknown>> {
     children: (store: { data: Data }) => React.ReactNode;
-    options?: {
-        enabled?: "always" | "never" | "after-hydration" | ((store: { data: Data }) => boolean);
-    };
+    options?: StoreOptions<{ data: Data }>;
 }
 
 export const UpperLayerConsumer =
@@ -15,7 +15,7 @@ export const UpperLayerConsumer =
         instance: InheritedStore<Store> & { _id: string; _initial: Data },
     ) =>
     ({ children, options }: UpperLayerConsumerProps<Data>) => {
-        const [store] = useUpperLayerStatus(instance, options);
+        const store = useUpperLayerStore(instance, options);
 
         return children(store);
     };

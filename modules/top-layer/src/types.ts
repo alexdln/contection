@@ -5,32 +5,36 @@ export type InheritedStore<Store extends TopLayerStore> = {
     _instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
 };
 
+export type CheckIsActive<ItemData extends unknown = unknown> = (
+    data: Omit<ItemData, "checkIsActive" | "type">,
+) => boolean;
+
 export type Dialog<Data extends unknown = unknown> = {
     isolated: boolean;
     open: boolean;
     data: Data;
     node: HTMLDialogElement | null;
-    checkIsActive: (data: Omit<Dialog<Data>, "checkIsActive" | "type">) => boolean;
+    checkIsActive: CheckIsActive<Dialog<Data>>;
     type: "dialog";
 };
 
 export type UpperLayer<Data extends unknown = unknown> = {
     isolated: boolean;
     data?: Data;
-    checkIsActive: (data: Omit<UpperLayer<Data>, "checkIsActive" | "type">) => boolean;
+    checkIsActive: CheckIsActive<UpperLayer<Data>>;
     type: "upperLayer";
 };
 
 export type ConfigurationDialogLayer<Data extends unknown = unknown> = {
     isolated?: boolean;
     data?: Data;
-    checkIsActive?: (data: Omit<Dialog<Data>, "checkIsActive" | "type">) => boolean;
+    checkIsActive?: CheckIsActive<Dialog<Data>>;
 };
 
 export type ConfigurationUpperLayerLayer<Data extends unknown = unknown> = {
     isolated?: boolean;
     data?: Data;
-    checkIsActive?: (data: Omit<UpperLayer<Data>, "checkIsActive" | "type">) => boolean;
+    checkIsActive?: CheckIsActive<UpperLayer<Data>>;
 };
 
 export type Configuration<

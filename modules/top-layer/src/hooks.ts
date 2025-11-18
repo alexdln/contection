@@ -2,9 +2,9 @@ import { type StoreInstance } from "contection/dist/types";
 import { useStore, useStoreReducer } from "contection";
 import { useMemo } from "react";
 
-import { type TopLayerStore, type Dialog, type UpperLayer, TopLayerHookStore } from "./types";
+import { type TopLayerStore, type Dialog, type UpperLayer, type TopLayerHookStore } from "./types";
 
-export const useTopLayer = <
+export const useTopLayerStore = <
     Store extends TopLayerStore,
     Keys extends ("dialogs" | "upperLayers" | "hasActiveIsolatedLayers" | "hasActiveLayers")[],
 >(
@@ -13,14 +13,20 @@ export const useTopLayer = <
         keys?: Keys;
     },
 ) => {
-    const keys = options?.keys ?? ["dialogs", "upperLayers", "hasActiveIsolatedLayers", "hasActiveLayers"];
-    const store = useStore(instance, {
+    const keys = useMemo(
+        () => (options?.keys ?? ["dialogs", "upperLayers", "hasActiveIsolatedLayers", "hasActiveLayers"]) as Keys,
+        [options?.keys],
+    );
+
+    return useStore(instance, {
         mutation: (store, prevStore, prevMutatedStore) => {
             const newStore = {
-                dialogs: keys.includes("dialogs") && Object.values(store).filter((dialog) => dialog.type === "dialog"),
-                upperLayers:
-                    keys.includes("upperLayers") &&
-                    Object.values(store).filter((upperLayer) => upperLayer.type === "upperLayer"),
+                dialogs: keys.includes("dialogs")
+                    ? Object.values(store).filter((dialog) => dialog.type === "dialog")
+                    : [],
+                upperLayers: keys.includes("upperLayers")
+                    ? Object.values(store).filter((upperLayer) => upperLayer.type === "upperLayer")
+                    : [],
                 hasActiveIsolatedLayers:
                     keys.includes("hasActiveIsolatedLayers") &&
                     Object.values(store).some(
@@ -40,7 +46,7 @@ export const useTopLayer = <
                 keys.length === Object.keys(prevMutatedStoreTyped).length &&
                 keys.every((key) => newStore[key] === prevMutatedStoreTyped[key]);
 
-            if (isSameStore) return prevMutatedStoreTyped as Pick<TopLayerHookStore, (typeof keys)[number]>;
+            if (isSameStore) return prevMutatedStoreTyped;
 
             return Object.fromEntries(keys.map((key) => [key, newStore[key]])) as Pick<
                 TopLayerHookStore,
@@ -48,8 +54,6 @@ export const useTopLayer = <
             >;
         },
     }) as Pick<TopLayerHookStore, Keys[number]>;
-
-    return store;
 };
 
 export const useTopLayerImperative = <Store extends TopLayerStore>(
@@ -66,14 +70,13 @@ export const useTopLayerImperative = <Store extends TopLayerStore>(
             },
             get hasActiveIsolatedLayers(): boolean {
                 return Object.values(store).some(
-                    ({ checkIsActive, isolated, type, ...layer }) =>
-                        isolated &&
+                    ({ checkIsActive, type, ...layer }) =>
+                        layer.isolated &&
                         (type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer)),
                 );
             },
             get hasActiveLayers(): boolean {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                return Object.values(store).some(({ checkIsActive, isolated, type, ...layer }) =>
+                return Object.values(store).some(({ checkIsActive, type, ...layer }) =>
                     type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer),
                 );
             },

@@ -1,10 +1,10 @@
 import { createTopLayer } from "contection-top-layer";
-import { useDialogStatus, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
+import { useDialogStore, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
 import React from "react";
 
 import { render, screen, act } from "@src/setup/test-utils";
 
-describe("useDialogStatus", () => {
+describe("useDialogStore", () => {
     it("should return dialog status with data and open state", () => {
         const { TopLayerStore, Dialogs } = createTopLayer({
             dialogs: {
@@ -18,11 +18,11 @@ describe("useDialogStatus", () => {
         const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
-            const [status] = useDialogStatus(Dialog);
+            const store = useDialogStore(Dialog);
             return (
                 <div>
-                    <span data-testid="open">{String(status.open)}</span>
-                    <span data-testid="title">{String(status.data?.title)}</span>
+                    <span data-testid="open">{String(store.open)}</span>
+                    <span data-testid="title">{String(store.data?.title)}</span>
                 </div>
             );
         };
@@ -41,11 +41,11 @@ describe("useDialogStatus", () => {
         const { TopLayerStore } = createTopLayer({});
 
         const TestComponent = () => {
-            const [status] = useDialogStatus(TopLayerStore);
+            const store = useDialogStore(TopLayerStore);
             return (
                 <div>
-                    <span data-testid="open">{String(status.open)}</span>
-                    <span data-testid="data">{String(status.data)}</span>
+                    <span data-testid="open">{String(store.open)}</span>
+                    <span data-testid="data">{String(store.data)}</span>
                 </div>
             );
         };
@@ -73,8 +73,8 @@ describe("useDialogStatus", () => {
         const Dialog = Dialogs.MyDialog;
 
         const TestComponent = () => {
-            const [status] = useDialogStatus(Dialog, { enabled: "always" });
-            return <span data-testid="title">{String(status.data?.title)}</span>;
+            const store = useDialogStore(Dialog, { enabled: "always" });
+            return <span data-testid="title">{String(store.data?.title)}</span>;
         };
 
         render(

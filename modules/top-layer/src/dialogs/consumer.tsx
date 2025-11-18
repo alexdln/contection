@@ -1,13 +1,13 @@
 "use client";
 
-import { InheritedStore, NonFunction, TopLayerStore } from "../types";
-import { useDialogStatus } from "./hooks";
+import { type StoreOptions } from "contection/dist/types";
+
+import { type InheritedStore, type NonFunction, type TopLayerStore } from "../types";
+import { useDialogStore } from "./hooks";
 
 export interface DialogConsumerProps<Data extends NonFunction<unknown>> {
     children: (store: { data: Data; open: boolean }) => React.ReactNode;
-    options?: {
-        enabled?: "always" | "never" | "after-hydration" | ((store: { data: Data; open: boolean }) => boolean);
-    };
+    options?: StoreOptions<{ data: Data; open: boolean }>;
 }
 
 export const DialogConsumer =
@@ -15,7 +15,7 @@ export const DialogConsumer =
         instance: InheritedStore<Store> & { _id: string; _initial: Data },
     ) =>
     ({ children, options }: DialogConsumerProps<Data>) => {
-        const [store] = useDialogStatus(instance, options);
+        const store = useDialogStore(instance, options);
 
         return children(store);
     };

@@ -9,9 +9,9 @@ import React from "react";
 
 import { type Dialog, type UpperLayer } from "contection-top-layer/src/types";
 import { createTopLayer } from "contection-top-layer";
-import { useTopLayer, useTopLayerImperative } from "contection-top-layer/src/hooks";
-import { useDialogStatus, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
-import { useUpperLayerStatus, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
+import { useTopLayerStore, useTopLayerImperative } from "contection-top-layer/src/hooks";
+import { useDialogStore, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
+import { useUpperLayerStore, useUpperLayerReducer } from "contection-top-layer/src/upper-layers/hooks";
 
 // Test 1: createTopLayer basic structure
 function testCreateTopLayer() {
@@ -138,7 +138,7 @@ function testCreateUpperLayerWithOptionalData() {
     const data: undefined = UpperLayer._initial;
 }
 
-// Test 6: useTopLayer
+// Test 6: useTopLayerStore
 function testUseTopLayer() {
     const { TopLayerStore } = createTopLayer({
         dialogs: {
@@ -156,13 +156,13 @@ function testUseTopLayer() {
     });
 
     function Component() {
-        const store = useTopLayer(TopLayerStore);
+        const store = useTopLayerStore(TopLayerStore);
         const dialogs: Dialog[] = store.dialogs;
         const upperLayers: UpperLayer[] = store.upperLayers;
         const hasActiveIsolatedLayers: boolean = store.hasActiveIsolatedLayers;
         const hasActiveLayers: boolean = store.hasActiveLayers;
 
-        const partial = useTopLayer(TopLayerStore, { keys: ["dialogs", "hasActiveLayers"] });
+        const partial = useTopLayerStore(TopLayerStore, { keys: ["dialogs", "hasActiveLayers"] });
         const partialDialogs: Dialog[] = partial.dialogs;
         const partialHasActive: boolean = partial.hasActiveLayers;
         // @ts-expect-error - should not have unselected keys
@@ -192,7 +192,7 @@ function testUseTopLayerImperative() {
     }
 }
 
-// Test 8: useDialogStatus
+// Test 8: useDialogStore
 function testUseDialogStatus() {
     const { Dialogs } = createTopLayer({
         dialogs: {
@@ -206,18 +206,18 @@ function testUseDialogStatus() {
     const Dialog = Dialogs.Dialog;
 
     function Component() {
-        const [status] = useDialogStatus(Dialog);
-        const open: boolean = status.open;
-        const title: string = status.data.title;
-        const count: number = status.data.count;
+        const store = useDialogStore(Dialog);
+        const open: boolean = store.open;
+        const title: string = store.data.title;
+        const count: number = store.data.count;
 
-        const [statusWithEnabled] = useDialogStatus(Dialog, { enabled: "always" });
-        const open2: boolean = statusWithEnabled.open;
+        const storeWithEnabled = useDialogStore(Dialog, { enabled: "always" });
+        const open2: boolean = storeWithEnabled.open;
 
-        const [statusWithFunction] = useDialogStatus(Dialog, {
+        const storeWithFunction = useDialogStore(Dialog, {
             enabled: (store) => store.open,
         });
-        const open3: boolean = statusWithFunction.open;
+        const open3: boolean = storeWithFunction.open;
     }
 }
 
@@ -250,7 +250,7 @@ function testUseDialogReducer() {
     }
 }
 
-// Test 10: useUpperLayerStatus
+// Test 10: useUpperLayerStore
 function testUseUpperLayerStatus() {
     const { UpperLayers } = createTopLayer({
         upperLayers: {
@@ -264,17 +264,17 @@ function testUseUpperLayerStatus() {
     const UpperLayer = UpperLayers.UpperLayer;
 
     function Component() {
-        const [status] = useUpperLayerStatus(UpperLayer);
-        const content: string | undefined = status.data?.content;
-        const active: boolean | undefined = status.data?.active;
+        const store = useUpperLayerStore(UpperLayer);
+        const content: string | undefined = store.data?.content;
+        const active: boolean | undefined = store.data?.active;
 
-        const [statusWithEnabled] = useUpperLayerStatus(UpperLayer, { enabled: "always" });
-        const content2: string | undefined = statusWithEnabled.data?.content;
+        const storeWithEnabled = useUpperLayerStore(UpperLayer, { enabled: "always" });
+        const content2: string | undefined = storeWithEnabled.data?.content;
 
-        const [statusWithFunction] = useUpperLayerStatus(UpperLayer, {
+        const storeWithFunction = useUpperLayerStore(UpperLayer, {
             enabled: (store) => Boolean(store.data),
         });
-        const content3: string | undefined = statusWithFunction.data?.content;
+        const content3: string | undefined = storeWithFunction.data?.content;
     }
 }
 
@@ -350,7 +350,7 @@ function testMultipleLayers() {
     const Dialog2 = Dialogs.Dialog2;
     const UpperLayer1 = UpperLayers.UpperLayer1;
 
-    const store = useTopLayer(TopLayerStore);
+    const store = useTopLayerStore(TopLayerStore);
     const dialogsCount: number = store.dialogs.length;
     const upperLayersCount: number = store.upperLayers.length;
 }

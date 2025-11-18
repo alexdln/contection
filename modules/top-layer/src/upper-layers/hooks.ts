@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { type StoreInstance } from "contection/dist/types";
+import { type StoreOptions, type StoreInstance } from "contection/dist/types";
 import { useStore, useStoreReducer } from "contection";
 import { use, useMemo } from "react";
 
@@ -12,24 +12,20 @@ type InheritedStore<Store extends TopLayerStore> = {
     _instance: Pick<StoreInstance<Store>, "_context" | "_initial">;
 };
 
-export const useUpperLayerStatus = <Store extends TopLayerStore, Data>(
+export const useUpperLayerStore = <Store extends TopLayerStore, Data>(
     instance:
         | Pick<StoreInstance<Store>, "_context" | "_initial">
         | (InheritedStore<Store> & { _id: string; _initial: Data }),
-    {
-        enabled = "always",
-    }: {
-        enabled?: "always" | "never" | "after-hydration" | ((store: { data: Data }) => boolean);
-    } = {},
+    { enabled = "always" }: StoreOptions<{ data: Data }> = {},
 ) => {
     const id = "_id" in instance ? instance._id : use(UpperLayerContext).id;
 
-    const store = useStore("_instance" in instance ? instance._instance : instance, {
+    return useStore("_instance" in instance ? instance._instance : instance, {
         keys: id ? [id] : [],
         mutation: (store, prevStore, prevMutatedStore) => {
-            if (!id || !store[id]) return { data: "_instance" in instance ? instance._initial : undefined };
-            if ((prevMutatedStore as { data: Data })?.data === store[id].data) {
-                return prevMutatedStore as { data: Data };
+            if (!id || !store[id]) return { data: "_instance" in instance ? instance._initial : (undefined as Data) };
+            if (prevMutatedStore && prevMutatedStore?.data === store[id].data) {
+                return prevMutatedStore;
             }
             return { data: store[id].data as Data };
         },
@@ -38,8 +34,7 @@ export const useUpperLayerStatus = <Store extends TopLayerStore, Data>(
                 ? (store) => enabled({ data: store[id].data as Data })
                 : enabled
             : "never",
-    });
-    return useMemo(() => [store] as [{ data: Data }], [store]);
+    }) as { data: Data };
 };
 
 export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends NonFunction<unknown>>(
@@ -48,7 +43,7 @@ export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends N
         | (InheritedStore<Store> & { _id: string; _initial: Data }),
 ) => {
     const id = "_id" in instance ? instance._id : use(UpperLayerContext).id;
-    const [origStore, origDispatch] = useStoreReducer("_instance" in instance ? instance._instance : instance);
+    const [origStore, origSetStore] = useStoreReducer("_instance" in instance ? instance._instance : instance);
 
     return useMemo(() => {
         if (!id || !origStore[id])
@@ -57,14 +52,14 @@ export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends N
                 () => {},
             ] as const;
 
-        const upperLayer = {
+        const store = {
             get data() {
                 return origStore[id].data;
             },
         } as { data: Data };
-        function update(store: (store: { data: Data }) => { data: Data }): void;
-        function update(store: { data: NonFunction<Data> }): void;
-        function update(store: unknown) {
+        function setStore(store: (store: { data: Data }) => { data: Data }): void;
+        function setStore(store: { data: NonFunction<Data> }): void;
+        function setStore(store: unknown) {
             if (!id) return;
 
             let newPart: { data: Data };
@@ -73,8 +68,8 @@ export const useUpperLayerReducer = <Store extends TopLayerStore, Data extends N
             } else {
                 newPart = store as { data: Data };
             }
-            origDispatch((prev) => ({ [id]: { ...prev[id], ...newPart } }) as any);
+            origSetStore((prev) => ({ [id]: { ...prev[id], ...newPart } }) as any);
         }
-        return [upperLayer, update] as const;
+        return [store, setStore] as const;
     }, []);
 };
