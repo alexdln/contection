@@ -13,20 +13,20 @@ export interface DialogProps
 }
 
 export const Dialog =
-    <Store extends TopLayerStore>({
+    ({
         instance,
         id,
         context: Context = DialogWrapperContext,
     }: {
-        instance: Pick<StoreInstance<Store>, "_context">;
+        instance: Pick<StoreInstance<TopLayerStore>, "_context">;
         id: string;
         context?: React.Context<{ id?: string }>;
     }) =>
     ({ children, onClose, ...props }: DialogProps) => {
-        const [store, dispatch, listen] = useStoreReducer(instance);
+        const [store, setStore, subscribe] = useStoreReducer(instance);
 
         const registerDialog = useCallback((node: HTMLDialogElement | null) => {
-            if (!node || !store[id]) return;
+            if (!node || !store[id] || store[id]) return;
             const dialogStore = store[id] as DialogType;
 
             if (dialogStore.open) {
@@ -34,13 +34,13 @@ export const Dialog =
             } else if (node.open) {
                 node.close();
             }
-            dispatch((prev) => {
+            setStore((prev) => {
                 (prev[id] as DialogType).node = node;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                return prev as any;
+
+                return prev;
             });
 
-            return listen(String(id) as keyof Store, (newDialog) => {
+            return subscribe(id, (newDialog) => {
                 if ((newDialog as DialogType).open) {
                     node.showModal();
                 } else if (node.open) {
@@ -56,10 +56,9 @@ export const Dialog =
                 if (e.defaultPrevented) return;
 
                 const dialogStore = store[id] as DialogType;
-                dispatch({
+                setStore({
                     [id]: { ...dialogStore, open: false },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any);
+                });
             },
             [onClose],
         );

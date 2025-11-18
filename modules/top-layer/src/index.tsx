@@ -14,11 +14,12 @@ export const createTopLayer = <
     const { dialogs, upperLayers } = configuration;
     const initialState: TopLayerStore = formatStore(configuration);
     const Store = createStore<TopLayerStore>(initialState, options);
-    const { Provider: StoreProvider, $$typeof, _context, _initial, displayName } = Store;
 
     const Provider = ({ children }: { children: React.ReactNode }) => {
         return <StoreProvider>{children}</StoreProvider>;
     };
+
+    const { Provider: StoreProvider, $$typeof, _context, _initial, displayName } = Store;
     const TopLayerStore = Object.assign(Provider, {
         Provider,
         $$typeof,
@@ -41,32 +42,6 @@ export const createTopLayer = <
 
     return { TopLayerStore, Dialogs, UpperLayers };
 };
-
-// const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
-//     dialogs: {
-//         MyDialog: {
-//             data: "Hello",
-//         } as const,
-//         MyDialog2: {
-//             data: "Hello22",
-//         } as const,
-//     },
-// });
-
-// const Example = () => {
-//     const [data] = useDialogStatus(Dialogs.MyDialog);
-//     return (
-//         <TopLayerStore>
-//             <Dialogs.MyDialog>Welcome {data}</Dialogs.MyDialog>
-//             <Dialogs.MyDialog2.Consumer>
-//                 {(data) => {
-//                     return <div>MyDialog</div>;
-//                 }}
-//             </Dialogs.MyDialog2.Consumer>
-//             {/* <UpperLayers.MyUpperLayer /> */}
-//         </TopLayerStore>
-//     );
-// };
 
 export * from "./hooks";
 export * from "./dialogs/hooks";

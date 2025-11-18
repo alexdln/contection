@@ -59,15 +59,15 @@ function App() {
 
 ```tsx
 function ConfirmButton() {
-  const [dialog, setDialog] = useDialogReducer(Dialogs.ConfirmDialog);
+  const [store, setStore] = useDialogReducer(Dialogs.ConfirmDialog);
 
   const handleClick = () => {
-    setDialog({
+    setStore({
       open: true,
       data: {
         message: "Are you sure?",
         onConfirm: () => {
-          setDialog({ open: false, data: dialog.data });
+          setStore({ open: false, data: store.data });
         },
       },
     });
@@ -78,11 +78,11 @@ function ConfirmButton() {
       <button onClick={handleClick}>Delete</button>
       <Dialogs.ConfirmDialog>
         <div>
-          <p>{dialog.data.message}</p>
-          <button onClick={() => setDialog({ open: false, data: dialog.data })}>
+          <p>{store.data.message}</p>
+          <button onClick={() => setStore({ open: false, data: store.data })}>
             Cancel
           </button>
-          <button onClick={dialog.data.onConfirm}>Confirm</button>
+          <button onClick={store.data.onConfirm}>Confirm</button>
         </div>
       </Dialogs.ConfirmDialog>
     </>
@@ -128,13 +128,13 @@ The top-layer module provides a global layer state that works between elements. 
 
 ### Global Layer Management
 
-Use `useTopLayer` to access global layer state for managing backdrops and overflow:
+Use `useTopLayerStore` to access global layer state for managing backdrops and overflow:
 
 ```tsx
-import { useTopLayer } from "contection-top-layer";
+import { useTopLayerStore } from "contection-top-layer";
 
 function GlobalBackdrop() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
+  const { hasActiveIsolatedLayers } = useTopLayerStore(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -158,11 +158,11 @@ function GlobalBackdrop() {
 Block page scrolling when isolated layers are active:
 
 ```tsx
-import { useTopLayer } from "contection-top-layer";
+import { useTopLayerStore } from "contection-top-layer";
 import { useEffect } from "react";
 
 function OverflowBlocker() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
+  const { hasActiveIsolatedLayers } = useTopLayerStore(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -199,12 +199,12 @@ dialog {
 
 ### Backdrop Management
 
-**Best Practice:** Add a darkening backdrop element globally to the body using `useTopLayer` and checking for `hasActiveIsolatedLayers`. To close layer on-click-outside, create a transparent backdrop within each upper layer or dialog.
+**Best Practice:** Add a darkening backdrop element globally to the body using `useTopLayerStore` and checking for `hasActiveIsolatedLayers`. To close layer on-click-outside, create a transparent backdrop within each upper layer or dialog.
 
 ```tsx
 // Global backdrop for all isolated layers
 function GlobalBackdrop() {
-  const { hasActiveIsolatedLayers } = useTopLayer(TopLayerStore, {
+  const { hasActiveIsolatedLayers } = useTopLayerStore(TopLayerStore, {
     keys: ["hasActiveIsolatedLayers"],
   });
 
@@ -225,7 +225,7 @@ function GlobalBackdrop() {
 
 // Transparent backdrop within dialog/upper layer
 function MyDialog() {
-  const [, dispatch] = useDialogStatus(Dialogs.ConfirmDialog);
+  const [store, setStore] = useDialogReducer(Dialogs.ConfirmDialog);
 
   return (
     <Dialogs.ConfirmDialog>
@@ -236,7 +236,7 @@ function MyDialog() {
           backgroundColor: "transparent",
           zIndex: -1,
         }}
-        onClick={() => dispatch({ open: false, data: null })}
+        onClick={() => setStore({ open: false, data: store.data })}
       />
       <div>{/* Dialog content */}</div>
     </Dialogs.ConfirmDialog>
@@ -251,7 +251,7 @@ Dialog and upper layer hooks support the current element when used deeper in the
 ```tsx
 function DialogContent() {
   // Full type safety: dialog.data has correct types
-  const [dialog, setDialog] = useDialogStatus(Dialogs.ConfirmDialog);
+  const dialog = useDialogStore(Dialogs.ConfirmDialog);
 }
 
 function DialogCloseButton({
@@ -260,7 +260,7 @@ function DialogCloseButton({
   topLayerStore: typeof TopLayerStore;
 }) {
   // Works with any dialog, but loses type safety - dialog.data is unknown
-  const [dialog, dispatch] = useDialogStatus(topLayerStore);
+  const dialog = useDialogStore(topLayerStore);
 }
 ```
 
@@ -285,7 +285,7 @@ const { TopLayerStore, Dialogs } = createTopLayer({
 Use the `enabled` option to conditionally enable or disable subscriptions:
 
 ```tsx
-const [dialog] = useDialogStatus(Dialogs.ConfirmDialog, {
+const dialog = useDialogStore(Dialogs.ConfirmDialog, {
   enabled: (store) => store.open && store.data.message.length > 0,
 });
 ```
@@ -296,11 +296,11 @@ Access dialog/layer state using the Consumer pattern:
 
 ```tsx
 <Dialogs.ConfirmDialog.Consumer>
-  {({ data }) =>
-    data.shouldConfirm && (
+  {(store) =>
+    store.data.shouldConfirm && (
       <div>
-        <p>{data.message}</p>
-        <button onClick={data.onConfirm}>Confirm</button>
+        <p>{store.data.message}</p>
+        <button onClick={store.data.onConfirm}>Confirm</button>
       </div>
     )
   }
@@ -355,8 +355,8 @@ If you don't want elements to exist in duplicate, you can create a condition wit
 
 ```tsx
 const Notifications = () => {
-  const [currentDialogStore] = useDialogStatus(TopLayerStore);
-  const topLayerStore = useTopLayer(TopLayerStore, { keys: ["hasActiveIsolatedLayers"] });
+  const currentDialogStore = useDialogStore(TopLayerStore);
+  const topLayerStore = useTopLayerStore(TopLayerStore, { keys: ["hasActiveIsolatedLayers"] });
   if (
     (currentDialogStore.data !== undefined && !currentDialogStore.open) ||
     (currentDialogStore.data === undefined && topLayerStore.hasActiveIsolatedLayers)
@@ -413,7 +413,7 @@ const { TopLayerStore, Dialogs, UpperLayers } = createTopLayer({
 });
 ```
 
-### `useTopLayer(instance, options?)`
+### `useTopLayerStore(instance, options?)`
 
 Hook that provides access to global layer state.
 
@@ -435,7 +435,7 @@ _Re-renders:_ Only when subscribed keys change
 **Example:**
 
 ```tsx
-const store = useTopLayer(TopLayerStore, {
+const store = useTopLayerStore(TopLayerStore, {
   keys: ["hasActiveIsolatedLayers"],
 });
 store.hasActiveIsolatedLayers;
@@ -451,9 +451,9 @@ _Re-renders:_ never
 
 - `instance` - Top layer store instance
 
-**Returns:** Same as `useTopLayer` but as a proxy that doesn't trigger re-renders
+**Returns:** Same as `useTopLayerStore` but as a proxy that doesn't trigger re-renders
 
-### `useDialogStatus(dialog, options?)`
+### `useDialogStore(dialog, options?)`
 
 Hook that subscribes to dialog state.
 
@@ -465,19 +465,19 @@ _Re-renders:_ Only when dialog state (open or data) changes
 - `options?` (optional):
   - `enabled?: "always" | "never" | "after-hydration" | ((store) => boolean)` - Condition to enable/disable subscription
 
-**Returns:** `[{ data: Data, open: boolean }]` - Tuple with dialog state
+**Returns:** `{ data: Data, open: boolean }` - Object with dialog state
 
 **Example:**
 
 ```tsx
-const [dialog] = useDialogStatus(Dialogs.ConfirmDialog);
+const dialog = useDialogStore(Dialogs.ConfirmDialog);
 // dialog.open - boolean
 // dialog.data - Dialog data with full type safety
 ```
 
 ### `useDialogReducer(dialog)`
 
-Hook that returns dialog state and update function, similar to contection `useReducer`.
+Hook that returns imperative access to dialog state and update function without triggering re-renders.
 
 _Re-renders:_ never
 
@@ -485,19 +485,19 @@ _Re-renders:_ never
 
 - `dialog` - Dialog instance
 
-**Returns:** `[{ data: Data, open: boolean }, update]` - Tuple with dialog state and update function
+**Returns:** `[{ data: Data, open: boolean }, setStore]` - Tuple with dialog state and update function
 
 **Example:**
 
 ```tsx
-const [dialog, setDialog] = useDialogReducer(Dialogs.ConfirmDialog);
+const [store, setStore] = useDialogReducer(Dialogs.ConfirmDialog);
 
-setDialog({ open: true, data: { message: "Hello" } });
+setStore({ open: true, data: { message: "Hello" } });
 // Or with function
-setDialog((prev) => ({ open: false, data: prev.data }));
+setStore((prev) => ({ open: false, data: prev.data }));
 ```
 
-### `useUpperLayerStatus(upperLayer, options?)`
+### `useUpperLayerStore(upperLayer, options?)`
 
 Hook that subscribes to upper layer state.
 
@@ -509,18 +509,18 @@ _Re-renders:_ Only when layer data changes
 - `options?` (optional):
   - `enabled?: "always" | "never" | "after-hydration" | ((store) => boolean)` - Condition to enable/disable subscription
 
-**Returns:** `[{ data: Data }]` - Tuple with layer state
+**Returns:** `{ data: Data }` - Object with layer state
 
 **Example:**
 
 ```tsx
-const [layer] = useUpperLayerStatus(UpperLayers.NotificationLayer);
+const layer = useUpperLayerStore(UpperLayers.NotificationLayer);
 // layer.data - Layer data with full type safety
 ```
 
 ### `useUpperLayerReducer(upperLayer)`
 
-Hook that returns upper layer state and update function.
+Hook that returns imperative access to upper layer state and update function without triggering re-renders.
 
 _Re-renders:_ never
 
@@ -528,16 +528,16 @@ _Re-renders:_ never
 
 - `upperLayer` - Upper layer instance
 
-**Returns:** `[{ data: Data }, update]` - Tuple with layer state and update function
+**Returns:** `[{ data: Data }, setStore]` - Tuple with layer state and update function
 
 **Example:**
 
 ```tsx
-const [layer, setLayer] = useUpperLayerReducer(UpperLayers.NotificationLayer);
+const [store, setStore] = useUpperLayerReducer(UpperLayers.NotificationLayer);
 
-setLayer({ data: { message: "Hello", type: "info" } });
+setStore({ data: { message: "Hello", type: "info" } });
 // Or with function
-setLayer((prev) => ({ message: prev.message, type: "warning" }));
+setStore((prev) => ({ message: prev.message, type: "warning" }));
 ```
 
 ### `Dialog` Component
@@ -581,22 +581,22 @@ Components that consume dialog/layer state using render props pattern.
 **Dialog Consumer Props:**
 
 - `children: (store: { data: Data, open: boolean }) => React.ReactNode`
-- `options?: { enabled?: ... }` - Same as `useDialogStatus` enabled option
+- `options?: { enabled?: ... }` - Same as `useDialogStore` enabled option
 
 ```tsx
 <Dialogs.ConfirmDialog.Consumer>
-  {(data) => data.message}
+  {(store) => store.data.message}
 </Dialogs.ConfirmDialog.Consumer>
 ```
 
 **Upper Layer Consumer Props:**
 
 - `children: (store: { data: Data }) => React.ReactNode`
-- `options?: { enabled?: ... }` - Same as `useUpperLayerStatus` enabled option
+- `options?: { enabled?: ... }` - Same as `useUpperLayerStore` enabled option
 
 ```tsx
 <UpperLayers.NotificationLayer.Consumer>
-  {(data) => data.message}
+  {(store) => store.data.message}
 </UpperLayers.NotificationLayer.Consumer>
 ```
 

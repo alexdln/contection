@@ -1,39 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { type StoreInstance } from "contection/dist/types";
+import { type StoreOptions, type StoreInstance } from "contection/dist/types";
 import { useStore, useStoreReducer } from "contection";
 import { use, useMemo } from "react";
 
 import { type TopLayerStore, type NonFunction, type InheritedStore, type Dialog as DialogType } from "../types";
 import { DialogWrapperContext } from "./contexts";
 
-export const useDialogStatus = <Store extends TopLayerStore, Data>(
+export const useDialogStore = <Store extends TopLayerStore, Data>(
     instance:
         | Pick<StoreInstance<Store>, "_context" | "_initial">
         | (InheritedStore<Store> & { _id: string; _initial: Data }),
-    {
-        enabled = "always",
-    }: {
-        enabled?: "always" | "never" | "after-hydration" | ((store: { data: Data; open: boolean }) => boolean);
-    } = {},
+    { enabled = "always" }: StoreOptions<{ data: Data; open: boolean }> = {},
 ) => {
     const id = "_id" in instance ? instance._id : use(DialogWrapperContext).id;
 
-    const store = useStore("_instance" in instance ? instance._instance : instance, {
+    return useStore("_instance" in instance ? instance._instance : instance, {
         keys: id ? [id] : [],
         mutation: (store, prevStore, prevMutatedStore) => {
-            // return initial
-            if (!id || !store[id])
-                return { data: "_instance" in instance ? instance._initial : undefined, open: false };
-            if (
-                prevMutatedStore &&
-                (prevMutatedStore as { data: Data; open: boolean }).data === store[id].data &&
-                (prevMutatedStore as { data: Data; open: boolean }).open === (store[id] as DialogType).open
-            ) {
-                return prevMutatedStore as { data: Data; open: boolean };
+            if (!id || !store[id]) {
+                return { data: "_instance" in instance ? instance._initial : (undefined as Data), open: false };
             }
-            return { data: store[id].data, open: (store[id] as DialogType).open };
+
+            const dialog = store[id] as DialogType<Data>;
+
+            if (prevMutatedStore && prevMutatedStore.data === dialog.data && prevMutatedStore.open === dialog.open) {
+                return prevMutatedStore;
+            }
+            return { data: dialog.data, open: dialog.open };
         },
         enabled: id
             ? typeof enabled === "function"
@@ -44,8 +39,7 @@ export const useDialogStatus = <Store extends TopLayerStore, Data>(
                       })
                 : enabled
             : "never",
-    });
-    return useMemo(() => [store] as [{ data: Data; open: boolean }], [store]);
+    }) as { data: Data; open: boolean };
 };
 
 export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFunction<unknown>>(
@@ -54,7 +48,7 @@ export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFu
         | (InheritedStore<Store> & { _id: string; _initial: Data }),
 ) => {
     const id = "_id" in instance ? instance._id : use(DialogWrapperContext).id;
-    const [origStore, origDispatch] = useStoreReducer("_instance" in instance ? instance._instance : instance);
+    const [origStore, origSetStore] = useStoreReducer("_instance" in instance ? instance._instance : instance);
 
     return useMemo(() => {
         if (!id || !origStore[id])
@@ -66,7 +60,7 @@ export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFu
                 () => {},
             ] as const;
 
-        const dialog = {
+        const store = {
             get open() {
                 return (origStore[id] as DialogType).open;
             },
@@ -74,11 +68,11 @@ export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFu
                 return origStore[id].data;
             },
         } as { open: boolean; data: Data };
-        function update(store: (store: { open: boolean; data: Data }) => { open: boolean; data: Data }): void;
-        function update(store: (store: { open: boolean; data: Data }) => { open: boolean; data: never }): void;
-        function update(store: { open: boolean; data: NonFunction<Data> }): void;
-        function update(store: { open: boolean; data: never }): void;
-        function update(store: unknown) {
+        function setStore(store: (store: { open: boolean; data: Data }) => { open: boolean; data: Data }): void;
+        function setStore(store: (store: { open: boolean; data: Data }) => { open: boolean; data: never }): void;
+        function setStore(store: { open: boolean; data: NonFunction<Data> }): void;
+        function setStore(store: { open: boolean; data: never }): void;
+        function setStore(store: unknown) {
             if (!id) return;
 
             let newPart: { open: boolean; data: Data };
@@ -87,8 +81,8 @@ export const useDialogReducer = <Store extends TopLayerStore, Data extends NonFu
             } else {
                 newPart = store as { open: boolean; data: Data };
             }
-            origDispatch((prev) => ({ [id]: { ...prev[id], ...newPart } }) as any);
+            origSetStore((prev) => ({ [id]: { ...prev[id], ...newPart } }) as any);
         }
-        return [dialog, update] as const;
+        return [store, setStore] as const;
     }, [id]);
 };

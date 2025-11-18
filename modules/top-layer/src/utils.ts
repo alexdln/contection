@@ -91,5 +91,8 @@ export const formatStore = (configuration: Configuration) => {
                 },
             ] as [string, UpperLayerType],
     );
-    return Object.fromEntries([...formattedDialogs, ...formattedUpperLayers]);
+    return Object.fromEntries([...formattedDialogs, ...formattedUpperLayers]) as Record<
+        string,
+        DialogType | UpperLayerType
+    >;
 };
