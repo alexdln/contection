@@ -409,6 +409,146 @@ describe("useStore", () => {
             expect(screen.getByTestId("count")).toHaveTextContent("0");
         });
 
+        it("should use initial data on first renders when enabled is never", () => {
+            const TestStoreWithLifecycle = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: (store, dispatch) => {
+                        dispatch({ count: 10 });
+                    },
+                },
+            });
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStoreWithLifecycle, { enabled: "never" });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStoreWithLifecycle);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStoreWithLifecycle.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStoreWithLifecycle.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+        });
+
+        it("should use updated data on first renders when enabled is always and store is updated before mount", () => {
+            const TestStoreWithLifecycle = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: (store, dispatch) => {
+                        dispatch({ count: 10 });
+                    },
+                },
+            });
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStoreWithLifecycle, { enabled: "always" });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStoreWithLifecycle);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStoreWithLifecycle.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStoreWithLifecycle.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("count")).toHaveTextContent("10");
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+        });
+
+        it("should use initial data on first render and update after hydration when enabled is after-hydration", () => {
+            const TestStoreWithLifecycle = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: (store, dispatch) => {
+                        dispatch({ count: 10 });
+                    },
+                },
+            });
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStoreWithLifecycle, { enabled: "after-hydration" });
+                return <span data-testid="count">{store.count}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStoreWithLifecycle);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStoreWithLifecycle.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStoreWithLifecycle.Provider>,
+            );
+
+            expect(renderCount).toBe(2);
+            expect(screen.getByTestId("count")).toHaveTextContent("10");
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(3);
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+        });
+
+        it("should use initial data for mutation on first render and disabled state", () => {
+            const TestStoreWithLifecycle = createTestStore(undefined, {
+                lifecycleHooks: {
+                    storeWillMount: (store, dispatch) => {
+                        dispatch({ count: 10 });
+                    },
+                },
+            });
+            let renderCount = 0;
+            const TestComponent = () => {
+                renderCount++;
+                const store = useStore(TestStoreWithLifecycle, {
+                    keys: ["count"],
+                    mutation: (store) => store.count + 2,
+                    enabled: "never",
+                });
+                return <span data-testid="result">{store}</span>;
+            };
+
+            const UpdateComponent = () => {
+                const [, update] = useStoreReducer(TestStoreWithLifecycle);
+                return <button onClick={() => update({ count: 1 })}>Update</button>;
+            };
+
+            render(
+                <TestStoreWithLifecycle.Provider>
+                    <TestComponent />
+                    <UpdateComponent />
+                </TestStoreWithLifecycle.Provider>,
+            );
+
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("2");
+            act(() => screen.getByText("Update").click());
+            expect(renderCount).toBe(1);
+            expect(screen.getByTestId("result")).toHaveTextContent("2");
+        });
+
         it("should not re-render when enabled is never with keys option", () => {
             let renderCount = 0;
             const TestComponent = () => {
