@@ -1,5 +1,4 @@
-import { type StoreInstance } from "contection/dist/types";
-import { useStore, useStoreReducer } from "contection";
+import { type StoreInstance, useStore, useStoreReducer } from "contection";
 import { useMemo } from "react";
 
 import { type TopLayerStore, type Dialog, type UpperLayer, type TopLayerHookStore } from "./types";

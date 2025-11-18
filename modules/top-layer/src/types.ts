@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-constraint */
-import { type StoreInstance } from "contection/dist/types";
+import { type StoreInstance } from "contection";
 
 export type InheritedStore<Store extends TopLayerStore> = {
     _instance: Pick<StoreInstance<Store>, "_context" | "_initial">;

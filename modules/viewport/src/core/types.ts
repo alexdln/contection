@@ -1,5 +1,4 @@
-import { type createStore } from "contection";
-import { type GlobalStore, type StoreOptions } from "contection/dist/types";
+import { type createStore, type GlobalStore, type StoreOptions } from "contection";
 
 export type CompareMode = "equal" | "greater" | "less";
 

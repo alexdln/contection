@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { type StoreInstance } from "contection/dist/types";
-import { useStoreReducer } from "contection";
+import { type StoreInstance, useStoreReducer } from "contection";
 
 import { type Dialog as DialogType, type TopLayerStore } from "../types";
 import { DialogWrapperContext } from "./contexts";
