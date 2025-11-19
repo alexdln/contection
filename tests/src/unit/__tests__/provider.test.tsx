@@ -319,7 +319,7 @@ describe("GlobalStoreProvider", () => {
             expect(cleanup).toHaveBeenCalled();
         });
 
-        it("should handle storeWillMount cleanup in React Strict Mode", () => {
+        it("should correctly handle storeWillMount cleanup in React Strict Mode", () => {
             const cleanup = jest.fn();
             const storeWillMount = jest.fn(() => cleanup);
             const Store = createTestStore(undefined, {
@@ -334,11 +334,13 @@ describe("GlobalStoreProvider", () => {
                 <Store.Provider>
                     <TestComponent />
                 </Store.Provider>,
+                { reactStrictMode: true },
             );
 
-            expect(storeWillMount).toHaveBeenCalled();
+            expect(storeWillMount).toHaveBeenCalledTimes(2);
+            expect(cleanup).toHaveBeenCalledTimes(1);
             unmount();
-            expect(cleanup).toHaveBeenCalled();
+            expect(cleanup).toHaveBeenCalledTimes(2);
         });
     });
 
