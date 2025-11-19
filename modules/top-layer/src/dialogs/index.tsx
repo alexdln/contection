@@ -25,7 +25,7 @@ export const Dialog =
         const [store, setStore, subscribe] = useStoreReducer(instance);
 
         const registerDialog = useCallback((node: HTMLDialogElement | null) => {
-            if (!node || !store[id] || store[id]) return;
+            if (!node || !store[id]) return;
             const dialogStore = store[id] as DialogType;
 
             if (dialogStore.open) {
