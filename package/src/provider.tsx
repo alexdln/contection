@@ -114,11 +114,15 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     // to clean up the previous call.
     // We use "useMemo" instead of "useEffect" to run "storeWillMount" as soon as possible.
     const storeWillMountCallback = useRef<((store: Store) => void) | void | undefined>(undefined);
+    const storeWillMountStrict = useRef<boolean>(false);
     useMemo(() => {
         // We don't call "storeWillMount" on the server side to avoid unexpected behavior
         if (checkIsServer()) return;
 
-        if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+        if (storeWillMountCallback.current) {
+            storeWillMountStrict.current = true;
+            storeWillMountCallback.current(storeProxy);
+        }
         storeWillMountCallback.current = storeWillMount
             ? storeWillMount(storeProxy, setStore, subscribe, unsubscribe)
             : undefined;
@@ -137,7 +141,11 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         mounted.current = true;
 
         return () => {
-            if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+            if (storeWillMountStrict.current) {
+                storeWillMountStrict.current = false;
+            } else {
+                if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+            }
             if (storeDidMountCallback) storeDidMountCallback(storeProxy);
             if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy);
         };
