@@ -1,6 +1,6 @@
 "use client";
 
-import { type StoreOptions } from "contection/dist/types";
+import { type StoreOptions } from "contection";
 
 import { type InheritedStore, type NonFunction, type TopLayerStore } from "../types";
 import { useUpperLayerStore } from "./hooks";

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { type StoreOptions, type StoreInstance } from "contection/dist/types";
-import { useStore, useStoreReducer } from "contection";
+import { type StoreOptions, type StoreInstance, useStore, useStoreReducer } from "contection";
 import { use, useMemo } from "react";
 
 import { type NonFunction, type TopLayerStore } from "../types";

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { type StoreInstance } from "contection/dist/types";
-import { useStoreReducer } from "contection";
+import { type StoreInstance, useStoreReducer } from "contection";
 
 import { type Dialog as DialogType, type TopLayerStore } from "../types";
 import { DialogWrapperContext } from "./contexts";
@@ -26,7 +25,7 @@ export const Dialog =
         const [store, setStore, subscribe] = useStoreReducer(instance);
 
         const registerDialog = useCallback((node: HTMLDialogElement | null) => {
-            if (!node || !store[id] || store[id]) return;
+            if (!node || !store[id]) return;
             const dialogStore = store[id] as DialogType;
 
             if (dialogStore.open) {

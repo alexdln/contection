@@ -11,9 +11,11 @@ import {
     type ProviderProps,
     StoreOptions,
 } from "./types";
-export { useStoreReducer, useStore } from "./hooks";
 import { GlobalStoreProvider } from "./provider";
 import { GlobalStoreConsumer } from "./consumer";
+
+export { useStoreReducer, useStore } from "./hooks";
+export * from "./types";
 
 /**
  * Creates a new store instance with Provider and Consumer components.

@@ -1,4 +1,4 @@
-import { type StoreInstance } from "contection/dist/types";
+import { type StoreInstance } from "contection";
 
 import {
     type TopLayerStore,
