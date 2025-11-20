@@ -2,6 +2,8 @@
 
 A performance-based viewport management module built on top of [contection](https://github.com/alexdln/contection) - a performance-focused state management package. Provides efficient screen size tracking with granular subscriptions, memoization, and a single global resize subscribeer that triggers re-renders only where needed.
 
+[npm](https://www.npmjs.com/package/contection-viewport) • [demo](https://www.contection.dev/?tab=viewport)
+
 ## Features
 
 - **Custom Breakpoints** - Define custom width and height breakpoints with multiple breakpoint types

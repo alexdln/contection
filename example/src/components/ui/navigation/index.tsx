@@ -24,11 +24,11 @@ export const Navigation: React.FC = () => {
     return (
         <nav className="navigation">
             <div className={`navigation__container ${isMobile ? "navigation__container--mobile" : ""}`}>
-                <NavButton tab="contection" onClick={() => navigateHandler("contection")}>
-                    Store Management
-                </NavButton>
                 <NavButton tab="todo" onClick={() => navigateHandler("todo")}>
                     Todo List
+                </NavButton>
+                <NavButton tab="contection" onClick={() => navigateHandler("contection")}>
+                    Store Management
                 </NavButton>
                 <NavButton tab="viewport" onClick={() => navigateHandler("viewport")}>
                     Viewport

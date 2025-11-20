@@ -1,7 +1,7 @@
 .info-banner {
   padding: 16px;
-  background-color: var(--color-warning);
-  color: white;
+  border: 2px solid var(--color-warning);
+  background-color: var(--color-bg-secondary);
   border-radius: 8px;
   font-weight: 500;
 }
