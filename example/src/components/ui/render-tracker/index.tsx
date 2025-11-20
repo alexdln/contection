@@ -50,7 +50,7 @@ export const RenderTracker: React.FC<RenderTrackerProps> = ({ path, children, co
         >
             <div className="render-tracker__badges">
                 <a
-                    href={`https://github.com/alexdln/contection/tree/main/example/src/components${path}`}
+                    href={`https://github.com/alexdln/contection/tree/main/example/src${path}`}
                     className="render-tracker__badge"
                     target="_blank"
                     rel="noopener noreferrer"
