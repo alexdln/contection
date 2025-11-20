@@ -4,9 +4,10 @@ import { useRef } from "react";
 import { ToDoStore, TodoItem } from "../../../stores/todo-store";
 import { Card } from "../../ui/card";
 import { Button } from "../../ui/button";
-import { createNewItem } from "./createNewItem";
+import { createNewItem } from "./create-new-item";
 
 import "./styles.scss";
+import { RenderTracker } from "../../ui/render-tracker";
 
 export const TodoForm: React.FC = () => {
     const formRef = useRef<HTMLFormElement>(null);
@@ -73,57 +74,59 @@ export const TodoForm: React.FC = () => {
     };
 
     return (
-        <Card
-            title={store ? "Edit Todo" : "Add New Todo"}
-            description={store ? "Update the todo item" : "Create a new todo item"}
-        >
-            <form ref={formRef} onSubmit={store ? handleUpdate : handleAdd} className="demo-todo__form-content">
-                <div className="demo-todo__form-field">
-                    <label htmlFor="todo-title">Title</label>
-                    <input
-                        id="todo-title"
-                        type="text"
-                        name="title"
-                        {...(store
-                            ? {
-                                  value: store.title,
-                                  onChange: changeHandler,
-                              }
-                            : {
-                                  defaultValue: "",
-                              })}
-                        placeholder="My next task is..."
-                        required
-                    />
-                </div>
-                <div className="demo-todo__form-field">
-                    <label htmlFor="todo-description">Description</label>
-                    <textarea
-                        id="todo-description"
-                        name="description"
-                        {...(store
-                            ? {
-                                  value: store.description,
-                                  onChange: changeHandler,
-                              }
-                            : {
-                                  defaultValue: "",
-                              })}
-                        placeholder="I need to ... to achieve my goal"
-                        rows={4}
-                    />
-                </div>
-                <div className="demo-todo__form-actions">
-                    <Button type="submit" variant="primary">
-                        {store ? "Finish Editing" : "Add Todo"}
-                    </Button>
-                    {store && (
-                        <Button type="button" onClick={handleCancel} variant="secondary">
-                            Cancel
+        <RenderTracker path="/components/demos/todo/todo-form.tsx" color="#ef4444">
+            <Card
+                title={store ? "Edit Todo" : "Add New Todo"}
+                description={store ? "Update the todo item" : "Create a new todo item"}
+            >
+                <form ref={formRef} onSubmit={store ? handleUpdate : handleAdd} className="demo-todo__form-content">
+                    <div className="demo-todo__form-field">
+                        <label htmlFor="todo-title">Title</label>
+                        <input
+                            id="todo-title"
+                            type="text"
+                            name="title"
+                            {...(store
+                                ? {
+                                      value: store.title,
+                                      onChange: changeHandler,
+                                  }
+                                : {
+                                      defaultValue: "",
+                                  })}
+                            placeholder="My next task is..."
+                            required
+                        />
+                    </div>
+                    <div className="demo-todo__form-field">
+                        <label htmlFor="todo-description">Description</label>
+                        <textarea
+                            id="todo-description"
+                            name="description"
+                            {...(store
+                                ? {
+                                      value: store.description,
+                                      onChange: changeHandler,
+                                  }
+                                : {
+                                      defaultValue: "",
+                                  })}
+                            placeholder="I need to ... to achieve my goal"
+                            rows={4}
+                        />
+                    </div>
+                    <div className="demo-todo__form-actions">
+                        <Button type="submit" variant="primary">
+                            {store ? "Finish Editing" : "Add Todo"}
                         </Button>
-                    )}
-                </div>
-            </form>
-        </Card>
+                        {store && (
+                            <Button type="button" onClick={handleCancel} variant="secondary">
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
+                </form>
+            </Card>
+        </RenderTracker>
     );
 };

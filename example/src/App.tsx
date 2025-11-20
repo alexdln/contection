@@ -20,11 +20,11 @@ function App() {
                     <ToDoStore>
                         <Navigation />
                         <Layout>
-                            <NavigationTab tab="contection">
-                                <ContectionPage />
-                            </NavigationTab>
                             <NavigationTab tab="todo">
                                 <TodoPage />
+                            </NavigationTab>
+                            <NavigationTab tab="contection">
+                                <ContectionPage />
                             </NavigationTab>
                             <NavigationTab tab="viewport">
                                 <ViewportPage />

@@ -7,6 +7,7 @@ import {
     SettingsDialogDemo,
     TopLayerControls,
 } from "../../components/demos/top-layer";
+import { InfoBanner } from "../../components/ui/info-banner";
 
 import "./styles.scss";
 import { RenderTracker } from "../../components/ui/render-tracker";
@@ -15,6 +16,19 @@ export const TopLayerPage: React.FC = () => {
     return (
         <RenderTracker path="/pages/top-layer/index.tsx" color="#ef4444">
             <div className="page-top-layer">
+                <InfoBanner>
+                    <div>
+                        <a
+                            href="https://www.npmjs.com/package/contection-top-layer"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            npm
+                        </a>
+                        {" • "}
+                        <code>npm install contection contection-top-layer</code>
+                    </div>
+                </InfoBanner>
                 <TopLayerControls />
 
                 <div className="page-top-layer__grid">

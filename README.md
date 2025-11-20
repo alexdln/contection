@@ -2,6 +2,8 @@
 
 A state management library that extends React Context API with fine-grained subscriptions and computed values. Built on React hooks and `useSyncExternalStore` to provide efficient, granular state updates.
 
+[npm](https://www.npmjs.com/package/contection) • [demo](https://www.contection.dev/)
+
 ## Features
 
 - **React-Context-like API** - Extends the standard React Context pattern with hooks and components

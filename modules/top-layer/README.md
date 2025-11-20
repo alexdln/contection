@@ -2,6 +2,8 @@
 
 A layer management module built on top of [contection](https://github.com/alexdln/contection) - a performance-focused state management package. Provides efficient management of dialogs and upper layers with granular subscriptions, type safety, and support for isolated layers.
 
+[npm](https://www.npmjs.com/package/contection-top-layer) • [demo](https://www.contection.dev/?tab=top-layer)
+
 ## Features
 
 - **HTML Native Dialogs** - Full support for HTML `<dialog>` elements;
