@@ -1,0 +1,154 @@
+.demo-todo {
+  width: 100%;
+}
+
+.demo-todo__container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-todo__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-todo__list-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.demo-todo__items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-top: 12px;
+}
+
+.demo-todo__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.demo-todo__item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.demo-todo__item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-todo__item-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.demo-todo__item-description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.demo-todo__item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.demo-todo__item-date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.demo-todo__item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.demo-todo__item-button {
+  flex: 1;
+}
+
+.demo-todo__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-todo__form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-todo__form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+  
+  input,
+  textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+    
+    &::placeholder {
+      color: var(--color-text-secondary);
+    }
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+}
+
+.demo-todo__form-actions {
+  display: flex;
+  gap: 8px;
+}

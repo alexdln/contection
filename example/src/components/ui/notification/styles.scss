@@ -1,0 +1,17 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 7000;
+  min-width: 300px;
+  white-space: pre-line;
+}
+
+.notification__type {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
