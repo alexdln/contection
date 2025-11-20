@@ -1,0 +1,28 @@
+.render-tracker {
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 2px;
+  transition: all 0.2s ease;
+}
+
+.render-tracker__badges {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--tracker-color, #6366f1);
+  display: flex;
+  gap: 2px;
+  z-index: 1001;
+}
+
+.render-tracker__badge {
+  background-color: white;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--tracker-color, #6366f1) 30%, transparent);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}

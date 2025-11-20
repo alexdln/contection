@@ -1,8 +1,18 @@
 {
   "name": "contection-top-layer",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "A layer management module built on top of contection. Provides efficient management of dialogs and upper layers with granular subscriptions, type safety, and support for isolated layers.",
+  "keywords": [
+    "contection",
+    "layer",
+    "dialog",
+    "isolated-layers",
+    "top-layer",
+    "react",
+    "next",
+    "modal",
+    "notifications"
+  ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/cjs/index.d.ts",

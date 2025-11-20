@@ -1,0 +1,32 @@
+.demo-viewport__responsive-demo {
+  padding: 16px;
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.demo-viewport__demo-title {
+  margin-bottom: 16px;
+}
+
+.demo-viewport__responsive-grid {
+  display: grid;
+  gap: 16px;
+
+  &--mobile {
+    grid-template-columns: 1fr;
+  }
+
+  &--tablet {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &--desktop {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.demo-viewport__layout-info {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
