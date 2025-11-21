@@ -42,6 +42,15 @@ jobs:
             cd - > /dev/null
           done
 
+      - name: Build adapters
+        run: |
+          for adapter in adapters/*/; do
+            echo "Building adapter: $adapter"
+            cd "$adapter"
+            pnpm run build
+            cd - > /dev/null
+          done
+
       - name: Run tests
         run: |
           pnpm --filter contection-tests test
@@ -75,16 +84,16 @@ jobs:
           npm publish --tag experimental --access public
         working-directory: ./package
 
-      - name: Publish experimental modules
+      - name: Publish experimental subpackages
         if: steps.check.outputs.publish == 'true'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm set //registry.npmjs.org/:_authToken=$NPM_TOKEN
           VERSION=${{ steps.version.outputs.version }}
-          for module in modules/*/; do
-            echo "Publishing module: $module"
-            cd "$module"
+          for subpackage in modules/*/ adapters/*/; do
+            echo "Publishing subpackage: $subpackage"
+            cd "$subpackage"
             npm version --no-git-tag-version $VERSION
             npm publish --tag experimental --access public
             cd - > /dev/null
