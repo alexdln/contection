@@ -1,6 +1,6 @@
 module.exports = {
   testEnvironment: "jsdom",
-  roots: ["<rootDir>/src", "<rootDir>/modules", "<rootDir>/../package/src"],
+  roots: ["<rootDir>/src", "<rootDir>/modules", "<rootDir>/adapters", "<rootDir>/../package/src"],
   testMatch: ["**/__tests__/**/*.ts", "**/__tests__/**/*.tsx"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   transform: {
@@ -14,6 +14,8 @@ module.exports = {
     "^contection-viewport/(.*)$": "<rootDir>/../modules/viewport/$1",
     "^contection-top-layer$": "<rootDir>/../modules/top-layer/src/index.tsx",
     "^contection-top-layer/(.*)$": "<rootDir>/../modules/top-layer/$1",
+    "^contection-storage-adapter$": "<rootDir>/../adapters/storage/src/index.ts",
+    "^contection-storage-adapter/(.*)$": "<rootDir>/../adapters/storage/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/src/setup/jest.setup.ts"],
   collectCoverageFrom: [

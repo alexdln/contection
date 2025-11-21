@@ -3,3 +3,4 @@ packages:
   - "tests"
   - "example"
   - "modules/*"
+  - "adapters/*"
