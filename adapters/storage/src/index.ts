@@ -17,6 +17,8 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
 
     private schema: Exclude<StorageAdapterProps<Store>["schema"], undefined>;
 
+    private saveKeys: StorageAdapterProps<Store>["saveKeys"];
+
     constructor({
         prefix = "__ctn_",
         enabled = "always",
@@ -24,12 +26,14 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         rawLimit = 1024 * 100,
         storage = "localStorage",
         schema = null,
+        saveKeys,
     }: StorageAdapterProps<Store> = {}) {
         this.prefix = prefix;
         this.enabled = enabled;
         this.onDestroy = onDestroy;
         this.rawLimit = rawLimit;
         this.schema = schema || null;
+        this.saveKeys = saveKeys;
         const storageInstance = storage && STORAGE_TYPES[storage];
 
         if (storageInstance && isStorageAvailable(storageInstance)) {
@@ -55,7 +59,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     }
 
     private readFromStorage(key: string) {
-        if (!this.storage) return null;
+        if (!this.storage || (this.saveKeys && !this.saveKeys.includes(key as keyof Store))) return null;
 
         const storageKey = this.prefix + key;
         const value = this.storage.getItem(storageKey);
@@ -111,6 +115,8 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     afterUpdate(store: Store, part: Partial<Store>) {
         if (this.storage) {
             for (const key in part) {
+                if (this.saveKeys && !this.saveKeys.includes(key as keyof Store)) continue;
+
                 const rawValue = JSON.stringify(part[key]);
                 if (rawValue.length + this.prefix.length + key.length < this.rawLimit) {
                     this.storage.setItem(this.prefix + key, JSON.stringify(part[key]));
@@ -123,6 +129,8 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     beforeDestroy(store: Store) {
         if (this.storage && this.onDestroy === "cleanup") {
             for (const key in store) {
+                if (this.saveKeys && !this.saveKeys.includes(key as keyof Store)) continue;
+
                 this.storage.removeItem(this.prefix + key);
             }
         }
