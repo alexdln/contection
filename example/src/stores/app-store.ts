@@ -7,7 +7,7 @@ interface AppStore {
         email: string;
     };
     counter: number;
-    theme: "light" | "dark";
+    theme: string;
     notifications: Array<{ id: string; message: string; type: "info" | "success" | "warning" | "error" }>;
     settings: {
         language: string;
@@ -16,26 +16,25 @@ interface AppStore {
     tab: "contection" | "viewport" | "top-layer" | "combined" | "todo";
 }
 
-export const AppStore = createStore<AppStore>(
-    {
-        user: {
-            name: "John Doe",
-            email: "john@example.com",
-        },
-        counter: 0,
-        theme: "light",
-        notifications: [] as Array<{ id: string; message: string; type: "info" | "success" | "warning" | "error" }>,
-        settings: {
-            language: "en",
-            timezone: "UTC",
-        },
-        tab: "contection",
+export const initialState: AppStore = {
+    user: {
+        name: "John Doe",
+        email: "john@example.com",
     },
-    {
-        adapter: new StorageAdapter<AppStore>({
-            prefix: "app-store-",
-            enabled: "always",
-            storage: "localStorage",
-        }),
+    counter: 0,
+    theme: "light",
+    notifications: [] as Array<{ id: string; message: string; type: "info" | "success" | "warning" | "error" }>,
+    settings: {
+        language: "en",
+        timezone: "UTC",
     },
-);
+    tab: "contection",
+};
+
+export const AppStore = createStore<AppStore>(initialState, {
+    adapter: new StorageAdapter<AppStore>({
+        prefix: "app-store-",
+        enabled: "always",
+        storage: "localStorage",
+    }),
+});
