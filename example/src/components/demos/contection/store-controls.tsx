@@ -66,7 +66,7 @@ export const StoreControls: React.FC = () => {
                     }))
                 }
             >
-                Change Name
+                New Name
             </Button>
             <Button
                 onClick={() =>
@@ -75,12 +75,12 @@ export const StoreControls: React.FC = () => {
                     }))
                 }
             >
-                Change email
+                New email
             </Button>
             <Button onClick={() => setStore((prev) => ({ theme: prev.theme === "light" ? "dark" : "light" }))}>
                 Toggle Theme
             </Button>
-            <Button onClick={rapidUpdatesHandler}>Random updates</Button>
+            <Button onClick={rapidUpdatesHandler}>Rapid 200</Button>
             <Button onClick={() => setStore({ ...initialState })}>Reset</Button>
         </div>
     );
