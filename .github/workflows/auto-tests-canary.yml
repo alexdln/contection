@@ -23,18 +23,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm --filter contection-tests --filter contection --filter "./modules/*" add react@canary react-dom@canary --no-lockfile
-          pnpm --filter contection-tests --filter contection --filter "./modules/*" add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
+          pnpm --filter contection-tests --filter contection --filter "./modules/*" --filter "./adapters/*" add react@canary react-dom@canary --no-lockfile
+          pnpm --filter contection-tests --filter contection --filter "./modules/*" --filter "./adapters/*" add @types/react@latest @types/react-dom@latest --save-dev --no-lockfile
 
       - name: Build package
         run: |
           pnpm package run build
 
-      - name: Build modules
+      - name: Build subpackages
         run: |
-          for module in modules/*/; do
-            echo "Building module: $module"
-            cd "$module"
+          for subpackage in modules/*/ adapters/*/; do
+            echo "Building subpackage: $subpackage"
+            cd "$subpackage"
             pnpm run build
             cd - > /dev/null
           done

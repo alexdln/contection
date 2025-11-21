@@ -38,6 +38,15 @@ jobs:
             cd - > /dev/null
           done
 
+      - name: Build adapters
+        run: |
+          for adapter in adapters/*/; do
+            echo "Building adapter: $adapter"
+            cd "$adapter"
+            pnpm run build
+            cd - > /dev/null
+          done
+
       - name: Run tests
         run: |
           pnpm --filter contection-tests test
@@ -59,27 +68,27 @@ jobs:
           npm publish --tag canary --access public
         working-directory: ./package
 
-      - name: Publish modules on main
+      - name: Publish subpackages on main
         if: "!contains(github.ref_name, 'canary')"
         run: |
           npm set //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}}
           VERSION=${{github.ref_name}}
-          for module in modules/*/; do
-            echo "Publishing module: $module"
-            cd "$module"
+          for subpackage in modules/*/ adapters/*/; do
+            echo "Publishing subpackage: $subpackage"
+            cd "$subpackage"
             npm version --no-git-tag-version $VERSION
             npm publish --access public
             cd - > /dev/null
           done
 
-      - name: Publish modules on canary
+      - name: Publish subpackages on canary
         if: contains(github.ref_name, 'canary')
         run: |
           npm set //registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}}
           VERSION=${{github.ref_name}}
-          for module in modules/*/; do
-            echo "Publishing module: $module"
-            cd "$module"
+          for subpackage in modules/*/ adapters/*/; do
+            echo "Publishing subpackage: $subpackage"
+            cd "$subpackage"
             npm version --no-git-tag-version $VERSION
             npm publish --tag canary --access public
             cd - > /dev/null
