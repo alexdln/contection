@@ -111,9 +111,18 @@ interface LifecycleUnmountHook<Store extends BaseStore> {
     (store: Store): void;
 }
 
+export interface BaseAdapter<Store extends BaseStore> {
+    beforeInit(store: Store): Store;
+    afterInit(store: Store, setStore: GlobalStore<Store>["setStore"]): void | ((store: Store) => void);
+    beforeUpdate(store: Store, part: Partial<Store>): Partial<Store>;
+    afterUpdate(store: Store, part: Partial<Store>): void;
+    beforeDestroy(store: Store): void;
+}
+
 /**
  * Options for creating a storage instance
  * @template Store - The store state type
+ * @template Adapter - The adapter type
  */
 export type CreateStoreOptions<Store extends BaseStore> = {
     /** Lifecycle hooks for storage initialization and cleanup */
@@ -127,6 +136,7 @@ export type CreateStoreOptions<Store extends BaseStore> = {
         /** Runs asynchronously during component unmount. Use for async cleanup operations */
         storeWillUnmountAsync?: LifecycleUnmountHook<Store>;
     };
+    adapter?: BaseAdapter<Store>;
 };
 
 /**

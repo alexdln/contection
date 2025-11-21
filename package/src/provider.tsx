@@ -33,23 +33,28 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     defaultData,
     options,
     context: Context,
-}: GlobalStoreProviderProps<Store>) => {
-    const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = options?.lifecycleHooks || {};
+}: Required<GlobalStoreProviderProps<Store>>) => {
+    const { adapter, lifecycleHooks } = options || {};
+    const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = lifecycleHooks || {};
     const store = useRef<InternalStoreType>(
-        defaultData
-            ? Object.fromEntries(Object.entries(defaultData).map(([key, value]) => [key, { value, subscribers: [] }]))
-            : {},
+        Object.fromEntries(
+            Object.entries(adapter?.beforeInit ? adapter.beforeInit(defaultData) : defaultData).map(([key, value]) => [
+                key,
+                { value, subscribers: [] },
+            ]),
+        ),
     );
     const mounted = useRef(false);
 
     const setStore = useCallback((part: Partial<Store> | ((prevStore: Store) => Partial<Store>)) => {
         const newPart = typeof part === "function" ? part(storeProxy) : part;
+        const newPartAdapter = adapter?.beforeUpdate ? adapter.beforeUpdate(storeProxy, newPart) : newPart;
         const subscribersToNotify: {
             callback: (value: any) => void;
             value: unknown;
         }[] = [];
 
-        Object.entries(newPart).forEach(([key, value]) => {
+        Object.entries(newPartAdapter).forEach(([key, value]) => {
             if (!store.current[key]) store.current[key] = { value, subscribers: [] };
 
             if (store.current[key].value === value) return;
@@ -68,6 +73,8 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
         subscribersToNotify.forEach(({ callback, value }) => {
             callback(value);
         });
+
+        if (adapter?.afterUpdate) adapter.afterUpdate(storeProxy, newPartAdapter);
     }, []);
 
     const subscribe = useCallback((key: StoreKey, onStoreChange: (value: any) => void) => {
@@ -140,13 +147,17 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
             : undefined;
         mounted.current = true;
 
+        const afterInitCallback = adapter?.afterInit ? adapter.afterInit(storeProxy, setStore) : undefined;
+
         return () => {
             if (storeWillMountStrict.current) {
                 storeWillMountStrict.current = false;
-            } else {
-                if (storeWillMountCallback.current) storeWillMountCallback.current(storeProxy);
+            } else if (storeWillMountCallback.current) {
+                storeWillMountCallback.current(storeProxy);
             }
+            if (afterInitCallback) afterInitCallback(storeProxy);
             if (storeDidMountCallback) storeDidMountCallback(storeProxy);
+            if (adapter?.beforeDestroy) adapter.beforeDestroy(storeProxy);
             if (storeWillUnmountAsync) storeWillUnmountAsync(storeProxy);
         };
     }, []);
