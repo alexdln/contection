@@ -24,7 +24,7 @@
 .demo-contection__controls {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 7000;
   background-color: var(--color-bg);
   padding: 12px 0;
   display: flex;
@@ -32,8 +32,8 @@
   gap: 8px;
 
   @media (max-width: 768px) {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
   }
 }
 
