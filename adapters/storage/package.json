@@ -1,7 +1,7 @@
 {
   "name": "contection-storage-adapter",
   "version": "1.0.0",
-  "description": "",
+  "description": "A persistent storage adapter for contection that automatically saves and restores state to browser storage",
   "keywords": [
     "contection",
     "storage",
@@ -46,7 +46,7 @@
     "typescript": "5.9.3"
   },
   "peerDependencies": {
-    "contection": ">=1.4.0",
+    "contection": ">=2.2.0",
     "react": ">= 19.0.0"
   },
   "license": "MIT"
