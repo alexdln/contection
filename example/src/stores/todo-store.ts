@@ -1,4 +1,5 @@
 import { createStore } from "contection";
+import { StorageAdapter } from "contection-storage-adapter";
 
 export interface TodoItem {
     id: string;
@@ -18,26 +19,23 @@ export interface TodoStore {
 export const ToDoStore = createStore<TodoStore>(
     {
         userName: "User",
-        list: [],
+        list: [
+            {
+                id: `todo-${Date.now()}`,
+                title: "Welcome!",
+                description: "This is a sample todo item. You can edit or delete it.",
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            },
+        ],
         currentTodoId: null,
         lastVisited: null,
     },
     {
-        lifecycleHooks: {
-            storeWillMount: (_store, setStore) => {
-                // Initialize with a sample todo if list is empty
-                const sampleTodo: TodoItem = {
-                    id: `todo-${Date.now()}`,
-                    title: "Welcome!",
-                    description: "This is a sample todo item. You can edit or delete it.",
-                    createdAt: Date.now(),
-                    updatedAt: Date.now(),
-                };
-                setStore({
-                    list: [sampleTodo],
-                    lastVisited: sampleTodo.id,
-                });
-            },
-        },
+        adapter: new StorageAdapter<TodoStore>({
+            prefix: "todo-store-",
+            enabled: "always",
+            storage: "localStorage",
+        }),
     },
 );

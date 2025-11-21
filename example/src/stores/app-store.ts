@@ -1,6 +1,22 @@
 import { createStore } from "contection";
+import { StorageAdapter } from "contection-storage-adapter";
 
-export const AppStore = createStore(
+interface AppStore {
+    user: {
+        name: string;
+        email: string;
+    };
+    counter: number;
+    theme: "light" | "dark";
+    notifications: Array<{ id: string; message: string; type: "info" | "success" | "warning" | "error" }>;
+    settings: {
+        language: string;
+        timezone: string;
+    };
+    tab: "contection" | "viewport" | "top-layer" | "combined" | "todo";
+}
+
+export const AppStore = createStore<AppStore>(
     {
         user: {
             name: "John Doe",
@@ -16,13 +32,10 @@ export const AppStore = createStore(
         tab: "contection",
     },
     {
-        lifecycleHooks: {
-            storeWillMount: (_store, setStore) => {
-                const TABS = ["contection", "viewport", "top-layer", "combined", "todo"] as const;
-                type Tab = (typeof TABS)[number];
-                const savedTab = new URLSearchParams(window.location.search).get("tab") as Tab;
-                setStore({ tab: TABS.includes(savedTab) ? savedTab : "contection" });
-            },
-        },
+        adapter: new StorageAdapter<AppStore>({
+            prefix: "app-store-",
+            enabled: "always",
+            storage: "localStorage",
+        }),
     },
 );

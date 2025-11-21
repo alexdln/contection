@@ -17,7 +17,6 @@ export const Navigation: React.FC = () => {
     });
 
     const navigateHandler = (tab: Page) => {
-        window.history.pushState({}, "", `?tab=${tab}`);
         setStore({ tab });
     };
 
