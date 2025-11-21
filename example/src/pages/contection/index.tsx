@@ -25,6 +25,8 @@ export const ContectionPage: React.FC = () => {
                         {" • "}
                         <code>npm install contection</code>
                     </div>
+                    <br />
+                    <p>This page uses contection-storage-adapter to save the store to localStorage</p>
                 </InfoBanner>
                 <StoreControls />
 

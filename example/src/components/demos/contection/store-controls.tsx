@@ -1,7 +1,7 @@
 import { useStoreReducer } from "contection";
 import { useUpperLayerReducer } from "contection-top-layer";
 
-import { AppStore } from "../../../stores/app-store";
+import { AppStore, initialState } from "../../../stores/app-store";
 import { UpperLayers } from "../../../stores/top-layer-store";
 import { Button } from "../../ui/button";
 
@@ -53,6 +53,7 @@ export const StoreControls: React.FC = () => {
             },
         });
     };
+    console.log(initialState);
 
     return (
         <div className="demo-contection__controls">
@@ -80,6 +81,7 @@ export const StoreControls: React.FC = () => {
                 Toggle Theme
             </Button>
             <Button onClick={rapidUpdatesHandler}>Random updates</Button>
+            <Button onClick={() => setStore({ ...initialState })}>Reset</Button>
         </div>
     );
 };

@@ -16,6 +16,8 @@ export const TodoPage: React.FC = () => {
                         {" • "}
                         <code>npm install contection</code>
                     </div>
+                    <br />
+                    <p>This page uses contection-storage-adapter to save the todo list to localStorage</p>
                 </InfoBanner>
                 <TodoListDemo />
             </div>

@@ -28,6 +28,8 @@ export const TopLayerPage: React.FC = () => {
                         {" • "}
                         <code>npm install contection contection-top-layer</code>
                     </div>
+                    <br />
+                    <p>Dialogs are natively implemented using the HTML dialog element</p>
                 </InfoBanner>
                 <TopLayerControls />
 

@@ -34,14 +34,15 @@ export * from "./types";
  * const store = useStore(Store);
  */
 export const createStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
+    const initialStore = { ...initialData };
     const GlobalStoreContext = createContext<GlobalStore<Store>>({
-        store: initialData,
+        store: initialStore,
         setStore: () => {},
         subscribe: () => () => {},
         unsubscribe: () => {},
     });
 
-    const Provider: React.FC<ProviderProps<Store>> = ({ children, value = initialData, options: providerOptions }) => (
+    const Provider: React.FC<ProviderProps<Store>> = ({ children, value = initialStore, options: providerOptions }) => (
         <GlobalStoreProvider
             context={GlobalStoreContext}
             defaultData={value}
@@ -76,7 +77,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
     }): React.ReactNode {
         return (
             <GlobalStoreConsumer
-                instance={{ _context: GlobalStoreContext, _initial: initialData }}
+                instance={{ _context: GlobalStoreContext, _initial: initialStore }}
                 options={
                     options as {
                         keys: Keys;
@@ -91,7 +92,7 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
     }
 
     return Object.assign(Provider, {
-        _initial: initialData,
+        _initial: initialStore,
         _context: GlobalStoreContext,
         /**
          * Consumer component that provides store data using the render props pattern.

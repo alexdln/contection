@@ -28,10 +28,8 @@ export const ViewportPage: React.FC = () => {
                         {" • "}
                         <code>npm install contection contection-viewport</code>
                     </div>
-                    <div style={{ marginTop: "0.5rem" }}>
-                        Resize your browser window to see selective re-renders in action. Components with breakpoint
-                        subscriptions only re-render when the breakpoint changes, not on every pixel change.
-                    </div>
+                    <br />
+                    <p>Resize your browser window to see selective re-renders in action</p>
                 </InfoBanner>
 
                 <div className="page-viewport__grid">
