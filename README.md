@@ -12,6 +12,7 @@ A state management library that extends React Context API with fine-grained subs
 - **Computed Values** - Transform and derive state with mutation functions
 - **Type Safety** - Full type safety with type inference for store keys and mutations
 - **Additional Modules** - Extended functionality through specialized modules like [viewport management](https://github.com/alexdln/contection/tree/main/modules/viewport) and [top-layer management](https://github.com/alexdln/contection/tree/main/modules/top-layer)
+- **Storage adapters** - Automatic state persistence to localStorage or sessionStorage with optional validation and selective key persistence via [storage adapter](https://github.com/alexdln/contection/tree/main/adapters/storage)
 
 ## Installation
 
@@ -707,6 +708,12 @@ A performance-based viewport management module built on top of Contection. Provi
 ### [contection-top-layer](https://github.com/alexdln/contection/tree/main/modules/top-layer)
 
 A layer management module built on top of Contection. Provides efficient management of dialogs and upper layers with granular subscriptions, type safety, and support for isolated layers.
+
+## Contection adapters
+
+### [contection-storage-adapter](https://github.com/alexdln/contection/tree/main/adapters/storage)
+
+A persistent storage adapter for Contection that automatically saves and restores state to browser storage (localStorage or sessionStorage). It seamlessly integrates with Contection stores to provide automatic state persistence, handling serialization, validation, and storage management. This allows your application state to survive page refreshes and browser sessions.
 
 ## License
 

@@ -2,6 +2,8 @@
 
 A persistent storage adapter for [contection](https://github.com/alexdln/contection) that automatically saves and restores state to browser storage (localStorage or sessionStorage).
 
+[npm](https://www.npmjs.com/package/contection-storage-adapter) • [demo](https://www.contection.dev/)
+
 ## Overview
 
 The `StorageAdapter` seamlessly integrates with contection stores to provide automatic state persistence. It handles serialization, validation, and storage management, allowing your application state to survive page refreshes and browser sessions.
