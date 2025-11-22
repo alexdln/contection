@@ -14,4 +14,5 @@ export type StorageAdapterProps<Store extends BaseStore = BaseStore> = {
     storage?: keyof typeof STORAGE_TYPES | null;
     schema?: SchemaLike<Store> | null;
     saveKeys?: (keyof Store)[];
+    autoSync?: number | null;
 };

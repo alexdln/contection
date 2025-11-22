@@ -36,6 +36,7 @@ export const ToDoStore = createStore<TodoStore>(
             prefix: "todo-store-",
             enabled: "always",
             storage: "localStorage",
+            autoSync: 300,
         }),
     },
 );

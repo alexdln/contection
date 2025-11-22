@@ -106,6 +106,16 @@ new StorageAdapter({
 });
 ```
 
+### `autoSync` (number | `null`, default: `null`)
+
+Enables periodic synchronization from storage to the store at the specified interval (in milliseconds). Useful for keeping the store in sync with external storage changes, such as updates from other browser tabs or external modifications. When set to `null`, automatic synchronization is disabled. It is recommended to use values greater than 200ms to avoid performance issues.
+
+```typescript
+new StorageAdapter({
+  autoSync: 1000, // Sync every second
+});
+```
+
 ### `schema` (object, optional)
 
 A validation schema object with a `validate` method. Invalid data is automatically removed from storage.

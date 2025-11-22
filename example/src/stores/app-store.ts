@@ -36,5 +36,6 @@ export const AppStore = createStore<AppStore>(initialState, {
         prefix: "app-store-",
         enabled: "always",
         storage: "localStorage",
+        autoSync: 300,
     }),
 });

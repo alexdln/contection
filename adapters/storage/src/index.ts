@@ -19,6 +19,12 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
 
     private saveKeys: StorageAdapterProps<Store>["saveKeys"];
 
+    private autoSync: Exclude<StorageAdapterProps<Store>["autoSync"], undefined>;
+
+    private syncInterval: ReturnType<typeof setInterval> | null = null;
+
+    private cache: { [Key in keyof Store]?: { rawValue: string; value: Store[Key] } } = {};
+
     constructor({
         prefix = "__ctn_",
         enabled = "always",
@@ -27,6 +33,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         storage = "localStorage",
         schema = null,
         saveKeys,
+        autoSync = null,
     }: StorageAdapterProps<Store> = {}) {
         this.prefix = prefix;
         this.enabled = enabled;
@@ -34,6 +41,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         this.rawLimit = rawLimit;
         this.schema = schema || null;
         this.saveKeys = saveKeys;
+        this.autoSync = autoSync;
         const storageInstance = storage && STORAGE_TYPES[storage];
 
         if (storageInstance && isStorageAvailable(storageInstance)) {
@@ -58,13 +66,15 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         }
     }
 
-    private readFromStorage(key: string) {
-        if (!this.storage || (this.saveKeys && !this.saveKeys.includes(key as keyof Store))) return null;
+    private readFromStorage(key: keyof Store) {
+        if (!this.storage || (this.saveKeys && !this.saveKeys.includes(key))) return null;
 
-        const storageKey = this.prefix + key;
+        const storageKey = this.prefix + String(key);
         const value = this.storage.getItem(storageKey);
 
         if (!value) return null;
+
+        if (this.cache[key] && this.cache[key].rawValue === value) return { value: this.cache[key].value };
 
         try {
             const parsedValue = JSON.parse(value);
@@ -75,17 +85,20 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
                 return null;
             }
 
+            this.cache[key] = { rawValue: value, value: parsedValue };
+
             return { value: parsedValue };
         } catch {
-            this.storage.removeItem(this.prefix + key);
+            this.storage.removeItem(this.prefix + String(key));
         }
     }
 
     beforeInit(store: Store) {
+        const keys = (this.saveKeys || Object.keys(store)) as (keyof Store)[];
         const newStore = store;
 
         if (this.enabled === "always" && this.storage) {
-            for (const key in store) {
+            for (const key of keys) {
                 const savedValue = this.readFromStorage(key);
                 if (savedValue) {
                     newStore[key] = savedValue.value;
@@ -97,15 +110,33 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     }
 
     afterInit(store: Store, setStore: GlobalStore<Store>["setStore"]) {
+        const keys = (this.saveKeys || Object.keys(store)) as (keyof Store)[];
         if (this.enabled === "after-hydration" && this.storage) {
-            for (const key in store) {
+            for (const key of keys) {
                 const savedValue = this.readFromStorage(key);
                 if (savedValue) {
                     setStore({ [key]: savedValue.value } as ValidateNewStore<Store, Partial<Store>>);
                 }
             }
         }
-        return;
+
+        if (this.storage && this.autoSync && this.autoSync > 0) {
+            this.syncInterval = setInterval(() => {
+                for (const key of keys) {
+                    const savedValue = this.readFromStorage(key);
+                    if (savedValue) {
+                        setStore({ [key]: savedValue.value } as ValidateNewStore<Store, Partial<Store>>);
+                    }
+                }
+            }, this.autoSync);
+        }
+
+        return () => {
+            if (this.syncInterval) {
+                clearInterval(this.syncInterval);
+                this.syncInterval = null;
+            }
+        };
     }
 
     beforeUpdate(store: Store, part: Partial<Store>) {
@@ -115,11 +146,12 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     afterUpdate(store: Store, part: Partial<Store>) {
         if (this.storage) {
             for (const key in part) {
-                if (this.saveKeys && !this.saveKeys.includes(key as keyof Store)) continue;
+                if (this.saveKeys && !this.saveKeys.includes(key)) continue;
 
                 const rawValue = JSON.stringify(part[key]);
                 if (rawValue.length + this.prefix.length + key.length < this.rawLimit) {
                     this.storage.setItem(this.prefix + key, JSON.stringify(part[key]));
+                    this.cache[key] = { rawValue, value: store[key] };
                 }
             }
         }
@@ -134,6 +166,12 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
                 this.storage.removeItem(this.prefix + key);
             }
         }
+
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+            this.syncInterval = null;
+        }
+
         return;
     }
 }
