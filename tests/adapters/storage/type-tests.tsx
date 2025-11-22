@@ -57,6 +57,13 @@ function testConfigurationOptions() {
 
     new StorageAdapter<TestStore>({ prefix: "app_" });
     new StorageAdapter<TestStore>({ rawLimit: 1000 });
+
+    new StorageAdapter<TestStore>({ autoSync: null });
+    new StorageAdapter<TestStore>({ autoSync: 1000 });
+    new StorageAdapter<TestStore>({ autoSync: 200 });
+
+    // @ts-expect-error - invalid autoSync type
+    new StorageAdapter<TestStore>({ autoSync: "invalid" });
 }
 
 // Test 3: Schema validation

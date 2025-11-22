@@ -1,9 +1,9 @@
+import { type BaseStore, type GlobalStore } from "contection";
 import { createStore, useStore, useStoreReducer } from "contection";
 import { StorageAdapter } from "contection-storage-adapter";
-import { type BaseStore, type GlobalStore } from "contection";
 import React from "react";
 
-import { render, screen } from "../../../src/setup/test-utils";
+import { render, screen, act } from "../../../src/setup/test-utils";
 import { TestStoreType } from "../../../src/fixtures/test-store";
 
 const createMockStorage = () => {
@@ -197,6 +197,75 @@ describe("StorageAdapter", () => {
         });
     });
 
+    describe("autoSync", () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.runOnlyPendingTimers();
+            jest.useRealTimers();
+        });
+
+        it("should not setup interval when autoSync is null", () => {
+            const adapter = new StorageAdapter<{ count: number }>({ autoSync: null });
+            const store = { count: 0 };
+            const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
+
+            adapter.afterInit(store, setStore);
+
+            jest.advanceTimersByTime(1000);
+            expect(setStore).not.toHaveBeenCalled();
+        });
+
+        it("should sync from storage at specified interval", () => {
+            const adapter = new StorageAdapter<{ count: number }>({ autoSync: 500 });
+            mockLocalStorage.setItem("__ctn_count", "42");
+            const store = { count: 0 };
+            const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
+
+            adapter.afterInit(store, setStore);
+
+            jest.advanceTimersByTime(200);
+            expect(setStore).not.toHaveBeenCalled();
+            jest.advanceTimersByTime(300);
+            expect(setStore).toHaveBeenCalledWith({ count: 42 });
+            expect(setStore).toHaveBeenCalledTimes(1);
+
+            jest.advanceTimersByTime(500);
+            expect(setStore).toHaveBeenCalledTimes(2);
+        });
+
+        it("should not sync when storage is null", () => {
+            const adapter = new StorageAdapter<{ count: number }>({ storage: null, autoSync: 500 });
+            const store = { count: 0 };
+            mockLocalStorage.setItem("__ctn_count", "42");
+            const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
+
+            adapter.afterInit(store, setStore);
+
+            jest.advanceTimersByTime(1000);
+            expect(setStore).not.toHaveBeenCalled();
+        });
+
+        it("should only sync specified keys when saveKeys is provided", () => {
+            const adapter = new StorageAdapter<{ count: number; name: string }>({
+                autoSync: 500,
+                saveKeys: ["count"],
+            });
+            mockLocalStorage.setItem("__ctn_count", "42");
+            mockLocalStorage.setItem("__ctn_name", JSON.stringify("Updated"));
+            const store = { count: 0, name: "Initial" };
+            const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
+
+            adapter.afterInit(store, setStore);
+
+            jest.advanceTimersByTime(500);
+            expect(setStore).toHaveBeenCalledWith({ count: 42 });
+            expect(setStore).not.toHaveBeenCalledWith(expect.objectContaining({ name: "Updated" }));
+        });
+    });
+
     describe("integration with createStore", () => {
         it("should restore data from localStorage on mount", () => {
             mockLocalStorage.setItem("__ctn_count", "10");
@@ -326,6 +395,41 @@ describe("StorageAdapter", () => {
             );
 
             expect(mockSessionStorage.setItem).toHaveBeenCalledWith("__ctn_count", "7");
+        });
+
+        it("should sync from storage at interval when autoSync is enabled", () => {
+            jest.useFakeTimers();
+            mockLocalStorage.setItem("__ctn_count", "10");
+
+            const Store = createStore<TestStoreType>(
+                { count: 0, name: "Test", user: { id: 1, email: "test@example.com" }, theme: "light", items: [] },
+                {
+                    adapter: new StorageAdapter({ autoSync: 500 }),
+                },
+            );
+
+            const TestComponent = () => {
+                const store = useStore(Store);
+                return <div data-testid="count">{store.count}</div>;
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("count")).toHaveTextContent("10");
+
+            act(() => {
+                mockLocalStorage.setItem("__ctn_count", "42");
+                jest.advanceTimersByTime(500);
+            });
+
+            expect(mockLocalStorage.setItem).toHaveBeenCalledWith("__ctn_count", "42");
+            expect(screen.getByTestId("count")).toHaveTextContent("42");
+
+            jest.useRealTimers();
         });
     });
 });
