@@ -15,7 +15,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
 
     private storage: typeof localStorage | typeof sessionStorage | null;
 
-    private schema: Exclude<StorageAdapterProps<Store>["schema"], undefined>;
+    private validate: Exclude<StorageAdapterProps<Store>["validate"], undefined>;
 
     private saveKeys: StorageAdapterProps<Store>["saveKeys"];
 
@@ -31,7 +31,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         onDestroy = "ignore",
         rawLimit = 1024 * 100,
         storage = "localStorage",
-        schema = null,
+        validate = null,
         saveKeys,
         autoSync = null,
     }: StorageAdapterProps<Store> = {}) {
@@ -39,7 +39,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         this.enabled = enabled;
         this.onDestroy = onDestroy;
         this.rawLimit = rawLimit;
-        this.schema = schema || null;
+        this.validate = validate || null;
         this.saveKeys = saveKeys;
         this.autoSync = autoSync;
         const storageInstance = storage && STORAGE_TYPES[storage];
@@ -52,11 +52,11 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
     }
 
     private validateData<T>(data: T): boolean {
-        if (!this.schema) return true;
+        if (!this.validate) return true;
 
         try {
-            if (this.schema.validate) {
-                const isValid = this.schema.validate(data) as unknown as T;
+            if (this.validate) {
+                const isValid = this.validate(data) as unknown as T;
                 return isValid !== false;
             }
 

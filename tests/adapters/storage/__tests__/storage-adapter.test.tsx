@@ -167,26 +167,24 @@ describe("StorageAdapter", () => {
 
     describe("schema validation", () => {
         it("should validate data using schema", () => {
-            const schema = {
-                validate: jest.fn((data: unknown) => {
-                    const obj = data as { count?: number };
-                    return obj.count !== undefined && obj.count >= 0;
-                }),
-            };
+            const validate = jest.fn((data: unknown) => {
+                const obj = data as { count?: number };
+                return obj.count !== undefined && obj.count >= 0;
+            });
 
-            const adapter = new StorageAdapter<{ count: number }>({ enabled: "always", schema });
+            const adapter = new StorageAdapter<{ count: number }>({ enabled: "always", validate });
             mockLocalStorage.setItem("__ctn_count", "42");
 
             const store = { count: 0 };
             const result = adapter.beforeInit(store);
 
-            expect(schema.validate).toHaveBeenCalled();
+            expect(validate).toHaveBeenCalled();
             expect(result.count).toBe(42);
         });
 
         it("should remove invalid data from storage", () => {
-            const schema = { validate: jest.fn(() => false) };
-            const adapter = new StorageAdapter<{ count: number }>({ enabled: "always", schema });
+            const validate = jest.fn(() => false);
+            const adapter = new StorageAdapter<{ count: number }>({ enabled: "always", validate });
             mockLocalStorage.setItem("__ctn_count", "42");
 
             const store = { count: 0 };

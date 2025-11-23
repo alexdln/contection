@@ -116,14 +116,14 @@ new StorageAdapter({
 });
 ```
 
-### `schema` (object, optional)
+### `validate` (object, optional)
 
-A validation schema object with a `validate` method. Invalid data is automatically removed from storage.
+A validation method, invalid data is automatically removed from storage.
 
 ```typescript
 import { z } from "zod";
 
-const schema = z.object({
+const validate = z.object({
   user: z.object({
     name: z.string(),
     email: z.string().email(),
@@ -132,15 +132,12 @@ const schema = z.object({
 });
 
 new StorageAdapter({
-  schema: {
-    validate: (data) => {
-      const keys = Object.keys(data) as Array<keyof typeof schema>;
-      const partialSchema = schema.pick(
-        Object.fromEntries(keys.map((k) => [k, true]))
-      );
-      const result = partialSchema.safeParse(data);
-      return result.success ? result.data : false;
-    },
+  validate: (data) => {
+    const partialSchema = validate.pick(
+      Object.fromEntries(Object.keys(data).map((k) => [k, true]))
+    );
+    const result = partialSchema.safeParse(data);
+    return result.success ? result.data : false;
   },
 });
 ```

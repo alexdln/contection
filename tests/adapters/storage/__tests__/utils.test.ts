@@ -1,4 +1,4 @@
-import { isStorageAvailable } from "../../../../adapters/storage/src/utils";
+import { isStorageAvailable } from "contection-storage-adapter/src/utils";
 
 describe("isStorageAvailable", () => {
     it("should return true when storage is available", () => {

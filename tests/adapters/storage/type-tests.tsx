@@ -23,7 +23,7 @@ function testConstructor() {
         onDestroy: "cleanup",
         rawLimit: 5000,
         storage: "localStorage",
-        schema: null,
+        validate: null,
     });
 
     // @ts-expect-error - invalid enabled
@@ -66,17 +66,15 @@ function testConfigurationOptions() {
     new StorageAdapter<TestStore>({ autoSync: "invalid" });
 }
 
-// Test 3: Schema validation
-function testSchema() {
-    const schema = {
-        validate: (data: unknown) => {
-            const obj = data as { count?: number };
-            return obj.count !== undefined;
-        },
+// Test 3: Validate validation
+function testValidate() {
+    const validate = (data: unknown) => {
+        const obj = data as { count?: number };
+        return obj.count !== undefined;
     };
 
-    new StorageAdapter<TestStore>({ schema });
-    new StorageAdapter<TestStore>({ schema: null });
+    new StorageAdapter<TestStore>({ validate });
+    new StorageAdapter<TestStore>({ validate: null });
 }
 
 // Test 4: Adapter methods
