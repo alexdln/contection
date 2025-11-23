@@ -34,8 +34,11 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     options,
     context: Context,
 }: Required<GlobalStoreProviderProps<Store>>) => {
-    const { adapter, lifecycleHooks } = options || {};
+    const { adapter, lifecycleHooks, validate } = options || {};
     const { storeWillMount, storeDidMount, storeWillUnmount, storeWillUnmountAsync } = lifecycleHooks || {};
+
+    if (validate && !validate(defaultData)) throw new Error("Invalid initial store data");
+
     const store = useRef<InternalStoreType>(
         Object.fromEntries(
             Object.entries(adapter?.beforeInit ? adapter.beforeInit(defaultData) : defaultData).map(([key, value]) => [
@@ -49,6 +52,9 @@ export const GlobalStoreProvider = <Store extends BaseStore = BaseStore>({
     const setStore = useCallback((part: Partial<Store> | ((prevStore: Store) => Partial<Store>)) => {
         const newPart = typeof part === "function" ? part(storeProxy) : part;
         const newPartAdapter = adapter?.beforeUpdate ? adapter.beforeUpdate(storeProxy, newPart) : newPart;
+
+        if (validate && !validate(newPartAdapter)) return;
+
         const subscribersToNotify: {
             callback: (value: any) => void;
             value: unknown;

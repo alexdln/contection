@@ -98,4 +98,28 @@ describe("createStore", () => {
             expect(Store).toBeDefined();
         });
     });
+
+    describe("store with validate option", () => {
+        it("should accept validate option in createStore", () => {
+            const validate = jest.fn(() => true);
+            const initialData: TestStoreType = {
+                count: 0,
+                name: "Test",
+                user: { id: 1, email: "test@example.com" },
+                theme: "light",
+                items: [],
+            };
+
+            const Store = createStore(initialData, { validate });
+
+            expect(Store).toBeDefined();
+            // Validation happens in provider, not during store creation
+            expect(validate).not.toHaveBeenCalled();
+        });
+
+        it("should work without validate option", () => {
+            const Store = createTestStore();
+            expect(Store).toBeDefined();
+        });
+    });
 });

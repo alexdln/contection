@@ -336,4 +336,67 @@ function testEnabledOption() {
     const invalid2 = listen("count", (value: number) => {}, { enabled: "invalid" });
 }
 
+// Test 11: validate option
+function testValidateOption() {
+    const StoreWithValidate = createStore<TestStore>(
+        {
+            count: 0,
+            name: "Test",
+            user: { id: 1, email: "test@example.com" },
+            theme: "light",
+            items: [],
+        },
+        {
+            validate: (data) => {
+                const count: number = data.count;
+                return count >= 0;
+            },
+        },
+    );
+
+    createStore<TestStore>(
+        {
+            count: 0,
+            name: "Test",
+            user: { id: 1, email: "test@example.com" },
+            theme: "light",
+            items: [],
+        },
+        {
+            validate: () => true,
+        },
+    );
+
+    <Store.Provider
+        options={{
+            validate: (data) => {
+                const count: number = data.count;
+                return count >= 0;
+            },
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+
+    <Store.Provider
+        options={{
+            validate: () => true,
+            lifecycleHooks: {
+                storeDidMount: () => {},
+            },
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+
+    <Store.Provider
+        options={{
+            // @ts-expect-error - validate should return boolean | null | undefined
+            validate: () => "invalid",
+        }}
+    >
+        <div>Test</div>
+    </Store.Provider>;
+}
+
 export {};
