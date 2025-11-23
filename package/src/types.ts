@@ -119,6 +119,9 @@ export interface BaseAdapter<Store extends BaseStore> {
     beforeDestroy(store: Store): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Validate = (data: any) => boolean | null | never | undefined;
+
 /**
  * Options for creating a storage instance
  * @template Store - The store state type
@@ -138,6 +141,7 @@ export type CreateStoreOptions<Store extends BaseStore> = {
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     adapter?: BaseAdapter<any>;
+    validate?: Validate;
 };
 
 /**

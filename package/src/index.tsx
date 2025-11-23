@@ -35,6 +35,7 @@ export * from "./types";
  */
 export const createStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
     const initialStore = { ...initialData };
+
     const GlobalStoreContext = createContext<GlobalStore<Store>>({
         store: initialStore,
         setStore: () => {},

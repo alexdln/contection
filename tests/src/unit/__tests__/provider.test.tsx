@@ -612,4 +612,199 @@ describe("GlobalStoreProvider", () => {
             expect(createStoreDidMount).not.toHaveBeenCalled();
         });
     });
+
+    describe("validate option", () => {
+        it("should throw error when initial data validation fails", () => {
+            const validate = jest.fn(() => false);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => <div>Test</div>;
+
+            expect(() => {
+                render(
+                    <Store.Provider>
+                        <TestComponent />
+                    </Store.Provider>,
+                );
+            }).toThrow("Invalid initial store data");
+
+            expect(validate).toHaveBeenCalled();
+        });
+
+        it("should allow provider to render when initial data validation passes", () => {
+            const validate = jest.fn(() => true);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => <div>Test</div>;
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByText("Test")).toBeInTheDocument();
+            expect(validate).toHaveBeenCalled();
+        });
+
+        it("should throw error when initial data validation returns null", () => {
+            const validate = jest.fn(() => null);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => <div>Test</div>;
+
+            expect(() => {
+                render(
+                    <Store.Provider>
+                        <TestComponent />
+                    </Store.Provider>,
+                );
+            }).toThrow("Invalid initial store data");
+        });
+
+        it("should throw error when initial data validation returns undefined", () => {
+            const validate = jest.fn(() => undefined);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => <div>Test</div>;
+
+            expect(() => {
+                render(
+                    <Store.Provider>
+                        <TestComponent />
+                    </Store.Provider>,
+                );
+            }).toThrow("Invalid initial store data");
+        });
+
+        it("should allow update when validation passes", () => {
+            const validate = jest.fn(() => true);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => {
+                const store = useStore(Store);
+                const [, update] = useStoreReducer(Store);
+                return (
+                    <div>
+                        <div data-testid="count">{store.count}</div>
+                        <button onClick={() => update({ count: 5 })}>Update</button>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            // Validate is called once for initial data
+            expect(validate).toHaveBeenCalledTimes(1);
+            act(() => screen.getByText("Update").click());
+            expect(screen.getByTestId("count")).toHaveTextContent("5");
+            // Validate is called again for the update
+            expect(validate).toHaveBeenCalledTimes(2);
+            expect(validate).toHaveBeenCalledWith(expect.objectContaining({ count: 5 }));
+        });
+
+        it("should prevent update when validation fails", () => {
+            const validate = jest.fn((data) => data.count !== 5);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => {
+                const store = useStore(Store);
+                const [, update] = useStoreReducer(Store);
+                return (
+                    <div>
+                        <div data-testid="count">{store.count}</div>
+                        <button onClick={() => update({ count: 5 })}>Update Invalid</button>
+                        <button onClick={() => update({ count: 10 })}>Update Valid</button>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByText("Update Invalid").click());
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByText("Update Valid").click());
+            expect(screen.getByTestId("count")).toHaveTextContent("10");
+        });
+
+        it("should prevent update when validation returns undefined", () => {
+            const validate = jest.fn(() => undefined);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => {
+                const store = useStore(Store);
+                const [, update] = useStoreReducer(Store);
+                return (
+                    <div>
+                        <div data-testid="count">{store.count}</div>
+                        <button onClick={() => update({ count: 5 })}>Update</button>
+                    </div>
+                );
+            };
+
+            expect(() =>
+                render(
+                    <Store.Provider>
+                        <TestComponent />
+                    </Store.Provider>,
+                ),
+            ).toThrow("Invalid initial store data");
+        });
+
+        it("should validate function-based updates", () => {
+            const validate = jest.fn(() => true);
+            const Store = createTestStore(undefined, { validate });
+            const TestComponent = () => {
+                const store = useStore(Store);
+                const [, update] = useStoreReducer(Store);
+                return (
+                    <div>
+                        <div data-testid="count">{store.count}</div>
+                        <button onClick={() => update((prev) => ({ count: prev.count + 1 }))}>Increment</button>
+                    </div>
+                );
+            };
+
+            render(
+                <Store.Provider>
+                    <TestComponent />
+                </Store.Provider>,
+            );
+
+            expect(screen.getByTestId("count")).toHaveTextContent("0");
+            act(() => screen.getByText("Increment").click());
+            expect(screen.getByTestId("count")).toHaveTextContent("1");
+            expect(validate).toHaveBeenCalledWith(expect.objectContaining({ count: 1 }));
+        });
+
+        it("should use validate from Provider options when provided", () => {
+            const createStoreValidate = jest.fn(() => true);
+            const providerValidate = jest.fn(() => false);
+            const Store = createTestStore(undefined, { validate: createStoreValidate });
+            const TestComponent = () => {
+                const store = useStore(Store);
+                const [, update] = useStoreReducer(Store);
+                return (
+                    <div>
+                        <div data-testid="count">{store.count}</div>
+                        <button onClick={() => update({ count: 5 })}>Update</button>
+                    </div>
+                );
+            };
+
+            expect(() =>
+                render(
+                    <Store.Provider options={{ validate: providerValidate }}>
+                        <TestComponent />
+                    </Store.Provider>,
+                ),
+            ).toThrow("Invalid initial store data");
+
+            expect(providerValidate).toHaveBeenCalled();
+            expect(createStoreValidate).not.toHaveBeenCalled();
+        });
+    });
 });

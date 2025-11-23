@@ -620,6 +620,59 @@ function App() {
 }
 ```
 
+### Store Validation
+
+The `validate` option allows you to validate store data before it's applied. This is useful for ensuring data integrity and preventing invalid state updates.
+
+The validation function receives the store data (or partial update) and should return a truthy value if valid, or a falsy value if invalid:
+
+- **Invalid initial data** - Throws an error when the Provider is created
+- **Invalid updates** - Silently rejected (the update is not applied)
+
+```tsx
+import { createStore, useStoreReducer } from "contection";
+import { z } from "zod";
+
+const schema = z.object({
+  user: z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+  }),
+  count: z.number().int().min(0),
+});
+
+const AppStore = createStore(
+  {
+    user: { name: "John", email: "john@example.com" },
+    count: 0,
+  },
+  {
+    validate: (data) => {
+      const partialSchema = schema.pick(
+        Object.fromEntries(Object.keys(data).map((k) => [k, true]))
+      );
+      const result = partialSchema.safeParse(data);
+      return result.success ? result.data : false;
+    },
+  }
+);
+
+<AppStore value={{ user: { name: "", email: "invalid" }, count: -1 }}>
+  {/* Error: Invalid initial store data */}
+</AppStore>;
+
+// Invalid updates are silently rejected
+function Counter() {
+  const [store, setStore] = useStoreReducer(AppStore);
+
+  // This update will be rejected silently
+  setStore({ count: -1 });
+
+  // This update will be applied
+  setStore({ count: 1 });
+}
+```
+
 ## API Reference
 
 ### `createStore<Store>(initialData: Store, options?)`
@@ -631,6 +684,7 @@ Creates a new store instance with Provider and Consumer components.
 - `initialData: Store` - Initial state for the store
 - `options?: CreateStoreOptions<Store>` (optional):
   - `lifecycleHooks?: { storeWillMount?, storeDidMount?, storeWillUnmount?, storeWillUnmountAsync? }` - Lifecycle hooks for store initialization and cleanup
+  - `validate?: (data: any) => boolean | null | never | undefined` - Validation function that validates store data. Returns a truthy value if valid, falsy if invalid. Invalid initial data throws an error, invalid updates are silently rejected.
 
 **Returns:**
 
@@ -677,6 +731,7 @@ Component that provides a scoped store instance to child components. Each Provid
 - `value?: Store` - Optional initial value for this Provider's scope (defaults to store's initial data from `createStore`)
 - `options?: CreateStoreOptions<Store>` (optional):
   - `lifecycleHooks?: { storeWillMount?, storeDidMount?, storeWillUnmount?, storeWillUnmountAsync? }` - lifecycle hooks configuration. **Completely overrides** options passed to `createStore`, allowing per-instance customization. See [Lifecycle Hooks](#lifecycle-hooks) for available hooks.
+  - `validate?: (data: any) => boolean | null | never | undefined` - Validation function that validates store data. Returns a truthy value if valid, falsy if invalid. Invalid initial data throws an error, invalid updates are silently rejected.
 
 **Scoping Behavior:**
 
