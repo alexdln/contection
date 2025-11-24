@@ -140,8 +140,7 @@ export type CreateStoreOptions<Store extends BaseStore> = {
         /** Runs asynchronously during component unmount. Use for async cleanup operations */
         storeWillUnmountAsync?: LifecycleUnmountHook<Store>;
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    adapter?: BaseAdapter<any>;
+    adapter?: BaseAdapter<Store>;
     validate?: Validate;
 };
 
