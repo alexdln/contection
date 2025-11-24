@@ -1,0 +1,16 @@
+import { type CreateStoreOptions, type BaseStore } from "./core/types";
+
+export const prepareStore = <Store extends BaseStore>(initialData: Store, options?: CreateStoreOptions<Store>) => {
+    const { adapter, ...restOptions } = options || {};
+    const { getServerSnapshot, ...restAdapter } = adapter || {};
+    const getStore = getServerSnapshot ? () => getServerSnapshot(initialData) : () => initialData;
+
+    return {
+        initialData,
+        options: {
+            ...restOptions,
+            adapter: restAdapter,
+        },
+        getStore,
+    };
+};

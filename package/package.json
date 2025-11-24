@@ -19,6 +19,12 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js",
       "default": "./dist/cjs/index.js"
+    },
+    "./prepare-store": {
+      "types": "./dist/cjs/prepare-store.d.ts",
+      "import": "./dist/esm/prepare-store.js",
+      "require": "./dist/cjs/prepare-store.js",
+      "default": "./dist/cjs/prepare-store.js"
     }
   },
   "files": [
