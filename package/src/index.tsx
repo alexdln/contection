@@ -1,21 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { createContext } from "react";
+import { createContext } from "react";
 
-import {
-    type CreateStoreOptions,
-    type BaseStore,
-    type GlobalStore,
-    type MutationFn,
-    type ProviderProps,
-    StoreOptions,
-} from "./types";
-import { GlobalStoreProvider } from "./provider";
-import { GlobalStoreConsumer } from "./consumer";
+import { type CreateStoreOptions, type BaseStore, type GlobalStore } from "./core/types";
+import { createScopedProvider } from "./provider/create-scoped-provider";
+import { createScopedConsumer } from "./consumer/create-scoped-consumer";
 
 export { useStoreReducer, useStore } from "./hooks";
-export * from "./types";
+export * from "./core/types";
 
 /**
  * Creates a new store instance with Provider and Consumer components.
@@ -28,7 +20,7 @@ export * from "./types";
  * const Store = createStore({ count: 0 }, { lifecycleHooks: { storeWillMount: () => {} } });
  * // ...
  * <Store>
- *   <YourComponent />
+ *   <YourApp />
  * </Store>
  * // ...
  * const store = useStore(Store);
@@ -43,54 +35,8 @@ export const createStore = <Store extends BaseStore>(initialData: Store, options
         unsubscribe: () => {},
     });
 
-    const Provider: React.FC<ProviderProps<Store>> = ({ children, value = initialStore, options: providerOptions }) => (
-        <GlobalStoreProvider
-            context={GlobalStoreContext}
-            defaultData={value}
-            options={{ ...options, ...providerOptions }}
-        >
-            {children}
-        </GlobalStoreProvider>
-    );
-
-    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
-        options: {
-            keys?: Keys;
-            mutation: MutationFn<Store, Keys, ResultType>;
-            enabled?: StoreOptions<Store>["enabled"];
-        };
-        children: (data: ResultType) => React.ReactNode;
-    }): React.ReactNode;
-    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>(props: {
-        options?: { keys?: Keys; mutation?: undefined; enabled?: StoreOptions<Store>["enabled"] };
-        children: (data: Pick<Store, Keys[number]>) => React.ReactNode;
-    }): React.ReactNode;
-    function Consumer<ResultType, Keys extends Array<keyof Store> = Array<keyof Store>>({
-        children,
-        options,
-    }: {
-        options?: {
-            keys?: Keys;
-            mutation?: MutationFn<Store, Keys, ResultType>;
-            enabled?: StoreOptions<Store>["enabled"];
-        };
-        children: (data: Store | ResultType) => React.ReactNode;
-    }): React.ReactNode {
-        return (
-            <GlobalStoreConsumer
-                instance={{ _context: GlobalStoreContext, _initial: initialStore }}
-                options={
-                    options as {
-                        keys: Keys;
-                        mutation: MutationFn<Store, Keys, ResultType>;
-                        enabled?: StoreOptions<Store>["enabled"];
-                    }
-                }
-            >
-                {children}
-            </GlobalStoreConsumer>
-        );
-    }
+    const Provider = createScopedProvider({ initialStore, context: GlobalStoreContext, options });
+    const Consumer = createScopedConsumer({ initialStore, context: GlobalStoreContext });
 
     return Object.assign(Provider, {
         _initial: initialStore,

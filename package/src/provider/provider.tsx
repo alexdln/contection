@@ -9,8 +9,8 @@ import {
     type CreateStoreOptions,
     type GlobalStore,
     type InternalStoreType,
-} from "./types";
-import { checkIsServer, removeItemFromArray } from "./utils";
+} from "../core/types";
+import { checkIsServer, removeItemFromArray } from "../core/utils";
 
 /**
  * Props for the GlobalStoreProvider component.

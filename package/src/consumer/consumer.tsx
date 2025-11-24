@@ -1,6 +1,10 @@
+"use client";
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { type MutationFn, type BaseStore, type StoreInstance, StoreOptions } from "./types";
-import { useStore } from "./hooks";
+import React from "react";
+
+import { type MutationFn, type BaseStore, type StoreInstance, type StoreOptions } from "../core/types";
+import { useStore } from "../hooks";
 
 /**
  * Consumer component that provides store data using the render props pattern.
