@@ -9,7 +9,7 @@ export type CookieFlags = {
     sameSite?: "strict" | "lax" | "none";
 };
 
-export type StorageAdapterProps<Store extends BaseStore = BaseStore> = {
+export type NextCookieAdapterProps<Store extends BaseStore = BaseStore> = {
     prefix?: string;
     onDestroy?: "cleanup" | "ignore";
     rawLimit?: number;

@@ -1,6 +1,6 @@
 import { type BaseStore, type GlobalStore } from "contection";
 import { createStore, useStore, useStoreReducer } from "contection";
-import { StorageAdapter } from "contection-next-cookie-adapter";
+import { NextCookieAdapter } from "contection-next-cookie-adapter";
 import React from "react";
 
 import { render, screen, act } from "../../../src/setup/test-utils";
@@ -27,7 +27,7 @@ jest.mock("next/headers", () => ({
     cookies: jest.fn(),
 }));
 
-describe("StorageAdapter", () => {
+describe("NextCookieAdapter", () => {
     let mockCookieStore: ReturnType<typeof createMockCookies>;
 
     beforeEach(() => {
@@ -49,12 +49,12 @@ describe("StorageAdapter", () => {
 
     describe("constructor", () => {
         it("should initialize with default values", () => {
-            const adapter = new StorageAdapter({});
-            expect(adapter).toBeInstanceOf(StorageAdapter);
+            const adapter = new NextCookieAdapter({});
+            expect(adapter).toBeInstanceOf(NextCookieAdapter);
         });
 
         it("should use custom prefix", () => {
-            const adapter = new StorageAdapter({ prefix: "custom_" });
+            const adapter = new NextCookieAdapter({ prefix: "custom_" });
             const store = { count: 0 } as BaseStore;
             adapter.afterUpdate(store, { count: 1 });
             expect(document.cookie).toContain("custom_count=");
@@ -70,7 +70,7 @@ describe("StorageAdapter", () => {
                 configurable: true,
             });
 
-            const adapter = new StorageAdapter({});
+            const adapter = new NextCookieAdapter({});
             const store = { count: 0 } as BaseStore;
             adapter.afterUpdate(store, { count: 1 });
 
@@ -84,7 +84,7 @@ describe("StorageAdapter", () => {
 
     describe("getServerSnapshot", () => {
         it("should restore data from server cookies", async () => {
-            const adapter = new StorageAdapter<{ count: number }>({});
+            const adapter = new NextCookieAdapter<{ count: number }>({});
             const encodedValue = encodeURIComponent(JSON.stringify(42));
             mockCookieStore.cookies.set("__ctn_count", encodedValue);
 
@@ -95,7 +95,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should return original store when no cookies exist", async () => {
-            const adapter = new StorageAdapter<{ count: number }>({});
+            const adapter = new NextCookieAdapter<{ count: number }>({});
             const store = { count: 0 };
             const result = await adapter.getServerSnapshot(store);
 
@@ -103,7 +103,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should only restore specified keys when saveKeys is provided", async () => {
-            const adapter = new StorageAdapter<{ count: number; name: string }>({
+            const adapter = new NextCookieAdapter<{ count: number; name: string }>({
                 saveKeys: ["count"],
             });
             const encodedCount = encodeURIComponent(JSON.stringify(42));
@@ -119,7 +119,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should handle invalid JSON gracefully", async () => {
-            const adapter = new StorageAdapter<{ count: number }>({});
+            const adapter = new NextCookieAdapter<{ count: number }>({});
             mockCookieStore.cookies.set("__ctn_count", "invalid json");
 
             const store = { count: 0 };
@@ -130,7 +130,7 @@ describe("StorageAdapter", () => {
 
         it("should validate data and remove invalid entries", async () => {
             const validate = jest.fn(() => false);
-            const adapter = new StorageAdapter<{ count: number }>({ validate });
+            const adapter = new NextCookieAdapter<{ count: number }>({ validate });
             const encodedValue = encodeURIComponent(JSON.stringify(42));
             mockCookieStore.cookies.set("__ctn_count", encodedValue);
 
@@ -145,7 +145,7 @@ describe("StorageAdapter", () => {
     describe("afterInit", () => {
         it("should setup autoSync interval when enabled", () => {
             jest.useFakeTimers();
-            const adapter = new StorageAdapter<{ count: number }>({ autoSync: 500 });
+            const adapter = new NextCookieAdapter<{ count: number }>({ autoSync: 500 });
             const store = { count: 0 };
             const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
             document.cookie = "__ctn_count=42";
@@ -163,7 +163,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should not setup interval when autoSync is null", () => {
-            const adapter = new StorageAdapter<{ count: number }>({ autoSync: null });
+            const adapter = new NextCookieAdapter<{ count: number }>({ autoSync: null });
             const store = { count: 0 };
             const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
 
@@ -174,7 +174,7 @@ describe("StorageAdapter", () => {
 
         it("should cleanup interval on unmount", () => {
             jest.useFakeTimers();
-            const adapter = new StorageAdapter<{ count: number }>({ autoSync: 500 });
+            const adapter = new NextCookieAdapter<{ count: number }>({ autoSync: 500 });
             const store = { count: 0 };
             const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
 
@@ -190,7 +190,7 @@ describe("StorageAdapter", () => {
 
     describe("afterUpdate", () => {
         it("should save data to cookies", () => {
-            const adapter = new StorageAdapter<{ count: number }>({});
+            const adapter = new NextCookieAdapter<{ count: number }>({});
             const store = { count: 0 };
             adapter.afterUpdate(store, { count: 42 });
 
@@ -202,7 +202,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should not save data exceeding rawLimit", () => {
-            const adapter = new StorageAdapter<{ count: number }>({ rawLimit: 10 });
+            const adapter = new NextCookieAdapter<{ count: number }>({ rawLimit: 10 });
             const store = { count: 0 };
             adapter.afterUpdate(store, { count: 10000000000000 });
 
@@ -210,7 +210,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should only save specified keys when saveKeys is provided", () => {
-            const adapter = new StorageAdapter<{ count: number; name: string }>({
+            const adapter = new NextCookieAdapter<{ count: number; name: string }>({
                 saveKeys: ["count"],
             });
             const store = { count: 0, name: "Test" };
@@ -221,7 +221,7 @@ describe("StorageAdapter", () => {
         });
 
         it("should use custom flags when setting cookies", () => {
-            const adapter = new StorageAdapter<{ count: number }>({
+            const adapter = new NextCookieAdapter<{ count: number }>({
                 flags: { path: "/custom", sameSite: "lax" },
             });
             const store = { count: 0 };
@@ -235,7 +235,7 @@ describe("StorageAdapter", () => {
 
     describe("beforeDestroy", () => {
         it("should not cleanup when onDestroy is 'ignore'", () => {
-            const adapter = new StorageAdapter({ onDestroy: "ignore" });
+            const adapter = new NextCookieAdapter({ onDestroy: "ignore" });
             document.cookie = "__ctn_count=42";
             const store = { count: 1 } as BaseStore;
 
@@ -246,7 +246,7 @@ describe("StorageAdapter", () => {
 
         it("should clear sync interval", () => {
             jest.useFakeTimers();
-            const adapter = new StorageAdapter<{ count: number }>({ autoSync: 500 });
+            const adapter = new NextCookieAdapter<{ count: number }>({ autoSync: 500 });
             const store = { count: 0 };
             const setStore = jest.fn() as GlobalStore<typeof store>["setStore"];
 
@@ -267,7 +267,7 @@ describe("StorageAdapter", () => {
                 return obj.count !== undefined && obj.count >= 0;
             });
 
-            const adapter = new StorageAdapter<{ count: number }>({ validate });
+            const adapter = new NextCookieAdapter<{ count: number }>({ validate });
             const encodedValue = encodeURIComponent(JSON.stringify(42));
             mockCookieStore.cookies.set("__ctn_count", encodedValue);
 
@@ -280,7 +280,7 @@ describe("StorageAdapter", () => {
 
         it("should remove invalid data from storage", async () => {
             const validate = jest.fn(() => false);
-            const adapter = new StorageAdapter<{ count: number }>({ validate });
+            const adapter = new NextCookieAdapter<{ count: number }>({ validate });
             const encodedValue = encodeURIComponent(JSON.stringify(42));
             mockCookieStore.cookies.set("__ctn_count", encodedValue);
 
@@ -301,7 +301,7 @@ describe("StorageAdapter", () => {
             const Store = createStore<TestStoreType>(
                 { count: 0, name: "Initial", user: { id: 1, email: "test@example.com" }, theme: "light", items: [] },
                 {
-                    adapter: new StorageAdapter({}),
+                    adapter: new NextCookieAdapter({}),
                 },
             );
 
@@ -333,7 +333,7 @@ describe("StorageAdapter", () => {
             const Store = createStore<TestStoreType>(
                 { count: 0, name: "Test", user: { id: 1, email: "test@example.com" }, theme: "light", items: [] },
                 {
-                    adapter: new StorageAdapter({}),
+                    adapter: new NextCookieAdapter({}),
                 },
             );
 
@@ -363,7 +363,7 @@ describe("StorageAdapter", () => {
             const Store = createStore<TestStoreType>(
                 { count: 5, name: "Test", user: { id: 1, email: "test@example.com" }, theme: "light", items: [] },
                 {
-                    adapter: new StorageAdapter({ onDestroy: "cleanup" }),
+                    adapter: new NextCookieAdapter({ onDestroy: "cleanup" }),
                 },
             );
 
@@ -382,7 +382,7 @@ describe("StorageAdapter", () => {
             const Store = createStore<TestStoreType>(
                 { count: 0, name: "Test", user: { id: 1, email: "test@example.com" }, theme: "light", items: [] },
                 {
-                    adapter: new StorageAdapter({ prefix: "custom_" }),
+                    adapter: new NextCookieAdapter({ prefix: "custom_" }),
                 },
             );
 

@@ -150,7 +150,7 @@ describe("prepareStore", () => {
         it("should return options with empty adapter when no options provided", () => {
             const { options } = prepareStore(initialData);
 
-            expect(options).toEqual({ adapter: {} });
+            expect(options).toEqual({ adapter: undefined });
         });
 
         it("should return empty adapter when only getServerSnapshot is provided", () => {

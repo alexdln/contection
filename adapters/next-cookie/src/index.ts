@@ -1,22 +1,22 @@
 import { type BaseAdapter, type BaseStore, type GlobalStore, type ValidateNewStore } from "contection";
 
-import { type StorageAdapterProps } from "./types";
+import { type NextCookieAdapterProps } from "./types";
 import { isCookieAvailable, cookieStorage } from "./utils";
 
-export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Store> {
-    private prefix: Exclude<StorageAdapterProps<Store>["prefix"], undefined>;
+export class NextCookieAdapter<Store extends BaseStore> implements BaseAdapter<Store> {
+    private prefix: Exclude<NextCookieAdapterProps<Store>["prefix"], undefined>;
 
-    private onDestroy: Exclude<StorageAdapterProps<Store>["onDestroy"], undefined>;
+    private onDestroy: Exclude<NextCookieAdapterProps<Store>["onDestroy"], undefined>;
 
-    private rawLimit: Exclude<StorageAdapterProps<Store>["rawLimit"], undefined>;
+    private rawLimit: Exclude<NextCookieAdapterProps<Store>["rawLimit"], undefined>;
 
-    private flags: Exclude<StorageAdapterProps<Store>["flags"], undefined>;
+    private flags: Exclude<NextCookieAdapterProps<Store>["flags"], undefined>;
 
-    private validate: Exclude<StorageAdapterProps<Store>["validate"], undefined>;
+    private validate: Exclude<NextCookieAdapterProps<Store>["validate"], undefined>;
 
-    private saveKeys: StorageAdapterProps<Store>["saveKeys"];
+    private saveKeys: NextCookieAdapterProps<Store>["saveKeys"];
 
-    private autoSync: Exclude<StorageAdapterProps<Store>["autoSync"], undefined>;
+    private autoSync: Exclude<NextCookieAdapterProps<Store>["autoSync"], undefined>;
 
     private syncInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -32,7 +32,7 @@ export class StorageAdapter<Store extends BaseStore> implements BaseAdapter<Stor
         validate = null,
         saveKeys,
         autoSync = null,
-    }: StorageAdapterProps<Store> = {}) {
+    }: NextCookieAdapterProps<Store> = {}) {
         this.prefix = prefix;
         this.onDestroy = onDestroy;
         this.rawLimit = rawLimit;

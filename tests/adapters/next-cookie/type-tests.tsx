@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createStore, type GlobalStore } from "contection";
-import { StorageAdapter } from "contection-next-cookie-adapter";
+import { NextCookieAdapter } from "contection-next-cookie-adapter";
 
 interface TestStore {
     count: number;
@@ -15,9 +15,9 @@ interface TestStore {
 
 // Test 1: Constructor with options
 function testConstructor() {
-    new StorageAdapter<TestStore>();
-    new StorageAdapter<TestStore>({});
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>();
+    new NextCookieAdapter<TestStore>({});
+    new NextCookieAdapter<TestStore>({
         prefix: "custom_",
         onDestroy: "cleanup",
         rawLimit: 5000,
@@ -33,32 +33,32 @@ function testConstructor() {
     });
 
     // @ts-expect-error - invalid onDestroy
-    new StorageAdapter<TestStore>({ onDestroy: "invalid" });
+    new NextCookieAdapter<TestStore>({ onDestroy: "invalid" });
 
     // @ts-expect-error - invalid rawLimit type
-    new StorageAdapter<TestStore>({ rawLimit: "invalid" });
+    new NextCookieAdapter<TestStore>({ rawLimit: "invalid" });
 
     // @ts-expect-error - invalid prefix type
-    new StorageAdapter<TestStore>({ prefix: 123 });
+    new NextCookieAdapter<TestStore>({ prefix: 123 });
 }
 
 // Test 2: Configuration options
 function testConfigurationOptions() {
-    new StorageAdapter<TestStore>({ onDestroy: "cleanup" });
-    new StorageAdapter<TestStore>({ onDestroy: "ignore" });
+    new NextCookieAdapter<TestStore>({ onDestroy: "cleanup" });
+    new NextCookieAdapter<TestStore>({ onDestroy: "ignore" });
 
-    new StorageAdapter<TestStore>({ prefix: "app_" });
-    new StorageAdapter<TestStore>({ rawLimit: 1000 });
+    new NextCookieAdapter<TestStore>({ prefix: "app_" });
+    new NextCookieAdapter<TestStore>({ rawLimit: 1000 });
 
-    new StorageAdapter<TestStore>({ autoSync: null });
-    new StorageAdapter<TestStore>({ autoSync: 1000 });
-    new StorageAdapter<TestStore>({ autoSync: 200 });
+    new NextCookieAdapter<TestStore>({ autoSync: null });
+    new NextCookieAdapter<TestStore>({ autoSync: 1000 });
+    new NextCookieAdapter<TestStore>({ autoSync: 200 });
 
     // @ts-expect-error - invalid autoSync type
-    new StorageAdapter<TestStore>({ autoSync: "invalid" });
+    new NextCookieAdapter<TestStore>({ autoSync: "invalid" });
 
     // Cookie flags
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>({
         flags: {
             path: "/custom",
             domain: "example.com",
@@ -69,26 +69,26 @@ function testConfigurationOptions() {
         },
     });
 
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>({
         flags: {
             sameSite: "lax",
         },
     });
 
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>({
         flags: {
             sameSite: "none",
         },
     });
 
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>({
         flags: {
             // @ts-expect-error - invalid sameSite
             sameSite: "invalid",
         },
     });
 
-    new StorageAdapter<TestStore>({
+    new NextCookieAdapter<TestStore>({
         flags: {
             // @ts-expect-error - invalid expires type
             expires: "invalid",
@@ -103,26 +103,26 @@ function testValidate() {
         return obj.count !== undefined;
     };
 
-    new StorageAdapter<TestStore>({ validate });
-    new StorageAdapter<TestStore>({ validate: null });
+    new NextCookieAdapter<TestStore>({ validate });
+    new NextCookieAdapter<TestStore>({ validate: null });
 }
 
 // Test 4: saveKeys
 function testSaveKeys() {
-    new StorageAdapter<TestStore>({ saveKeys: [] });
-    new StorageAdapter<TestStore>({ saveKeys: ["count"] });
-    new StorageAdapter<TestStore>({ saveKeys: ["count", "name", "theme"] });
+    new NextCookieAdapter<TestStore>({ saveKeys: [] });
+    new NextCookieAdapter<TestStore>({ saveKeys: ["count"] });
+    new NextCookieAdapter<TestStore>({ saveKeys: ["count", "name", "theme"] });
 
     // @ts-expect-error - invalid key
-    new StorageAdapter<TestStore>({ saveKeys: ["invalidKey"] });
+    new NextCookieAdapter<TestStore>({ saveKeys: ["invalidKey"] });
 
     // @ts-expect-error - invalid type
-    new StorageAdapter<TestStore>({ saveKeys: "count" });
+    new NextCookieAdapter<TestStore>({ saveKeys: "count" });
 }
 
 // Test 5: Adapter methods
 async function testAdapterMethods() {
-    const adapter = new StorageAdapter<TestStore>({});
+    const adapter = new NextCookieAdapter<TestStore>({});
     const store: TestStore = {
         count: 0,
         name: "Test",
@@ -152,7 +152,7 @@ async function testAdapterMethods() {
 
 // Test 6: Type inference
 async function testTypeInference() {
-    const adapter = new StorageAdapter<TestStore>({});
+    const adapter = new NextCookieAdapter<TestStore>({});
     const store: TestStore = {
         count: 0,
         name: "Test",
@@ -179,7 +179,7 @@ function testCreateStoreIntegration() {
             items: [],
         },
         {
-            adapter: new StorageAdapter<TestStore>({
+            adapter: new NextCookieAdapter<TestStore>({
                 prefix: "app_",
                 onDestroy: "cleanup",
                 flags: {

@@ -1,6 +1,8 @@
 import { type CookieFlags } from "./types";
 
 export const isCookieAvailable = () => {
+    if (typeof window === "undefined") return true;
+
     try {
         document.cookie = "___ctn_test=1";
         const enabled = document.cookie.includes("___ctn_test=");
