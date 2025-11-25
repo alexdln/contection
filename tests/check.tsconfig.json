@@ -16,7 +16,9 @@
       "contection-top-layer": ["../modules/top-layer/src/index.tsx"],
       "contection-top-layer/*": ["../modules/top-layer/*"],
       "contection-storage-adapter": ["../adapters/storage/src/index.ts"],
-      "contection-storage-adapter/*": ["../adapters/storage/*"]
+      "contection-storage-adapter/*": ["../adapters/storage/*"],
+      "contection-next-cookie-adapter": ["../adapters/next-cookie/src/index.ts"],
+      "contection-next-cookie-adapter/*": ["../adapters/next-cookie/*"]
     }
   },
   "include": ["**/type-tests.tsx"]
