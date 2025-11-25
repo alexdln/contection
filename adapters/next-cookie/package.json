@@ -1,7 +1,7 @@
 {
   "name": "contection-next-cookie-adapter",
   "version": "1.0.0",
-  "description": "A persistent storage adapter for contection that automatically saves and restores state to browser cookie",
+  "description": "A Next.js cookie-based persistence adapter for contection that automatically saves and restores state to browser cookies",
   "keywords": [
     "contection",
     "storage",
