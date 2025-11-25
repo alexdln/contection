@@ -3,7 +3,7 @@ import { isStorageAvailable } from "contection-storage-adapter/src/utils";
 describe("isStorageAvailable", () => {
     it("should return true when storage is available", () => {
         const mockStorage = {
-            getItem: jest.fn((key: string) => (key === "feature_test" ? "yes" : null)),
+            getItem: jest.fn((key: string) => (key === "___ctn_test" ? "1" : null)),
             setItem: jest.fn(),
             removeItem: jest.fn(),
             clear: jest.fn(),
@@ -14,9 +14,9 @@ describe("isStorageAvailable", () => {
         const result = isStorageAvailable(mockStorage as typeof localStorage);
 
         expect(result).toBe(true);
-        expect(mockStorage.setItem).toHaveBeenCalledWith("feature_test", "yes");
-        expect(mockStorage.getItem).toHaveBeenCalledWith("feature_test");
-        expect(mockStorage.removeItem).toHaveBeenCalledWith("feature_test");
+        expect(mockStorage.setItem).toHaveBeenCalledWith("___ctn_test", "1");
+        expect(mockStorage.getItem).toHaveBeenCalledWith("___ctn_test");
+        expect(mockStorage.removeItem).toHaveBeenCalledWith("___ctn_test");
     });
 
     it("should return false when storage.setItem throws", () => {
@@ -38,7 +38,7 @@ describe("isStorageAvailable", () => {
 
     it("should return false when storage.getItem returns different value", () => {
         const mockStorage = {
-            getItem: jest.fn((key: string) => (key === "feature_test" ? "no" : null)),
+            getItem: jest.fn((key: string) => (key === "___ctn_test" ? "no" : null)),
             setItem: jest.fn(),
             removeItem: jest.fn(),
             clear: jest.fn(),
