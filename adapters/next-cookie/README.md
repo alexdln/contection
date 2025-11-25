@@ -1,0 +1,1 @@
+# contection-next-cookie-adapter

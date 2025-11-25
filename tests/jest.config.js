@@ -16,6 +16,8 @@ module.exports = {
     "^contection-top-layer/(.*)$": "<rootDir>/../modules/top-layer/$1",
     "^contection-storage-adapter$": "<rootDir>/../adapters/storage/src/index.ts",
     "^contection-storage-adapter/(.*)$": "<rootDir>/../adapters/storage/$1",
+    "^contection-next-cookie-adapter$": "<rootDir>/../adapters/next-cookie/src/index.ts",
+    "^contection-next-cookie-adapter/(.*)$": "<rootDir>/../adapters/next-cookie/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/src/setup/jest.setup.ts"],
   collectCoverageFrom: [
