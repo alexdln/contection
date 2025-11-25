@@ -7,7 +7,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
-import { createStore, useStore, useStoreReducer } from "contection";
+import { createStore, useStore, useStoreReducer } from "contection/src";
+import { prepareStore } from "contection/src/prepare-store";
 
 interface TestStore {
     count: number;
@@ -397,6 +398,52 @@ function testValidateOption() {
     >
         <div>Test</div>
     </Store.Provider>;
+}
+
+// Test 12: prepareStore with getServerSnapshot (async)
+async function testPrepareStoreWithAsyncGetServerSnapshot() {
+    const { getStore } = prepareStore<TestStore>(
+        {
+            count: 0,
+            name: "Test",
+            user: { id: 1, email: "test@example.com" },
+            theme: "light",
+            items: [],
+        },
+        {
+            adapter: {
+                getServerSnapshot: async (store) => ({ ...store, count: 1 }),
+            },
+        },
+    );
+
+    const storePromise = await getStore();
+    const storeType: TestStore = storePromise;
+}
+
+// Test 13: prepareStore integration with createStore
+async function testPrepareStoreIntegrationWithCreateStore() {
+    const { initialData, options, getStore } = prepareStore<TestStore>(
+        {
+            count: 0,
+            name: "Test",
+            user: { id: 1, email: "test@example.com" },
+            theme: "light",
+            items: [],
+        },
+        {
+            adapter: {
+                getServerSnapshot: async (store) => ({ ...store, count: 42 }),
+                beforeInit: (store) => store,
+            },
+        },
+    );
+
+    const Store = createStore(initialData, options);
+    const serverStorePromise = await getStore();
+
+    const initial: TestStore = Store._initial;
+    const storeType: TestStore = serverStorePromise;
 }
 
 export {};

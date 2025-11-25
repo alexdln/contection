@@ -94,7 +94,7 @@ export type GlobalStore<Store extends BaseStore> = {
  * @template Store - The store state type
  * @returns Optional cleanup function that receives the store
  */
-interface LifecycleMountHook<Store extends BaseStore> {
+export interface LifecycleMountHook<Store extends BaseStore> {
     (
         store: Store,
         setStore: GlobalStore<Store>["setStore"],
@@ -107,16 +107,17 @@ interface LifecycleMountHook<Store extends BaseStore> {
  * Lifecycle hook that runs during unmount phase
  * @template Store - The store state type
  */
-interface LifecycleUnmountHook<Store extends BaseStore> {
+export interface LifecycleUnmountHook<Store extends BaseStore> {
     (store: Store): void;
 }
 
 export interface BaseAdapter<Store extends BaseStore> {
-    beforeInit(store: Store): Store;
-    afterInit(store: Store, setStore: GlobalStore<Store>["setStore"]): void | ((store: Store) => void);
-    beforeUpdate(store: Store, part: Partial<Store>): Partial<Store>;
-    afterUpdate(store: Store, part: Partial<Store>): void;
-    beforeDestroy(store: Store): void;
+    getServerSnapshot?: (store: Store) => Store | Promise<Store>;
+    beforeInit?: (store: Store) => Store;
+    afterInit?: (store: Store, setStore: GlobalStore<Store>["setStore"]) => void | ((store: Store) => void);
+    beforeUpdate?: (store: Store, part: Partial<Store>) => Partial<Store>;
+    afterUpdate?: (store: Store, part: Partial<Store>) => void;
+    beforeDestroy?: (store: Store) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,8 +140,7 @@ export type CreateStoreOptions<Store extends BaseStore> = {
         /** Runs asynchronously during component unmount. Use for async cleanup operations */
         storeWillUnmountAsync?: LifecycleUnmountHook<Store>;
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    adapter?: BaseAdapter<any>;
+    adapter?: BaseAdapter<Store>;
     validate?: Validate;
 };
 
