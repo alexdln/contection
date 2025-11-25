@@ -1,6 +1,6 @@
 packages:
   - "package"
   - "tests"
-  - "example"
+  - "examples/*"
   - "modules/*"
   - "adapters/*"
