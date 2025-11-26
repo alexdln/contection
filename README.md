@@ -10,7 +10,6 @@ A state management library that extends React Context API with fine-grained subs
 - **Granular Subscriptions** - Built on `useSyncExternalStore` for efficient, per-key subscription updates
 - **Selective Re-renders** - Subscribe to specific store keys to minimize component re-renders
 - **Computed Values** - Transform and derive state with mutation functions
-- **Type Safety** - Full type safety with type inference for store keys and mutations
 - **Additional Modules** - Extended functionality through specialized modules like [viewport management](https://github.com/alexdln/contection/tree/main/modules/viewport) and [top-layer management](https://github.com/alexdln/contection/tree/main/modules/top-layer)
 - **Storage adapters** - Automatic state persistence with optional validation and selective key persistence via [storage adapter](https://github.com/alexdln/contection/tree/main/adapters/storage) (localStorage/sessionStorage) and [next-cookie adapter](https://github.com/alexdln/contection/tree/main/adapters/next-cookie) (cookies with SSR support)
 
@@ -773,6 +772,14 @@ A persistent storage adapter for Contection that automatically saves and restore
 ### [contection-next-cookie-adapter](https://github.com/alexdln/contection/tree/main/adapters/next-cookie)
 
 A cookie-based persistence adapter for Contection designed for Next.js applications with full server-side rendering support. Unlike localStorage-based adapters, cookies are accessible on both server and client, enabling true SSR with automatic state hydration. The adapter handles serialization, validation and cookie management.
+
+## Examples
+
+The repository includes example applications demonstrating Contection's capabilities:
+
+- **[demo](examples/demo)** - Demonstrates fine-grained subscriptions with various optimization strategies, storage adapters for state persistence, and integration with `contection-viewport` and `contection-top-layer` modules.
+
+- **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence.
 
 ## License
 

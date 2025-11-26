@@ -146,6 +146,14 @@ new StorageAdapter({
 
 The adapter automatically detects storage availability and gracefully degrades if localStorage or sessionStorage is unavailable (e.g., in private browsing mode or when storage is disabled).
 
+## Examples
+
+The repository includes example applications demonstrating storage adapter capabilities:
+
+- **[demo](examples/demo)** - Demonstrates fine-grained subscriptions with various optimization strategies, storage adapters for state persistence, and integration with `contection-viewport` and `contection-top-layer` modules.
+
+- **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence.
+
 ## License
 
 MIT
