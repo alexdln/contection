@@ -13,7 +13,7 @@ export interface HomePageContentProps {
 }
 
 const HomePageContent: React.FC<HomePageContentProps> = async ({ store }) => {
-    "use cache";
+    "use cache: remote";
     cacheLife("minutes");
 
     return (
