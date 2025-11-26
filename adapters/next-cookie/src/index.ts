@@ -117,7 +117,7 @@ export class NextCookieAdapter<Store extends BaseStore> implements BaseAdapter<S
 
     async getServerSnapshot(store: Store) {
         const keys = (this.saveKeys || Object.keys(store)) as (keyof Store)[];
-        const newStore = store;
+        const newStore = { ...store };
 
         if (this.storage) {
             for (const key of keys) {

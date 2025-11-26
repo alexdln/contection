@@ -1,0 +1,141 @@
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+.tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.content {
+  min-height: 400px;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.post {
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  transition: all 0.2s;
+}
+
+.post:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.postImageContainer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  aspect-ratio: 16/9;
+  border: 1px solid var(--border-color);
+}
+
+.postImageBackground {
+  display: block;
+  position: absolute;
+  inset: -10px;
+  margin: 0 auto;
+  object-fit: cover;
+  filter: blur(16px);
+  opacity: 0.9;
+}
+
+.postImage {
+  position: relative;
+  display: block;
+  margin: 0 auto;
+  height: 440px;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.authorInfo {
+  flex: 1;
+}
+
+.displayName {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.handle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.postText {
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.postMeta {
+  display: flex;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.postMeta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -43,7 +43,6 @@ export const cookieStorage = {
 
         const [, ...valueParts] = cookieValue.split("=");
         const value = valueParts.join("=");
-        // return value ? { value: JSON.parse(decodeURIComponent(value)) } : null;
         return { value };
     },
     getItemServer: async (key: string) => {
@@ -55,7 +54,6 @@ export const cookieStorage = {
             if (!cookieValue) return null;
 
             return { value: cookieValue.value };
-            // return cookieValue ? { value: JSON.parse(decodeURIComponent(cookieValue)) } : null;
         } catch {
             return null;
         }
