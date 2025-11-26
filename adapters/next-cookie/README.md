@@ -234,6 +234,12 @@ Cookies have strict size limitations (typically 4KB per cookie). The adapter:
 
 For large state objects, consider using `saveKeys` to persist only essential data, or use a combination of cookies for small critical data and localStorage for larger data.
 
+## Examples
+
+The repository includes example applications demonstrating next-cookie adapter capabilities:
+
+- **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence.
+
 ## License
 
 MIT
