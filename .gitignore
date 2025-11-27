@@ -9,3 +9,4 @@ yarn-error.log
 *.d.ts
 !env.d.ts
 *.local
+.vercel

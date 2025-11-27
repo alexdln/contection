@@ -4,11 +4,10 @@ import { Store } from "@/providers/feed-store/data";
 import { FeedTabs } from "./feed-tabs";
 
 export interface FeedTabsServerProps {
-    store: Store;
+    feed: Store["currentFeed"];
 }
 
-export const FeedTabsServer: React.FC<FeedTabsServerProps> = async ({ store }) => {
-    const currentFeed = store.currentFeed;
-    const initialPosts = await getCachedFeed(currentFeed);
+export const FeedTabsServer: React.FC<FeedTabsServerProps> = async ({ feed }) => {
+    const initialPosts = await getCachedFeed(feed);
     return <FeedTabs initialPosts={initialPosts} />;
 };

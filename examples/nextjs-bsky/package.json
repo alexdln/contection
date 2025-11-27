@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node ./cache-handlers/postbuild.js",
     "start": "next start",
     "lint": "next lint"
   },
@@ -14,9 +14,11 @@
     "contection": "workspace:*",
     "contection-next-cookie-adapter": "workspace:*",
     "contection-storage-adapter": "workspace:*",
+    "lru-cache": "11.2.2",
     "next": "16.0.4",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "redis": "5.10.0"
   },
   "devDependencies": {
     "@types/node": "22.10.1",

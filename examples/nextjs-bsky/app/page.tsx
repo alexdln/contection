@@ -9,24 +9,16 @@ import { getStore, Store } from "@/providers/feed-store/data";
 import styles from "./page.module.css";
 
 export interface HomePageContentProps {
-    store: Store;
+    feed: Store["currentFeed"];
 }
 
-const HomePageContent: React.FC<HomePageContentProps> = async ({ store }) => {
+const HomePageContent: React.FC<HomePageContentProps> = async ({ feed }) => {
     "use cache: remote";
     cacheLife("minutes");
 
     return (
-        <FeedStoreProvider store={store}>
-            <div className={styles.container}>
-                <header className={styles.header}>
-                    <h1 className={styles.title}>Feeds</h1>
-                    <ThemeToggle />
-                </header>
-                <main className={styles.main}>
-                    <FeedTabsServer store={store} />
-                </main>
-            </div>
+        <FeedStoreProvider feed={feed}>
+            <FeedTabsServer feed={feed} />
         </FeedStoreProvider>
     );
 };
@@ -34,14 +26,22 @@ const HomePageContent: React.FC<HomePageContentProps> = async ({ store }) => {
 const HomePageStore: React.FC = async () => {
     const store = await getStore();
 
-    return <HomePageContent store={store} />;
+    return <HomePageContent feed={store.currentFeed} />;
 };
 
 const HomePage: React.FC = () => {
     return (
-        <Suspense fallback={null}>
-            <HomePageStore />
-        </Suspense>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <h1 className={styles.title}>Feeds</h1>
+                <ThemeToggle />
+            </header>
+            <main className={styles.main}>
+                <Suspense fallback={null}>
+                    <HomePageStore />
+                </Suspense>
+            </main>
+        </div>
     );
 };
 
