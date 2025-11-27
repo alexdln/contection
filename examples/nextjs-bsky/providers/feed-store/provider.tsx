@@ -3,9 +3,9 @@ import { FeedStore } from "./store";
 
 export interface FeedStoreProviderProps {
     children: React.ReactNode;
-    store: Store;
+    feed: Store["currentFeed"];
 }
 
-export const FeedStoreProvider: React.FC<FeedStoreProviderProps> = async ({ children, store }) => {
-    return <FeedStore value={store}>{children}</FeedStore>;
+export const FeedStoreProvider: React.FC<FeedStoreProviderProps> = async ({ children, feed }) => {
+    return <FeedStore value={{ currentFeed: feed }}>{children}</FeedStore>;
 };

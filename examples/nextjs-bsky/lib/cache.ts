@@ -1,4 +1,4 @@
-"use cache";
+"use cache: remote";
 
 import { cacheLife } from "next/cache";
 
