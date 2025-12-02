@@ -257,7 +257,7 @@ For large state objects, consider using `saveKeys` to persist only essential dat
 
 The repository includes example applications demonstrating react-router-cookie adapter capabilities:
 
-- **[react-routerjs-bsky](examples/react-routerjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with react-router-cookie adapter and storage adapter for state persistence.
+- **[react-routerjs-bsky](examples/react-routerjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with react-router-cookie adapter and storage adapter for state persistence. [Preview](https://router-bsky.contection.dev/)
 
 ## License
 

@@ -238,7 +238,7 @@ For large state objects, consider using `saveKeys` to persist only essential dat
 
 The repository includes example applications demonstrating next-cookie adapter capabilities:
 
-- **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence.
+- **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence. [Preview](https://bsky.contection.dev/)
 
 ## License
 
