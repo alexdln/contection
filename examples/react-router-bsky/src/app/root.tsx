@@ -1,8 +1,8 @@
 import { Links, Meta, Outlet, ScrollRestoration } from "react-router";
 
-import { ReactQueryProvider } from "../providers/react-query/provider";
-import { AppStoreProvider } from "../providers/app-store/provider";
-import { themeScript } from "../lib/scripts";
+import { ReactQueryProvider } from "@/src/providers/react-query/provider";
+import { AppStoreProvider } from "@/src/providers/app-store/provider";
+import { themeScript } from "@/src/lib/scripts";
 
 import "./globals.css";
 

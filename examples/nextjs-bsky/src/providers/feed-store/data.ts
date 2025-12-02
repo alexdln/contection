@@ -1,7 +1,7 @@
 import { prepareStore } from "contection/prepare-store";
 import { NextCookieAdapter } from "contection-next-cookie-adapter";
 
-import { type FEEDS } from "@/lib/bsky";
+import { type FEEDS } from "@/src/lib/bsky";
 
 export interface Store {
     currentFeed: keyof typeof FEEDS;

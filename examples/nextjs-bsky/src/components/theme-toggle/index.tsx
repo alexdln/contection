@@ -2,7 +2,7 @@
 
 import { useStoreReducer } from "contection";
 
-import { AppStore } from "@/providers/app-store/store";
+import { AppStore } from "@/src/providers/app-store/store";
 
 import styles from "./theme-toggle.module.css";
 
