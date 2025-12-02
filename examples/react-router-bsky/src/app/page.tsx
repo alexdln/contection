@@ -1,4 +1,4 @@
-import { FeedTabs } from "@/src/components/feed-tabs/feed-tabs";
+import { FeedTabs } from "@/src/components/feed-tabs";
 import { ThemeToggle } from "@/src/components/theme-toggle";
 import { FeedStoreProvider } from "@/src/providers/feed-store/provider";
 import { getStore } from "@/src/providers/feed-store/data";
@@ -6,14 +6,14 @@ import { getCachedFeed } from "@/src/lib/get-cached-feed";
 
 import { type Route } from "./+types/page";
 
-import styles from "./index.module.css";
+import styles from "./page.module.css";
 
 export function meta() {
     return [
         { title: "Bluesky Feeds | RR7 | Contection" },
         {
             name: "description",
-            content: "Example Next.js app using Contection with Bluesky feeds",
+            content: "Example React Router v7 app using Contection with Bluesky feeds",
         },
     ];
 }
