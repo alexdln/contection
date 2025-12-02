@@ -53,7 +53,6 @@ export const StoreControls: React.FC = () => {
             },
         });
     };
-    console.log(initialState);
 
     return (
         <div className="demo-contection__controls">

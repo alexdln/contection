@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.button {
+  padding: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+html[data-theme-mode="system"] .button.themeButtonSystem,
+html[data-theme-mode="light"] .button.themeButtonLight,
+html[data-theme-mode="dark"] .button.themeButtonDark {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+

@@ -1,0 +1,54 @@
+{
+  "name": "contection-react-router-cookie-adapter",
+  "version": "1.0.0",
+  "description": "A React Router cookie-based persistence adapter for contection that automatically saves and restores state to browser cookies",
+  "keywords": [
+    "contection",
+    "storage",
+    "adapter",
+    "react",
+    "react-router",
+    "performance",
+    "save state",
+    "state management",
+    "cookie"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && tsc --project tsconfig.esm.json",
+    "clean": "rm -rf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alexdln/contection.git"
+  },
+  "author": {
+    "name": "Alex Savelyev",
+    "email": "dev@alexdln.com",
+    "url": "https://github.com/alexdln/"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "contection": "1.4.2",
+    "react-router": "7.9.6",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "contection": ">=2.2.0",
+    "react": ">= 19.0.0"
+  },
+  "license": "MIT"
+}

@@ -112,7 +112,8 @@ export interface LifecycleUnmountHook<Store extends BaseStore> {
 }
 
 export interface BaseAdapter<Store extends BaseStore> {
-    getServerSnapshot?: (store: Store) => Store | Promise<Store>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getServerSnapshot?: (store: Store, ...args: any[]) => Store | Promise<Store>;
     beforeInit?: (store: Store) => Store;
     afterInit?: (store: Store, setStore: GlobalStore<Store>["setStore"]) => void | ((store: Store) => void);
     beforeUpdate?: (store: Store, part: Partial<Store>) => Partial<Store>;
