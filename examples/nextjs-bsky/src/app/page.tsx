@@ -15,7 +15,7 @@ export interface HomePageContentProps {
 
 const HomePageContent: React.FC<HomePageContentProps> = async ({ feed }) => {
     "use cache: remote";
-    cacheLife("minutes");
+    cacheLife({ stale: 30, revalidate: 60, expire: 300 });
     const initialPosts = await getCachedFeed(feed);
 
     return (

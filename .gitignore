@@ -10,3 +10,4 @@ yarn-error.log
 !env.d.ts
 *.local
 .vercel
+.env*.local
