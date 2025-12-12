@@ -137,14 +137,14 @@ importers:
         specifier: 0.18.3
         version: 0.18.3
       '@nimpl/cache-redis':
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.7
+        version: 0.2.7
       '@nimpl/cache-tools':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 0.1.2
+        version: 0.1.2
       '@nimpl/cache-widget':
-        specifier: 0.2.2
-        version: 0.2.2(react@19.2.0)
+        specifier: 0.2.3
+        version: 0.2.3(react@19.2.0)
       '@tanstack/react-query':
         specifier: 5.64.0
         version: 5.64.0(react@19.2.0)
@@ -192,14 +192,14 @@ importers:
         specifier: 0.18.3
         version: 0.18.3
       '@nimpl/cache-redis':
-        specifier: 0.2.6
-        version: 0.2.6
+        specifier: 0.2.7
+        version: 0.2.7
       '@nimpl/cache-tools':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 0.1.2
+        version: 0.1.2
       '@nimpl/cache-widget':
-        specifier: 0.2.2
-        version: 0.2.2(react@19.2.0)
+        specifier: 0.2.3
+        version: 0.2.3(react@19.2.0)
       '@react-router/node':
         specifier: 7.9.6
         version: 7.9.6(react-router@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(typescript@5.9.3)
@@ -1655,14 +1655,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@nimpl/cache-redis@0.2.6':
-    resolution: {integrity: sha512-spOq9RUf8Fw7aKX7DqHY2MobzM4rOIzhFjHb5/KeWlxntNbFmnAw7qVS1fgR/D69q/BQR3FcK7NBG7xtR3Cevg==}
+  '@nimpl/cache-redis@0.2.7':
+    resolution: {integrity: sha512-CUY/VpyCKNv+IUDRERbKH50PQuRZsfj/kNVcm1mmzhs7yhODocBvObTcf2jlrYwTv7wDCRWRA9nxiOAOC2Zi0w==}
 
-  '@nimpl/cache-tools@0.1.1':
-    resolution: {integrity: sha512-i0JWMvkX69yHCnq6VyDcU5Fkj0GZC5NFSwoWpVv+2R0aRXgBUv477Cxen4CRGrYDWr9We/SNz0qKD/B2ipH2kw==}
+  '@nimpl/cache-tools@0.1.2':
+    resolution: {integrity: sha512-gdjrt0FHN16kc1gFcdrOFdixGsyaXirkDIaaTFkgp7Q45ldV2UM5wbxtQsQVDWIkj1B8aspPPQ4xDtTTeksDPQ==}
 
-  '@nimpl/cache-widget@0.2.2':
-    resolution: {integrity: sha512-YEi2rI2e3tFBDX4+iSl9Thc07Tvg8CWNwgRtbFGhMaXWvLSpGoKZhVD7u4fsoyFNAFp4V/xbA7hnvrf48atupg==}
+  '@nimpl/cache-widget@0.2.3':
+    resolution: {integrity: sha512-ETAHegULGaSxEPBvCvO4Y0Zp0r7FlF3bCMXZyriYtu4JsXESNci8eSLVtJnZFVYgSzjIY8ZqGlRraJe/sx9rlQ==}
     peerDependencies:
       react: '>=18.0.0'
 
@@ -5964,7 +5964,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.0.7':
     optional: true
 
-  '@nimpl/cache-redis@0.2.6':
+  '@nimpl/cache-redis@0.2.7':
     dependencies:
       chalk: 4.1.2
       ioredis: 5.8.2
@@ -5972,9 +5972,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@nimpl/cache-tools@0.1.1': {}
+  '@nimpl/cache-tools@0.1.2': {}
 
-  '@nimpl/cache-widget@0.2.2(react@19.2.0)':
+  '@nimpl/cache-widget@0.2.3(react@19.2.0)':
     dependencies:
       react: 19.2.0
 

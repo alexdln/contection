@@ -6,9 +6,6 @@ import devtoolsJson from "vite-plugin-devtools-json";
 
 export default defineConfig({
     plugins: [tsconfigPaths(), reactRouterRSC(), rsc(), devtoolsJson()],
-    define: {
-        "process.env.BUILD_ID": JSON.stringify(process.env.BUILD_ID || ""),
-    },
     optimizeDeps: {
         include: ["react-router/dom"],
     },
