@@ -13,7 +13,7 @@ export const getCachedFeed = async (id: keyof typeof FEEDS) => {
             const feed = await fetchBskyFeed(id);
             return { feed, loadedAt: new Date().toISOString() };
         },
-        { key: cacheKey },
+        { key: cacheKey, duration: { stale: 30, revalidate: 60, expire: 300 } },
     );
 
     return cachedLoad();
