@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@atproto/api": "0.18.3",
-    "@nimpl/cache-redis": "0.2.5",
+    "@nimpl/cache-redis": "0.2.6",
     "@nimpl/cache-tools": "0.1.1",
     "@nimpl/cache-widget": "0.2.2",
     "@react-router/node": "7.9.6",

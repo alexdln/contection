@@ -137,8 +137,8 @@ importers:
         specifier: 0.18.3
         version: 0.18.3
       '@nimpl/cache-redis':
-        specifier: 0.2.5
-        version: 0.2.5
+        specifier: 0.2.6
+        version: 0.2.6
       '@nimpl/cache-tools':
         specifier: 0.1.1
         version: 0.1.1
@@ -192,8 +192,8 @@ importers:
         specifier: 0.18.3
         version: 0.18.3
       '@nimpl/cache-redis':
-        specifier: 0.2.5
-        version: 0.2.5
+        specifier: 0.2.6
+        version: 0.2.6
       '@nimpl/cache-tools':
         specifier: 0.1.1
         version: 0.1.1
@@ -1655,8 +1655,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@nimpl/cache-redis@0.2.5':
-    resolution: {integrity: sha512-pFFJm+8oXXLof7L+V2Y4k4TtchVZB+seJ4Ptx4+xV8LVP95NpvTbtylwng0ynAFyMx+xiT/R0MCGcmFO3Co9+A==}
+  '@nimpl/cache-redis@0.2.6':
+    resolution: {integrity: sha512-spOq9RUf8Fw7aKX7DqHY2MobzM4rOIzhFjHb5/KeWlxntNbFmnAw7qVS1fgR/D69q/BQR3FcK7NBG7xtR3Cevg==}
 
   '@nimpl/cache-tools@0.1.1':
     resolution: {integrity: sha512-i0JWMvkX69yHCnq6VyDcU5Fkj0GZC5NFSwoWpVv+2R0aRXgBUv477Cxen4CRGrYDWr9We/SNz0qKD/B2ipH2kw==}
@@ -5964,7 +5964,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.0.7':
     optional: true
 
-  '@nimpl/cache-redis@0.2.5':
+  '@nimpl/cache-redis@0.2.6':
     dependencies:
       chalk: 4.1.2
       ioredis: 5.8.2
