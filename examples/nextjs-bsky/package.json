@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@atproto/api": "0.18.3",
-    "@nimpl/cache-redis": "0.2.7",
-    "@nimpl/cache-tools": "0.1.2",
-    "@nimpl/cache-widget": "0.2.3",
+    "@nimpl/cache-redis": "0.4.0",
+    "@nimpl/cache-tools": "0.2.0",
+    "@nimpl/cache-widget": "0.3.0",
     "@tanstack/react-query": "5.64.0",
     "contection": "workspace:*",
     "contection-next-cookie-adapter": "workspace:*",
