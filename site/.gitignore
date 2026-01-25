@@ -37,3 +37,4 @@ yarn-error.log*
 # generated
 /public/sitemap*
 /public/preview
+/public/search-index.json
