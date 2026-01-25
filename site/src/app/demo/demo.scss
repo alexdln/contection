@@ -1,0 +1,35 @@
+.main {
+  font-size: 16px;
+  padding: 24px;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-desc {
+  color: var(--r-main-700);
+  margin: -8px 0 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nested {
+  padding: 16px;
+  background: var(--r-main-100);
+  border: 1px solid var(--r-main-200);
+  border-radius: 8px;
+
+  .card {
+    margin-top: 12px;
+    background: color-mix(in srgb, var(--r-main-200) 30%, transparent);
+  }
+}

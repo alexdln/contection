@@ -20,7 +20,6 @@ export const StoreControls: React.FC = () => {
         };
         for (let i = 0; i < 200; i++) {
             const nextTimezone = `UTC${Math.floor(i / 20)}`;
-            await new Promise((resolve) => setTimeout(resolve, 20));
             const random = Math.random();
             if (random < 0.25) {
                 summary.counter++;

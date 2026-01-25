@@ -14,7 +14,8 @@
     "robindoc": "latest",
     "@robindoc/minisearch": "latest",
     "@robindoc/next": "latest",
-    "sass": "1.97.2"
+    "sass": "1.97.2",
+    "contection": "latest"
   },
   "devDependencies": {
     "@types/node": "25.0.8",

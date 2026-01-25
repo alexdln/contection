@@ -15,7 +15,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     <RobinProvider>
                         <Header
                             logo={<>Contection</>}
-                            links={[{ href: "/docs", title: "Docs" }]}
+                            links={[
+                                { href: "/docs", title: "Docs" },
+                                { href: "/demo", title: "Demo" },
+                            ]}
                             git="https://github.com/alexdln/contection"
                             searcher={searchProvider}
                         />

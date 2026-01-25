@@ -321,6 +321,9 @@ importers:
       '@robindoc/next':
         specifier: latest
         version: 3.7.1(next@16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(robindoc@3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+      contection:
+        specifier: latest
+        version: 2.3.0(react@19.2.3)
       next:
         specifier: 16.1.4
         version: 16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
@@ -2823,6 +2826,11 @@ packages:
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+
+  contection@2.3.0:
+    resolution: {integrity: sha512-SvgdLv4Ynb3Abpmf53a8WqYMlCSrG6JHwJvxA5FZqfKYaWSP2aGzFjQ/q8Tyvb/Hbbt8JT7bgl9cyhTGPNmH2w==}
+    peerDependencies:
+      react: '>= 19.0.0'
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -7584,6 +7592,10 @@ snapshots:
       - supports-color
 
   concat-map@0.0.1: {}
+
+  contection@2.3.0(react@19.2.3):
+    dependencies:
+      react: 19.2.3
 
   content-disposition@0.5.4:
     dependencies:
