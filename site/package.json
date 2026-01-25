@@ -11,9 +11,9 @@
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "robindoc": "latest",
-    "@robindoc/minisearch": "latest",
-    "@robindoc/next": "latest",
+    "robindoc": "3.7.2",
+    "@robindoc/minisearch": "3.7.2",
+    "@robindoc/next": "3.7.2",
     "sass": "1.97.2",
     "contection": "latest"
   },

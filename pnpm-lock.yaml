@@ -316,11 +316,11 @@ importers:
   site:
     dependencies:
       '@robindoc/minisearch':
-        specifier: latest
-        version: 3.7.1(tsx@4.21.0)
+        specifier: 3.7.2
+        version: 3.7.2(tsx@4.21.0)
       '@robindoc/next':
-        specifier: latest
-        version: 3.7.1(next@16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(robindoc@3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+        specifier: 3.7.2
+        version: 3.7.2(next@16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(robindoc@3.7.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       contection:
         specifier: latest
         version: 2.3.0(react@19.2.3)
@@ -334,8 +334,8 @@ importers:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
       robindoc:
-        specifier: latest
-        version: 3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 3.7.2
+        version: 3.7.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       sass:
         specifier: 1.97.2
         version: 1.97.2
@@ -2113,8 +2113,8 @@ packages:
   '@remix-run/node-fetch-server@0.9.0':
     resolution: {integrity: sha512-SoLMv7dbH+njWzXnOY6fI08dFMI5+/dQ+vY3n8RnnbdG7MdJEgiP28Xj/xWlnRnED/aB6SFw56Zop+LbmaaKqA==}
 
-  '@robindoc/minisearch@3.7.1':
-    resolution: {integrity: sha512-fkNMkT4o0h3oPWdV6cFVSFgm3fryY5UOZEiZzYBDhh5Mfr5JZwuq7Gi2qnYOqTRs1NCCklVuVLeREzIUgElrVg==}
+  '@robindoc/minisearch@3.7.2':
+    resolution: {integrity: sha512-nzMtWIhjWU94RQUL8DFG98WtvQeC6iQCc+YCDVho1FftkWtIRBU/thMoPfoG8HxUF7Jqc9PXQvPFgYPoEYLvdg==}
     hasBin: true
     peerDependencies:
       tsx: '>= 1.0.0'
@@ -2122,8 +2122,8 @@ packages:
       tsx:
         optional: true
 
-  '@robindoc/next@3.7.1':
-    resolution: {integrity: sha512-/thcDef9KgRGxSh5cbmg3hgIKoHr4An1NPh8cz010f9ActOhh2byxKM630SrVOKNRYazjueq86hf48u6FqxsxQ==}
+  '@robindoc/next@3.7.2':
+    resolution: {integrity: sha512-PhFYOAQX++cCzAvM74jf+g49Hp8cSTIDickcVKzDwQyaytmvY6XeGLO6o1o63jrGLnhGLMivl5nhKowUANemRA==}
     peerDependencies:
       next: '>= 14.0.0'
       react: '>= 18.3.0'
@@ -4318,8 +4318,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  robindoc@3.7.1:
-    resolution: {integrity: sha512-3W95a9iL10o2d82/Naude3UTBm63+1m2wevUn7dgdfayuQ0QW+66SkqeoaC1TtIg0jbPM57v5uKygmbt/x2k9A==}
+  robindoc@3.7.2:
+    resolution: {integrity: sha512-D2ZzYd7goA2ryXVIoH2r7re453naflxPFi5PYprPwAh350DoxTaohiQqrdyN3wSTObrSKNDX6M4/hCDc2Dya2w==}
     peerDependencies:
       react: '>= 18.3.0'
       react-dom: '>= 18.3.0'
@@ -6856,7 +6856,7 @@ snapshots:
 
   '@remix-run/node-fetch-server@0.9.0': {}
 
-  '@robindoc/minisearch@3.7.1(tsx@4.21.0)':
+  '@robindoc/minisearch@3.7.2(tsx@4.21.0)':
     dependencies:
       gray-matter: 4.0.3
       marked: 17.0.1
@@ -6864,12 +6864,12 @@ snapshots:
     optionalDependencies:
       tsx: 4.21.0
 
-  '@robindoc/next@3.7.1(next@16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(robindoc@3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
+  '@robindoc/next@3.7.2(next@16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(robindoc@3.7.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
     dependencies:
       next: 16.1.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      robindoc: 3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      robindoc: 3.7.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
 
   '@rolldown/pluginutils@1.0.0-beta.47': {}
 
@@ -9322,7 +9322,7 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  robindoc@3.7.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  robindoc@3.7.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       clsx: 2.1.1
       dot-prop: 10.1.0
