@@ -6,7 +6,7 @@ Working examples demonstrating Contection patterns and integrations.
 
 | Example | Description | Preview |
 |---------|-------------|---------|
-| **demo** | Fine-grained subscriptions, storage adapters, viewport/top-layer modules | [contection.dev](https://www.contection.dev/) |
+| **demo** | Fine-grained subscriptions, storage adapters, viewport/top-layer modules | [contection.dev](https://contection.dev/demo) |
 | **nextjs-bsky** | Next.js SSR with cookie adapter, combined server/client architecture | [nextjs-bsky.contection.dev](https://nextjs-bsky.contection.dev/) |
 | **react-routerjs-bsky** | React Router integration with storage persistence | [router-bsky.contection.dev](https://router-bsky.contection.dev/) |
 

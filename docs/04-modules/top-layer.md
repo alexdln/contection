@@ -1,6 +1,6 @@
 # Top Layer Module
 
-[GitHub](https://github.com/alexdln/contection/tree/main/modules/top-layer) • [Demo](https://www.contection.dev/)
+[GitHub](https://github.com/alexdln/contection/tree/main/modules/top-layer)
 
 Manage stacked UI layers like dialogs, modals, drawers, and tooltips. Handles z-index ordering, focus trapping, and escape key dismissal.
 

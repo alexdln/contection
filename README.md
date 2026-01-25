@@ -176,7 +176,7 @@ A cookie-based persistence adapter for Contection designed for Next.js applicati
 
 The repository includes example applications demonstrating Contection's capabilities:
 
-- **[demo](examples/demo)** - Demonstrates fine-grained subscriptions with various optimization strategies, storage adapters for state persistence, and integration with `contection-viewport` and `contection-top-layer` modules. [Preview](https://demo.contection.dev/)
+- **[demo](examples/demo)** - Demonstrates fine-grained subscriptions with various optimization strategies, storage adapters for state persistence, and integration with `contection-viewport` and `contection-top-layer` modules. [Preview](https://contection.dev/demo/)
 - **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence. [Preview](https://router-bsky.contection.dev/)
 - **[react-routerjs-bsky](examples/react-routerjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with react-router-cookie adapter and storage adapter for state persistence. [Preview](https://router-bsky.contection.dev/)
 

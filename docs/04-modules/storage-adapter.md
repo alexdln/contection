@@ -74,6 +74,5 @@ const sessionAdapter = createStorageAdapter({
 
 ## Examples
 
-- [demo](https://www.contection.dev/) - Theme and settings persistence
 - [nextjs-bsky](https://nextjs-bsky.contection.dev/) - Combined with cookie adapter
 - [react-routerjs-bsky](https://router-bsky.contection.dev/) - React Router integration

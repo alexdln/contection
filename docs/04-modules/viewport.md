@@ -1,6 +1,6 @@
 # Viewport Module
 
-[GitHub](https://github.com/alexdln/contection/tree/main/modules/viewport) • [Demo](https://www.contection.dev/)
+[GitHub](https://github.com/alexdln/contection/tree/main/modules/viewport)
 
 Reactive viewport dimensions with a single shared resize listener. Components subscribe to specific properties and only re-render when those values change.
 
