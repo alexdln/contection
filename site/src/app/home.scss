@@ -1,0 +1,117 @@
+.home {
+    margin: 60px auto;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 64px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+}
+
+.tagline {
+    font-size: 1.125rem;
+    color: var(--r-main-700);
+    margin: 0 0 32px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.btn-primary {
+    background: var(--r-primary-500);
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--r-main-200);
+    color: var(--r-main-900);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+    opacity: 0.85;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 80px 0;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.feature {
+    padding: 16px;
+    border-radius: 8px;
+    border: 4px solid var(--r-main-100);
+}
+
+.feature h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+
+.feature p {
+    font-size: 0.875rem;
+    color: var(--r-main-700);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.example {
+    max-width: 600px;
+    margin: 60px auto;
+}
+
+.example pre {
+    border-radius: 8px;
+    border: 4px solid var(--r-main-100);
+    padding: 16px;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.example code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--r-main-900);
+}
+
+.links {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}
+
+.links a {
+    color: var(--r-main-700);
+    text-decoration: none;
+}
+
+.links a:hover {
+    color: var(--r-main-900);
+    text-decoration: underline;
+}

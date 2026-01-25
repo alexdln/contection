@@ -2,7 +2,7 @@
 
 A persistent storage adapter for [contection](https://github.com/alexdln/contection) that automatically saves and restores state to browser storage (localStorage or sessionStorage).
 
-[npm](https://www.npmjs.com/package/contection-storage-adapter) • [demo](https://www.contection.dev/)
+[npm](https://www.npmjs.com/package/contection-storage-adapter)
 
 ## Overview
 
@@ -149,8 +149,6 @@ The adapter automatically detects storage availability and gracefully degrades i
 ## Examples
 
 The repository includes example applications demonstrating storage adapter capabilities:
-
-- **[demo](examples/demo)** - Demonstrates fine-grained subscriptions with various optimization strategies, storage adapters for state persistence, and integration with `contection-viewport` and `contection-top-layer` modules.
 
 - **[nextjs-bsky](examples/nextjs-bsky)** - Showcases performance improvements in Next.js applications using `cacheComponents` and a combined client-server architecture with next-cookie adapter and storage adapter for state persistence.
 
