@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type Metadata } from "next/types";
 import { RobinProvider, Header, Footer } from "robindoc";
 import { NavigationProvider } from "@robindoc/next";
 
@@ -7,7 +7,7 @@ import { searchProvider } from "./search-provider";
 import "robindoc/lib/styles.css";
 import "./globals.css";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
             <body>
@@ -30,3 +30,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </html>
     );
 }
+
+export const metadata: Metadata = {
+    title: "Contection",
+    description: "Contection is a library for managing state in React applications.",
+};
