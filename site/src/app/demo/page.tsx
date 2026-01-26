@@ -1,5 +1,4 @@
-"use client";
-
+import { type Metadata } from "next/types";
 import { DemoStore, initialState } from "./store";
 import {
     FullStoreSubscriber,
@@ -50,3 +49,8 @@ export default function DemoPage() {
         </DemoStore>
     );
 }
+
+export const metadata: Metadata = {
+    title: "Contection - Demo",
+    description: "Basic demo of possible subscription patterns with Contection and best practices.",
+};
