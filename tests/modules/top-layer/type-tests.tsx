@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
-import { type Dialog, type UpperLayer } from "contection-top-layer/src/types";
+import { type DialogType, type UpperLayerType } from "contection-top-layer/src/types";
 import { createTopLayer } from "contection-top-layer";
 import { useTopLayerStore, useTopLayerImperative } from "contection-top-layer/src/hooks";
 import { useDialogStore, useDialogReducer } from "contection-top-layer/src/dialogs/hooks";
@@ -157,13 +157,13 @@ function testUseTopLayer() {
 
     function Component() {
         const store = useTopLayerStore(TopLayerStore);
-        const dialogs: Dialog[] = store.dialogs;
-        const upperLayers: UpperLayer[] = store.upperLayers;
+        const dialogs: DialogType[] = store.dialogs;
+        const upperLayers: UpperLayerType[] = store.upperLayers;
         const hasActiveIsolatedLayers: boolean = store.hasActiveIsolatedLayers;
         const hasActiveLayers: boolean = store.hasActiveLayers;
 
         const partial = useTopLayerStore(TopLayerStore, { keys: ["dialogs", "hasActiveLayers"] });
-        const partialDialogs: Dialog[] = partial.dialogs;
+        const partialDialogs: DialogType[] = partial.dialogs;
         const partialHasActive: boolean = partial.hasActiveLayers;
         // @ts-expect-error - should not have unselected keys
         const partialUpperLayers = partial.upperLayers;
@@ -183,8 +183,8 @@ function testUseTopLayerImperative() {
 
     function Component() {
         const store = useTopLayerImperative(TopLayerStore);
-        const dialogs: Dialog[] = store.dialogs;
-        const upperLayers: UpperLayer[] = store.upperLayers;
+        const dialogs: DialogType[] = store.dialogs;
+        const upperLayers: UpperLayerType[] = store.upperLayers;
         const hasActiveIsolatedLayers: boolean = store.hasActiveIsolatedLayers;
         const hasActiveLayers: boolean = store.hasActiveLayers;
         // @ts-expect-error - should not have other property

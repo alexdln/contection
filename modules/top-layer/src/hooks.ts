@@ -1,7 +1,7 @@
 import { type StoreInstance, useStore, useStoreReducer } from "contection";
 import { useMemo } from "react";
 
-import { type TopLayerStore, type Dialog, type UpperLayer, type TopLayerHookStore } from "./types";
+import { type TopLayerStore, type DialogType, type UpperLayerType, type TopLayerHookStore } from "./types";
 
 export const useTopLayerStore = <
     Store extends TopLayerStore,
@@ -31,12 +31,14 @@ export const useTopLayerStore = <
                     Object.values(store).some(
                         ({ checkIsActive, isolated, type, ...layer }) =>
                             isolated &&
-                            (type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer)),
+                            (type === "dialog"
+                                ? checkIsActive(layer as DialogType)
+                                : checkIsActive(layer as UpperLayerType)),
                     ),
                 hasActiveLayers:
                     keys.includes("hasActiveLayers") &&
                     Object.values(store).some(({ checkIsActive, type, ...layer }) =>
-                        type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer),
+                        type === "dialog" ? checkIsActive(layer as DialogType) : checkIsActive(layer as UpperLayerType),
                     ),
             } as const;
             const prevMutatedStoreTyped = prevMutatedStore as typeof newStore;
@@ -61,22 +63,24 @@ export const useTopLayerImperative = <Store extends TopLayerStore>(
     const [store] = useStoreReducer(instance);
     return useMemo(() => {
         const storeProxy = {
-            get dialogs(): Dialog[] {
+            get dialogs(): DialogType[] {
                 return Object.values(store).filter((dialog) => dialog.type === "dialog");
             },
-            get upperLayers(): UpperLayer[] {
+            get upperLayers(): UpperLayerType[] {
                 return Object.values(store).filter((upperLayer) => upperLayer.type === "upperLayer");
             },
             get hasActiveIsolatedLayers(): boolean {
                 return Object.values(store).some(
                     ({ checkIsActive, type, ...layer }) =>
                         layer.isolated &&
-                        (type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer)),
+                        (type === "dialog"
+                            ? checkIsActive(layer as DialogType)
+                            : checkIsActive(layer as UpperLayerType)),
                 );
             },
             get hasActiveLayers(): boolean {
                 return Object.values(store).some(({ checkIsActive, type, ...layer }) =>
-                    type === "dialog" ? checkIsActive(layer as Dialog) : checkIsActive(layer as UpperLayer),
+                    type === "dialog" ? checkIsActive(layer as DialogType) : checkIsActive(layer as UpperLayerType),
                 );
             },
         };

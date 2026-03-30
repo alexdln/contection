@@ -1,11 +1,6 @@
 import { type StoreInstance } from "contection";
 
-import {
-    type TopLayerStore,
-    type Configuration,
-    type UpperLayer as UpperLayerType,
-    type Dialog as DialogType,
-} from "./types";
+import { type TopLayerStore, type Configuration, type UpperLayerType, type DialogType } from "./types";
 import { UpperLayerContext } from "./upper-layers/contexts";
 import { UpperLayerConsumer } from "./upper-layers/consumer";
 import { UpperLayer } from "./upper-layers";

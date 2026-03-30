@@ -4,7 +4,7 @@
 import { type StoreOptions, type StoreInstance, useStore, useStoreReducer } from "contection";
 import { use, useMemo } from "react";
 
-import { type TopLayerStore, type NonFunction, type InheritedStore, type Dialog as DialogType } from "../types";
+import { type TopLayerStore, type NonFunction, type InheritedStore, type DialogType } from "../types";
 import { DialogWrapperContext } from "./contexts";
 
 export const useDialogStore = <Store extends TopLayerStore, Data>(
