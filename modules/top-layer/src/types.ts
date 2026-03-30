@@ -9,32 +9,32 @@ export type CheckIsActive<ItemData extends unknown = unknown> = (
     data: Omit<ItemData, "checkIsActive" | "type">,
 ) => boolean;
 
-export type Dialog<Data extends unknown = unknown> = {
+export type DialogType<Data extends unknown = unknown> = {
     isolated: boolean;
     open: boolean;
     data: Data;
     node: HTMLDialogElement | null;
-    checkIsActive: CheckIsActive<Dialog<Data>>;
+    checkIsActive: CheckIsActive<DialogType<Data>>;
     type: "dialog";
 };
 
-export type UpperLayer<Data extends unknown = unknown> = {
+export type UpperLayerType<Data extends unknown = unknown> = {
     isolated: boolean;
     data?: Data;
-    checkIsActive: CheckIsActive<UpperLayer<Data>>;
+    checkIsActive: CheckIsActive<UpperLayerType<Data>>;
     type: "upperLayer";
 };
 
 export type ConfigurationDialogLayer<Data extends unknown = unknown> = {
     isolated?: boolean;
     data?: Data;
-    checkIsActive?: CheckIsActive<Dialog<Data>>;
+    checkIsActive?: CheckIsActive<DialogType<Data>>;
 };
 
 export type ConfigurationUpperLayerLayer<Data extends unknown = unknown> = {
     isolated?: boolean;
     data?: Data;
-    checkIsActive?: CheckIsActive<UpperLayer<Data>>;
+    checkIsActive?: CheckIsActive<UpperLayerType<Data>>;
 };
 
 export type Configuration<
@@ -49,7 +49,7 @@ export type Configuration<
     upperLayers?: { [Key in keyof UpperLayerData]: ConfigurationUpperLayerLayer<UpperLayerData[Key]["data"]> };
 };
 
-export type TopLayerStore = Record<string, Dialog<unknown> | UpperLayer<unknown>>;
+export type TopLayerStore = Record<string, DialogType<unknown> | UpperLayerType<unknown>>;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export type NonFunction<T> = T extends Function ? never : T;
@@ -58,18 +58,18 @@ export type RegisterDialogProps<Data extends unknown = unknown> = {
     type: "dialog";
     data: Data;
     isolated: boolean;
-    checkIsActive: Dialog<Data>["checkIsActive"];
+    checkIsActive: DialogType<Data>["checkIsActive"];
 };
 export type RegisterUpperLayerProps<Data extends unknown = unknown> = {
     type: "upperLayer";
     data: Data;
     isolated: boolean;
-    checkIsActive: UpperLayer<Data>["checkIsActive"];
+    checkIsActive: UpperLayerType<Data>["checkIsActive"];
 };
 
 export type TopLayerHookStore = {
-    dialogs: Dialog[];
-    upperLayers: UpperLayer[];
+    dialogs: DialogType[];
+    upperLayers: UpperLayerType[];
     hasActiveIsolatedLayers: boolean;
     hasActiveLayers: boolean;
 };

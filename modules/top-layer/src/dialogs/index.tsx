@@ -3,7 +3,7 @@
 import React, { useCallback } from "react";
 import { type StoreInstance, useStoreReducer } from "contection";
 
-import { type Dialog as DialogType, type TopLayerStore } from "../types";
+import { type DialogType, type TopLayerStore } from "../types";
 import { DialogWrapperContext } from "./contexts";
 
 export interface DialogProps

@@ -43,6 +43,11 @@ export const createTopLayer = <
     return { TopLayerStore, Dialogs, UpperLayers };
 };
 
+export * from "contection";
+export * from "./types";
 export * from "./hooks";
+export * from "./dialogs";
+export * from "./dialogs/types";
+export * from "./dialogs/consumer";
 export * from "./dialogs/hooks";
 export * from "./upper-layers/hooks";
